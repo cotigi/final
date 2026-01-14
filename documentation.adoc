@@ -3,3 +3,19 @@ Pászti Tibor Miklós & Póra Dávid
 include::utils.adoc[]
 
 == Project Management
+
+=== Task Tracking
+The task are tracked using https://trello.com/[Trello].
+
+=== Documentation
+The documentation is written in https://asciidoctor.org/[Asciidoctor]
+and converted into PDF. This document is stored on https://github.com/[Github]
+for easier teamwork and version control.
+
+Every addition to the documentation is a new branch that has the 
+following naming convention:
+
+- *Networking:* network/<site>/<topic>
+- *Server:* server/<OS>/<topic>
+- *General modifications:* docs/<topic>
+

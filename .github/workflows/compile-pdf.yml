@@ -32,8 +32,9 @@ jobs:
 
       - name: Upload PDF to release
         uses: softprops/action-gh-release@v2
-        if: startsWith(github.ref, 'refs/tags/')
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         with:
+          tag_name: latest
+          name: Latest Documentation
           files: documentation.pdf
-
 

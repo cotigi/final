@@ -1,3 +1,16 @@
 = Final Project
 Pászti Tibor Miklós & Póra Dávid
 include::utils.adoc[]
+
+== Introduction
+
+In this project we documented the network infrastructure 
+of a package delivery company. Like https://gls-group.com/HU/hu/home/[GLS]
+and https://www.foxpost.hu/[FOXPOST], this company delivers to 
+package lockers.
+
+There are three sites:
+
+Headquarters:: This location is where the company handles acounting and development.
+Office:: This location offers in person customer service and package pick up.
+Package Center:: This location houses the packages and the company servers.

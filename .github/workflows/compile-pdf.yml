@@ -1,0 +1,32 @@
+name: Build documentation PDF
+
+on: [push, pull_request]
+
+jobs:
+  build-docs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+
+      - name: Install Asciidoctor PDF
+        run: |
+          gem install asciidoctor
+          gem install asciidoctor-pdf
+
+      - name: Build PDF
+        run: |
+          asciidoctor-pdf documentation.adoc
+
+      - name: Upload PDF artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: documentation-pdf
+          path: documentation.pdf
+

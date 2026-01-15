@@ -5,7 +5,37 @@ include::utils.adoc[]
 == Project Management
 
 === Task Tracking
-The task are tracked using https://trello.com/[Trello].
+The task are tracked using https://trello.com/[Trello] with 
+each task being assigned to one of three lists.
+
+- *Todo*
+- *In Progress*
+- *Done*
+
+The task naming convention is: *<category>: <topic>*
+
+==== Automations
+
+===== Labeling
+
+Automations are set up to assign colored labels depending
+on the category at the start of the task name. 
+These categories are:
+
+- *Documentation*
+- *Network*
+- *Linux server*
+- *Windows server*
+
+When a task is dragged into the Done list the Done label
+is automatically assigned.
+
+===== miscellaneous
+
+There is an automation that when dragging a task 
+from Todo to In Progress, it automatically assigns the
+said person to the task.
+
 
 === Documentation
 The documentation is written in https://asciidoctor.org/[Asciidoctor]
@@ -17,5 +47,7 @@ following naming convention:
 
 - *Networking:* network/<site>/<topic>
 - *Server:* server/<OS>/<topic>
-- *General modifications:* docs/<topic>
+- *Documentation:* docs/<topic>
 
+When an addition is completed the person assigned to the task has to issue
+a pull-request and the other party has to authorize it.

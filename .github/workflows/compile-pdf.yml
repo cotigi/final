@@ -20,6 +20,7 @@ jobs:
 
       - name: Install Asciidoctor PDF
         run: |
+          gem install rouge 
           gem install asciidoctor
           gem install asciidoctor-pdf
 

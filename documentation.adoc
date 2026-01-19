@@ -29,12 +29,6 @@ each task being assigned to one of three lists.
 
 The task naming convention is: *<category>: <topic>*
 
-==== Automations
-
-===== Labeling
-
-Automations are set up to assign colored labels depending
-on the category at the start of the task name. 
 These categories are:
 
 - *Documentation*
@@ -42,14 +36,21 @@ These categories are:
 - *Linux server*
 - *Windows server*
 
-When a task is dragged into the Done list the Done label
+==== Automations
+
+===== Labeling
+
+- When a new task is created in the Todo list, this automation
+labels the task depending on the category mentioned at the start
+of the task name.
+
+- When a task is dragged into the Done list the Done label
 is automatically assigned.
 
 ===== miscellaneous
 
-There is an automation that when dragging a task 
-from Todo to In Progress, it automatically assigns the
-said person to the task.
+- When dragging a task from Todo to In Progress,
+it automatically assigns the said person to the task.
 
 
 === Documentation
@@ -66,3 +67,59 @@ following naming convention:
 
 When an addition is completed the person assigned to the task has to issue
 a pull-request and the other party has to authorize it.
+The main branch is protected and thus people can't push directly.
+
+==== Github Actions
+
+There is one workflow that is responsible for converting the 
+Asciidoctor file to a PDF file for every branch on push and or pull requests.
+This PDF file is uploaded as an artifact and can be downloaded in a zip file.
+In the case of the main branch there is an additional feature 
+that places the generated PDF file into the latest release.
+
+[source, yaml]
+----
+name: Build documentation PDF
+
+permissions:
+  contents: write
+
+on: [push, pull_request]
+
+jobs:
+  build-docs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+
+      - name: Install Asciidoctor PDF
+        run: |
+          gem install asciidoctor
+          gem install asciidoctor-pdf
+
+      - name: Build PDF
+        run: |
+          asciidoctor-pdf documentation.adoc
+
+      - name: Upload PDF artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: documentation-pdf
+          path: documentation.pdf
+
+      - name: Upload PDF to release
+        uses: softprops/action-gh-release@v2
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        with:
+          tag_name: latest
+          name: Latest Documentation
+          files: documentation.pdf
+
+----

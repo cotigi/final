@@ -146,8 +146,8 @@ jobs:
 |===
 |Vlan ID | Name | Network Address
 
-|Vlan 10 | WORKERS | 172.16.10.0/23
-|Vlan 20 | SERVERS | 172.16.20.0/28
+|Vlan 210 | WORKERS | 172.16.10.0/23
+|Vlan 220 | SERVERS | 172.16.20.0/28
 |Vlan 333 | MANAGEMENT | 172.16.255.0/27
 |Vlan 666 | THRASH | -------
 |===
@@ -157,9 +157,9 @@ jobs:
 |===
 |Vlan ID | Name | Network Address
 
-|Vlan 10 | CUSTOMER_SUPPORT | 192.168.10.0/25
-|Vlan 20 | GUEST | 192.168.20.0/26
-|Vlan 30 | FRONT_DESK | 192.168.30.0/27
+|Vlan 310 | CUSTOMER_SUPPORT | 192.168.10.0/25
+|Vlan 320 | GUEST | 192.168.20.0/26
+|Vlan 330 | FRONT_DESK | 192.168.30.0/27
 |Vlan 333 | MANAGEMENT | 192.168.255.0/27
 |Vlan 666 | THRASH | -------
 |===

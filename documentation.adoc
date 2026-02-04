@@ -123,3 +123,55 @@ jobs:
           files: documentation.pdf
 
 ----
+
+== Network
+
+=== Vlans
+
+[cols="^1,^1,^1""]
+.HQ VLANs
+|===
+|Vlan ID | Name | Network Address
+
+|Vlan 110 | DEVELOPERS | 10.10.0.0/24
+|Vlan 120 | HR | 10.20.0.0/25
+|Vlan 130 | ACCOUNTING | 10.30.0.0/26
+|Vlan 140 | MARKETING | 10.40.0.0/26
+|Vlan 333 | MANAGEMENT | 10.255.0.0/27
+|Vlan 666 | THRASH | -------
+|===
+
+[cols="^1,^1,^1""]
+.Package Center VLANs
+|===
+|Vlan ID | Name | Network Address
+
+|Vlan 10 | WORKERS | 172.16.10.0/23
+|Vlan 20 | SERVERS | 172.16.20.0/28
+|Vlan 333 | MANAGEMENT | 172.16.255.0/27
+|Vlan 666 | THRASH | -------
+|===
+
+[cols="^1,^1,^1""]
+.Office VLANs
+|===
+|Vlan ID | Name | Network Address
+
+|Vlan 10 | CUSTOMER_SUPPORT | 192.168.10.0/25
+|Vlan 20 | GUEST | 192.168.20.0/26
+|Vlan 30 | FRONT_DESK | 192.168.30.0/27
+|Vlan 333 | MANAGEMENT | 192.168.255.0/27
+|Vlan 666 | THRASH | -------
+|===
+
+- In this network design, we have implemented VLANs to segment the network into different logical groups.
+
+- Each VLAN has its own unique network address range, allowing for better organization and security.
+
+- The VLANs are categorized based on their function. We use Vlan 333 for management purposes across all sites, and Vlan 666 is reserved for any unused ports for security reasons. This design helps to improve network performance and security by isolating different types of traffic and reducing broadcast domains.
+
+- The vlan ids are following the network address numbering scheme for easier identification.
+
+
+
+

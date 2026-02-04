@@ -172,6 +172,8 @@ jobs:
 
 - The vlan ids are following the network address numbering scheme for easier identification.
 
+- The vlan ids are also following a pattern where the first digit represents the site (1 for HQ, 2 for Package Center, and 3 for Office) and the last two digits represent the specific function of the vlan. This makes it easier to identify the purpose of each vlan at a glance.
+
 
 
 

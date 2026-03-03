@@ -1,3 +1,4 @@
 :source-highlighter: rouge
 :title-page:
 :toc:
+:figure-caption!:

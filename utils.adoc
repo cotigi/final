@@ -1,4 +1,6 @@
 :source-highlighter: rouge
 :title-page:
 :toc:
+:toclevels: 3
 :figure-caption!:
+:sectnums:

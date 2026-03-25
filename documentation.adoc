@@ -832,10 +832,14 @@ These interfaces are:
 |Null
 
 |Gig1/8
-|10.2.250.1
+|12.12.12.2
 |Null
 
-.4+.^|PC-CORE-MLS1
+.5+.^|PC-CORE-MLS1
+|Gig1/0/1
+|10.2.200.26
+|Null
+
 |Gig1/0/5
 |10.2.200.17
 |Null
@@ -852,7 +856,11 @@ These interfaces are:
 |10.2.255.1
 |Null
 
-.4+.^|PC-CORE-MLS2
+.5+.^|PC-CORE-MLS2
+|Gig1/0/1
+|10.2.200.30
+|Null
+
 |Gig1/0/5
 |10.2.200.21
 |Null

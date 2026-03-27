@@ -5,7 +5,7 @@ include::utils.adoc[]
 == Introduction
 
 In this project we documented the network infrastructure 
-of a package delivery company. Like https://gls-group.com/HU/hu/home/[GLS]
+of a package delivery company called BitBox. Like https://gls-group.com/HU/hu/home/[GLS]
 and https://www.foxpost.hu/[FOXPOST], this company delivers to 
 package lockers.
 
@@ -13,7 +13,7 @@ There are three sites:
 
 Headquarters:: This location is where the company handles acounting and development.
 Remote Package Storage:: This location is for long term package storage.
-Package Center:: This location houses the packages and the company servers, while also handling customer service
+Package Center:: This location houses the packages and the company webserver, while also handling customer service
 and in person package pick up.
 
 <<<
@@ -87,29 +87,139 @@ that places the generated PDF file into the latest release.
 General configurations apply to all devices specified
 in the given section across all sites.
 
+=== User and Password Policies
+
+All network devices must handle login attempts through AAA in
+the following ways (configured as the default list):
+
+==== Login
+
+. AAA should check the given RADIUS server
+. AAA Should check the local user database
+
+==== Dot1x
+
+. AAA should check the given RADIUS server
+
+More specific AAA configurations are specified within the given site.
+
+NOTE: All sites must use RADIUS as their AAA server.
+
+All network devices must be configured with the following user:
+
+* *Username*: admin
+* *Password*: adminpa55
+
+All network devices must be configured with the following passwords:
+
+.Device Passwords
+[cols="1h,1,1",options="header"]
+|===
+|Place
+|Password
+|Applied As
+
+|Priviliged 
+|enpa55
+|Secret
+
+|Console
+|conpa55
+|Password
+
+|Aux
+|auxpa55
+|Password
+|===
+
+NOTE: The VTY lines must use the local user database
+
+=== Remote Access Policy
+
+Remote access is achieved through the SSH protocol,
+available on all available VTY lines on the given device, using
+the default AAA configuration.
+
+SSH is configured with the following parameters:
+
+.SSH Parameters
+[cols="1h,1",options="header"]
+|===
+|Setting
+|Parameter
+
+|Version
+|2
+
+|Key Modulus
+|2048
+
+|Auth-retries
+|2
+
+|Timeout
+|30sec
+|===
+
 === Port-security Policies
 
-.Port-security Policies
+==== General
+
+.Port-security Policy
 [cols="3,^.^1",options="header"]
 |===
 |Policy 
 |Upon Violation
 
-|All connections leading to host devices should
+|All connections leading to host devices must
 allow atmost 2 MAC addresses
 |Restrict
 
 |All connections leading to printers or access points 
-should allow atmost 1 MAC address with the sticky setting
+must allow atmost 1 MAC address with the sticky setting
 .2+.^|Shutdown
 
-|All connections leading to servers should
+|All connections leading to servers must
 allow atmost 1 static MAC address
 
-|All unused ports should be shutdown and
-placedinto the TRASH VLAN
+|All unused interfaces must be shutdown and
+placedinto the TRASH Vlan
 |Null
 |===
+
+All access interfaces must be configured with an
+aging time of 5 minutes.
+
+==== Dot1x
+
+All switch interfaces connecting to a
+PC, laptop or server must use Dot1x port authentication
+through the given AAA RADIUS server.
+
+==== IP Source Guard
+
+* IP source guard must be configured on all switches and 
+multi-layer switches with connections to end devices.
+
+* All printer and servers must be statically configured
+with it's given MAC and IP address.
+
+More information regarding the configuration is specified in 
+the given site's section.
+
+=== DHCP Snooping Policy
+
+DHCP snooping must me configured on all switches globally with
+a rate limit of `20` on untrusted interfaces.
+
+Further configurations are stated under the given site's section.
+
+=== Dynamic ARP Inspection Policy
+
+All interfaces leading to host, printer or server devices, 
+should be treated as, untrusted (this applies to unused interfaces too).
+
+Interfaces leading to other network devies should be treated as trusted.
 
 === Duplex Connection Policy
 
@@ -126,6 +236,11 @@ stated in the documentation, found at the given site's topology section.
 . All network devices must be configured with `no ip domain-lookup`
 to avoid accidental DNS lookup while configuring the given device.
 
+. All switch and multi-layer switch interfaces (in switch-port mode)
+must be configured with `switchport nonegotiation`
+
+. All network devices must be configured with `service password-encryption`
+
 <<<
 
 == HQ
@@ -138,44 +253,44 @@ image::images/hq.png[align="center"]
 
 <<<
 
-==== VLANs
+==== Vlans
 
 [cols="1,1,1",options="header"]
-.VLANs
+.Vlans
 |===
-|VLAN ID    
+|Vlan ID    
 |Name          
 |Network 
 
-|VLAN 110   
+|Vlan 110   
 |DEVELOPERS    
 |10.1.10.0/27
 
-|VLAN 120   
+|Vlan 120   
 |HR            
 |10.1.20.0/26
 
-|VLAN 130   
+|Vlan 130   
 |ACCOUNTING    
 |10.1.30.0/27
 
-|VLAN 140   
+|Vlan 140   
 |MARKETING     
 |10.1.40.0/28
 
-|VLAN 150   
+|Vlan 150   
 |SERVER        
 |10.1.50.0/29
 
-|VLAN 160   
+|Vlan 160   
 |FRONTDESK     
 |10.1.60.0/28
 
-|VLAN 333   
+|Vlan 333   
 |MANAGEMENT    
 |10.1.255.0/27
 
-|VLAN 666   
+|Vlan 666   
 |TRASH         
 |Null
 |===
@@ -183,7 +298,7 @@ image::images/hq.png[align="center"]
 ===== VTP
 
 VTP version 2 is configured between all switches, with
-*HQ-S1 being the server* and all other switches 
+`HQ-S1` being the server and all other switches 
 taking up the client role.
 
 .VTP Settings
@@ -204,7 +319,7 @@ taking up the client role.
 
 ==== Etherchannel
 
-Etherchannel is set up between HQ-S1 and HQ-S2, with LACP
+Etherchannel is set up between `HQ-S1` and `HQ-S2`, with LACP
 
 .Etherchannel Connections and Roles
 [cols="1,1,1",options="header"]
@@ -224,8 +339,8 @@ Etherchannel is set up between HQ-S1 and HQ-S2, with LACP
 
 Rapid-PVST is used between all the switches in the network.
 
-switches, with HQ-S1 being the primary and 
-HQ-S2 being the secondary root bridge in all VLANs.
+Switches, with `HQ-S1` being the primary and 
+`HQ-S2` being the secondary root bridge in all Vlans.
 
 [cols="1h,2",options="header"]
 .Rapid-PVST Roles
@@ -240,13 +355,202 @@ HQ-S2 being the secondary root bridge in all VLANs.
 |HQ-S2
 |===
 
+===== BPDU Guard and Portfast
+
+BPDU guard and portfast options are applied to
+all end device facing interfaces.
+
+These are:
+
+.BPDU Guard and Portfast
+[cols="1,1",options="header"]
+|===
+|Device
+|Interface
+
+|HQ-S1
+|Gig0/2
+
+.4+.^|HQ-F0-S1
+|Fa0/10
+|Fa0/11
+|Fa0/20
+|Fa0/24
+
+.2+.^|HQ-F1-S1
+|Fa0/10
+|Fa0/16
+
+.3+.^|HQ-F1-S2
+|Fa0/10
+|Fa0/20
+|Fa0/24
+
+|HQ-F2-S1
+|Fa0/10
+
+.2+.^|HQ-F2-S2
+|Fa0/10
+|Fa0/24
+|===
+
+===== Loop Guard
+
+Loop guard is configured on all switches and multi-layer switches
+globally in the case of a link's partial failure.
+
+The interfaces configured with loop guard is as follows:
+
+.Loop Guard Interfaces
+[cols="1,1",options="header"]
+|===
+|Device
+|Interface
+
+.2+.^|HQ-S1
+|Fa0/23
+|Fa0/24
+
+.2+.^|HQ-S2
+|Fa0/23
+|Fa0/24
+
+.2+.^|HQ-F0-S1
+|Fa0/1
+|Fa0/2
+
+.3+.^|HQ-F1-S1
+|Fa0/1
+|Fa0/2
+|Gig0/1
+
+.3+.^|HQ-F1-S2
+|Fa0/1
+|Fa0/2
+|Gig0/1
+
+.3+.^|HQ-F2-S1
+|Fa0/1
+|Fa0/2
+|Gig0/1
+
+.3+.^|HQ-F2-S2
+|Fa0/1
+|Fa0/2
+|Gig0/1
+|===
+
+===== Root Guard
+
+Only the switches `HQ-S1` and `HQ-S2` should 
+participate in the root election process, and so
+root guard are placed on the following interfaces:
+
+.Root Guarded Interfaces
+[cols="1,1",options="header"]
+|===
+|Device
+|Interface
+
+.5+.^|HQ-S1
+|Fa0/1
+|Fa0/11
+|Fa0/12
+|Fa0/21
+|Fa0/22
+
+.5+.^|HQ-S2
+|Fa0/1
+|Fa0/11
+|Fa0/12
+|Fa0/21
+|Fa0/22
+|===
+
+==== IP Source Guard
+
+NOTE: IP source guard is paired with switchport port-security,
+so that MAC addresses will also be checked.
+
+===== Dynamic
+
+Dynamic IP source guard is configured as follows:
+
+.Dynamic IP Source Guard
+[cols="1,1"]
+|===
+|Device
+|Interface
+
+.3+.^|HQ-F0-S1
+|Fa0/10
+|Fa0/11
+|Fa0/24
+
+.2+.^|HQ-F1-S1
+|Fa0/10
+|Fa0/16
+
+|HQ-F1-S2
+|Fa0/10
+
+|HQ-F2-S1
+|Fa0/10
+
+|HQ-F2-S2
+|Fa0/10
+|===
+
+===== Static
+
+Static IP source guard is configured as follows:
+
+.Static IP Source Guard
+[cols="1,1,1,2,2",options="header"]
+|===
+|Device
+|Interface
+|IP
+|MAC
+|Name
+
+|HQ-S1
+|Gig0/2
+|10.1.50.5
+|00D0.9756.36C6
+|Private Windows
+
+|HQ-F0-S1
+|Fa0/24
+|10.1.60.13
+|0003.E4D8.BC6D
+|Frontdesk Printer
+
+.2+.^|HQ-F1-S2
+|Fa0/20
+|10.1.30.29
+|0010.1199.6748
+|Accounting Printer
+
+|Fa0/24
+|10.1.40.13
+|0010.1166.7675
+|Marketing Printer
+
+|HQ-F2-S2
+|Fa0/24
+|10.1.20.61
+|0006.2ACE.3B8A
+|HR Printer
+|===
+
 ==== HSRP
 
-HSRP is set up between HQ-R1 and HQ-R2, with the 
+HSRP is set up between `HQ-R1` and `HQ-R2`, with the 
 HSRP address being the last host IP address in the
 given network.
 
-HQ-R1 is the active, with HQ-R2 being the standby device.
+`HQ-R1` is the active, with `HQ-R2` being the standby device.
 
 This is achieved through the following parameters:
 
@@ -271,7 +575,7 @@ This is achieved through the following parameters:
 [cols="1,1",options="header"]
 .HSRP IPv4 Addresses
 |===
-|VLAN       
+|Vlan       
 |Address
 
 |DEVELOPERS 
@@ -300,13 +604,13 @@ This is achieved through the following parameters:
 
 ==== DHCPv4
 
-The DHCP server is the *Private Windows* host, 
+The DHCP server is the `Private Windows` host, 
 providing IPv4 addresses for the following networks:
 
 [cols="1,1,1,1,1",options="header"]
 .IPv4 DHCP Addressing
 |===
-|VLAN       
+|Vlan       
 |Addressing Range   
 |Number Of Hosts
 |DNS    
@@ -343,6 +647,311 @@ providing IPv4 addresses for the following networks:
 |15             
 |10.1.255.30
 |===
+
+<<<
+
+==== DHCP Snooping
+
+DHCP snooping is configuration is illustrated with the 
+following diagram:
+
+image::images/hq-dhcp-snooping.png[align="center"]
+
+This state is achieved with the following table of trusted ports:
+
+.DHCP Snooping Trusted Interfaces
+[cols="1,1",options="header"]
+|===
+|Device
+|Interface
+
+.9+.^|HQ-S1
+|Fa0/1
+|Fa0/11
+|Fa0/12
+|Fa0/21
+|Fa0/22
+|Fa0/23
+|Fa0/24
+|Gig0/1
+|Gig0/2
+
+.9+.^|HQ-S2
+|Fa0/1
+|Fa0/11
+|Fa0/12
+|Fa0/21
+|Fa0/22
+|Fa0/23
+|Fa0/24
+|Gig0/1
+|Gig0/2
+
+.2+.^|HQ-F0-S1
+|Fa0/1
+|Fa0/2
+
+.3+.^|HQ-F1-S1
+|Fa0/1
+|Fa0/2
+|Gig0/1
+
+.3+.^|HQ-F1-S2
+|Fa0/1
+|Fa0/2
+|Gig0/1
+
+.3+.^|HQ-F2-S1
+|Fa0/1
+|Fa0/2
+|Gig0/1
+
+.3+.^|HQ-F2-S2
+|Fa0/1
+|Fa0/2
+|Gig0/1
+|===
+
+NOTE: `HQ-R1` and `HQ-R2` are trusted devices because they use
+the `Private Windows` server as the helper-address.
+
+==== Dynamic ARP Inspection
+
+ARP inspection is configured on the following devices:
+
+.ARP Inspected Devices
+[cols="1,1",options="header"]
+|===
+|Device
+|Vlans
+
+|HQ-S1
+|150
+
+|HQ-F0-S1
+|160
+
+|HQ-F1-S1
+.2+.^|110,130,140
+
+|HQ-F1-S2
+
+|HQ-F2-S1
+.2+.^|120,333
+
+|HQ-F2-S2
+|===
+
+The trusted interfaces for these devices are:
+
+.ARP Trusted Interfaces
+[cols="1,1",options="header"]
+|===
+|Device
+|Interface
+
+.8+.^|HQ-S1
+|Fa0/1
+|Fa0/11
+|Fa0/12
+|Fa0/21
+|Fa0/22
+|Fa0/23
+|Fa0/24
+|Gig0/1
+
+.2+.^|HQ-F0-S1
+|Fa0/1
+|Fa0/2
+
+.3+.^|HQ-F1-S1
+|Fa0/1
+|Fa0/2
+|Gig0/1
+
+.3+.^|HQ-F1-S2
+|Fa0/1
+|Fa0/2
+|Gig0/1
+
+.3+.^|HQ-F2-S1
+|Fa0/1
+|Fa0/2
+|Gig0/1
+
+.3+.^|HQ-F2-S2
+|Fa0/1
+|Fa0/2
+|Gig0/1
+|===
+
+==== OSPF
+
+Network advertisement is achieved through single-area OSPF
+illustrated by the following diagram:
+
+image::images/hq-ospf.png[align="center"]
+
+===== Default Route
+
+`PC-ASA` is responsable for advertising the default route, 
+wich is `11.11.11.1`.
+
+===== Router-ID
+
+The router-ids are created according to the following naming convention:
+
+* The first three octets contain the OSPF area number repeated.
+
+* The last octet contains the device's id withing the given OSPF area.
+
+[cols="1,1",options="header"]
+.Router-IDs
+|===
+|Device     
+|Router-ID
+
+|HQ-ASA
+|0.0.0.3
+
+|HQ-R1
+|0.0.0.1
+
+|HQ-R2
+|0.0.0.2
+|===
+
+===== Passive Interfaces
+
+All interfaces on all devices running an OSPF process, has 
+all it's interfaces configured as passive with the following
+command `passive-interface default`.
+
+From that point on only the needed interfaces are selected 
+to be allowed to participate in OSPF advertising.
+
+These interfaces are:
+
+[cols="1,1",options="header"]
+.Active OSPF Interfaces
+|===
+|Device
+|Interface
+
+.2+.^|HQ-ASA
+|Gig1/1
+|Gig1/2
+
+|HQ-R1
+|Gig0/2
+
+|HQ-R2
+|Gig0/2
+|===
+
+==== AAA
+
+The AAA RADIUS server is `Private Windows` (`10.1.50.5`) with the following clients:
+
+* HQ-R1
+* HQ-R2
+* HQ-S1
+* HQ-S2
+* HQ-F0-S1
+* HQ-F1-S1
+* HQ-F1-S2
+* HQ-F2-S1
+* HQ-F2-S2
+
+The passkey for all clients is `aaapa55`.
+
+==== Access List
+
+All network devices serving SSH, must have an ACL
+configured so that only the `MANAGEMENT` Vlan can 
+connect to the VTY line.
+
+This is achieved with the following ACL
+
+[source]
+----
+ip access-list standard SSH
+    permit 10.1.255.0 0.0.0.31
+----
+
+This ACL must be applied onto all the VTY lines for all incoming messages.
+
+==== Firewall
+
+For the firewall we are using the ASA 5506, because of it's 
+Gigabit capabilities.
+
+===== Zones
+
+The firewall is split into for zones, which is as follows:
+
+[cols="1,1,1,1,2",options="header"]
+|===
+|Interface
+|Zone
+|Security-level
+|Address
+|Description
+
+|Gig1/1
+|INSIDE1
+|100
+|10.2.200.1
+|Link to HQ-R1
+
+|Gig1/2
+|INSIDE2
+|100
+|10.2.200.5
+|Link to HQ-R2
+
+|Gig1/8
+|OUTSIDE
+|0
+|11.11.11.2
+|Link to ISP
+|===
+
+===== Network Objects
+
+There are two network object, for easier ACL
+creation and PAT configuration.
+
+These are:
+
+[cols="1,1,1",options="header"]
+|===
+|Name
+|Network
+|Mask
+
+|LAN1
+|10.1.0.0 
+|255.255.0.0
+
+|LAN2
+|10.1.0.0 
+|255.255.0.0
+|===
+
+NOTE: `LAN1` and `LAN2` are separated because NAT configuration
+occurs inside the given network object which is dependent
+on the zone, so `INSIDE1` and `INSIDE2` both needed a dedicated
+network object.
+
+===== PAT
+
+PAT was set up for the zones, `INSIDE1` and `INSIDE2`.
+The network objects responsible for them are `LAN1` and `LAN2`.
+
+These two PAT configurations are used by the whole network
+across two different uplinks (This is why the same configuration
+is duplicated), and so they use the same address, which is `11.11.11.2`.
 
 <<<
 
@@ -432,37 +1041,37 @@ providing IPv4 addresses for the following networks:
 |Null        
 
 |HQ-S1              
-|VLAN 333   
+|Vlan 333   
 |10.1.255.3 
 |10.1.255.30
 
 |HQ-S2              
-|VLAN 333   
+|Vlan 333   
 |10.1.255.4 
 |10.1.255.30
 
 |HQ-F0-S1           
-|VLAN 333   
+|Vlan 333   
 |10.1.255.5 
 |10.1.255.30
 
 |HQ-F1-S1           
-|VLAN 333   
+|Vlan 333   
 |10.1.255.6 
 |10.1.255.30
 
 |HQ-F1-S2           
-|VLAN 333   
+|Vlan 333   
 |10.1.255.7 
 |10.1.255.30
 
 |HQ-F2-S1           
-|VLAN 333   
+|Vlan 333   
 |10.1.255.8 
 |10.1.255.30
 
 |HQ-F2-S2           
-|VLAN 333   
+|Vlan 333   
 |10.1.255.9 
 |10.1.255.30
 
@@ -529,60 +1138,60 @@ image::images/package_center.png[align="center"]
 
 <<<
 
-==== VLANs
+==== Vlans
 
 [cols="1,1,1",options="header"]
-.VLANs
+.Vlans
 |===
-|VLAN ID    
+|Vlan ID    
 |Name              
 |Network 
 
-|VLAN 210   
+|Vlan 210   
 |WORKERS           
 |10.2.10.0/24
 
-|VLAN 220   
+|Vlan 220   
 |SERVER           
 |10.2.20.0/28
 
-|VLAN 230   
+|Vlan 230   
 |FRONTDESK        
 |10.2.30.0/27
 
-|VLAN 331   
+|Vlan 331   
 |CORE-MANAGEMENT   
 |10.2.255.0/25
 
-|VLAN 332   
+|Vlan 332   
 |PS-MANAGEMENT     
 |10.2.255.128/26
 
-|VLAN 333   
+|Vlan 333   
 |O-MANAGEMENT      
 |10.2.255.192/26
 
-|VLAN 291
+|Vlan 291
 |INTER-LAYER-1
 |10.2.200.0/29
 
-|VLAN 292
+|Vlan 292
 |INTER-LAYER-2
 |10.2.200.8/29
 
-|VLAN 666   
+|Vlan 666   
 |TRASH             
 |Null 
 |===
 
-NOTE: The VLANs _INTER-LAYER-1_ and _INTER-LAYER-2_ are needed to
+NOTE: The Vlans _INTER-LAYER-1_ and _INTER-LAYER-2_ are needed to
 connect the distribution and core layer devices as they don't have 
 a shared network.
 
 ==== Etherchannel
 
-Etherchannel is set up between *PC-CORE-MLS1*, 
-*PC-CORE-MLS2*, *PC-PS-MLS1* and *PC-PS-MLS2* with *LACP*
+Etherchannel is set up between `PC-CORE-MLS1`, 
+`PC-CORE-MLS2`, `PC-PS-MLS1` and `PC-PS-MLS2` with *LACP*
 in the following ways:
 
 .Etherchannel Connections and Roles
@@ -646,43 +1255,61 @@ storage workers, with the following configurations:
 
 <<<
 
-==== DHCPv4
-The DHCP server is the *Private Linux* host, 
-providing IPv4 addresses for the following networks:
+==== IP Source Guard
 
-[cols="1,1,1,1,1",options="header"]
-.IPv4 DHCP Addressing
+NOTE: IP source guard is paired with switchport port-security,
+so that MAC addresses will also be checked.
+
+===== Dynamic
+
+Dynamic IP source guard is configured as follows:
+
+.Dynamic IP Source Guard
+[cols="1,1",options="header"]
 |===
-|VLAN       
-|Addressing Range   
-|Number Of Hosts
-|DNS    
-|Default-gateway
+|Device
+|Interface
 
-|WORKERS
-|10.2.10.3-253       
-|251             
-.3+.^|10.2.20.10
-|10.2.10.254
+|PC-PS-S1
+|Fa0/1
 
-|FRONTDESK
-|10.1.30.2-30
-|29             
-|10.2.30.1
+|PC-O-S1
+|Fa0/1
+|===
 
-|PS-MANAGEMENT 
-|10.2.255.133-189
-|57
-|10.2.255.190
+===== Static
+
+Static IP source guard is configured as follows:
+
+.Static IP Source Guard
+[cols="1,1,1,2,2",options="header"]
+|===
+|Device
+|Interface
+|IP
+|MAC
+|Name
+
+|PC-PS-S1
+|Fa0/24
+|10.2.20.10
+|0060.7035.2DB1
+|Private Linux
+
+|PC-O-S1
+|Fa0/24
+|10.2.30.2
+|00D0.BA5B.5C07
+|Frontdesk Printer
 |===
 
 ==== HSRP
 
-HSRP is set up between PC-PS-MLS1 and PC-PS-MLS2 with the 
+HSRP is set up between `PC-PS-MLS1` and `PC-PS-MLS2` with the 
 HSRP address being the last host IP address in the
 given network.
 
-PC-PS-MLS1 is the active, with PC-PS-MLS2 being the standby device.
+`PC-PS-MLS1` is the active, with `PC-PS-MLS2` being the standby device.
 
 This is achieved through the following parameters:
 
@@ -707,7 +1334,7 @@ This is achieved through the following parameters:
 [cols="1,1,1",options="header"]
 .HSRP IPv4 Addresses In Package Storage
 |===
-|VLAN           
+|Vlan           
 |Address
 |Group Number
 
@@ -724,6 +1351,128 @@ This is achieved through the following parameters:
 |2
 |===
 
+
+==== DHCPv4
+The DHCP server is the `Private Linux` host, 
+providing IPv4 addresses for the following networks:
+
+[cols="1,1,1,1,1",options="header"]
+.IPv4 DHCP Addressing
+|===
+|Vlan       
+|Addressing Range   
+|Number Of Hosts
+|DNS    
+|Default-gateway
+
+|WORKERS
+|10.2.10.3-253       
+|251             
+.3+.^|10.2.20.10
+|10.2.10.254
+
+|FRONTDESK
+|10.1.30.2-30
+|29             
+|10.2.30.1
+
+|PS-MANAGEMENT 
+|10.2.255.133-189
+|57
+|10.2.255.190
+|===
+
+<<<
+
+==== DHCP Snooping
+
+DHCP snooping is configuration is illustrated with the 
+following diagram:
+
+image::images/pc-dhcp-snooping.png[align="center"]
+
+This state is achieved with the following table of trusted ports:
+
+.DHCP Snooping Trusted Interfaces
+[cols="1,1",options="header"]
+|===
+|Device
+|Interface
+
+.4+.^|PC-CORE-MLS1
+|Gig1/0/11
+|Gig1/0/12
+|Gig1/0/13
+|Gig1/0/14
+
+.4+.^|PC-CORE-MLS2
+|Gig1/0/11
+|Gig1/0/12
+|Gig1/0/13
+|Gig1/0/14
+
+|PC-O-S1
+|Gig0/1
+
+.6+.^|PC-PS-MLS1
+|Gig1/0/1
+|Gig1/0/2
+|Gig1/0/11
+|Gig1/0/12
+|Gig1/0/21
+|Gig1/0/22
+
+.6+.^|PC-PS-MLS2
+|Gig1/0/1
+|Gig1/0/2
+|Gig1/0/13
+|Gig1/0/14
+|Gig1/0/23
+|Gig1/0/24
+
+.3+.^|PC-PS-S1
+|Fa0/24
+|Gig0/1
+|Gig0/2
+
+.2+.^|PC-PS-S2
+|Gig0/1
+|Gig0/2
+|===
+
+==== Dynamic ARP Inspection
+
+ARP inspection is configured on the following devices:
+
+.ARP Inspected Devices
+[cols="1,1",options="header"]
+|===
+|Device
+|Vlans
+
+|PC-PS-S1
+|220,332
+
+|PC-O-S1
+|230
+|===
+
+The trusted interfaces for these devices are:
+
+.ARP Trusted Interfaces
+[cols="1,1",options="header"]
+|===
+|Device
+|Interface
+
+.2+.^|PC-PS-S1
+|Gig0/1
+|Gig0/2
+
+|PC-O-S1
+|Gig0/1
+|===
+
 <<<
 
 ==== OSPF
@@ -734,6 +1483,13 @@ illustrated by the following diagram:
 image::images/pc-ospf.png[align="center"]
 
 NOTE: Etherchannels are simplified into one logical connection.
+
+===== Default Route
+
+`PC-ASA` is responsable for advertising the default route, 
+wich is `12.12.12.1`.
+
+<<<
 
 ===== Router-ID
 
@@ -750,8 +1506,11 @@ The router-ids are created according to the following naming convention:
 |Area   
 |Router-ID
 
+|PC-ASA
+.3+.^|0
+|0.0.0.3
+
 |PC-CORE-MLS1
-.2+.^|0
 |0.0.0.1
 
 |PC-CORE-MLS2
@@ -786,23 +1545,25 @@ These interfaces are:
 |Device
 |Interface
 
-.4+.^|PC-CORE-MLS1
+.5+.^|PC-CORE-MLS1
+|Gig1/0/1
 |Gig1/0/5
-|VLAN 291
-|VLAN 292
-|VLAN 331
+|Vlan 291
+|Vlan 292
+|Vlan 331
 
-.4+.^|PC-CORE-MLS2
+.5+.^|PC-CORE-MLS2
+|Gig1/0/1
 |Gig1/0/5
-|VLAN 291
-|VLAN 292
-|VLAN 331
+|Vlan 291
+|Vlan 292
+|Vlan 331
 
 |PC-PS-MLS1
-|VLAN 291
+|Vlan 291
 
 |PC-PS-MLS2
-|VLAN 292
+|Vlan 292
 
 .2+.^|PC-O-R1
 |Gig0/1
@@ -810,7 +1571,149 @@ These interfaces are:
 
 |===
 
-<<<
+==== AAA
+
+The AAA RADIUS server is `Private Linux` (`10.2.20.10`) with the following clients:
+
+* PC-CORE-MLS1
+* PC-CORE-MLS2
+* PC-O-R1
+* PC-O-S1
+* PC-PS-MLS1
+* PC-PS-MLS2
+* PC-PS-S1
+* PC-PS-S2
+
+The passkey for all clients is `aaapa55`.
+
+==== Access List
+
+All network devices serving SSH, must have an ACL
+configured so that only the `MANAGEMENT` Vlan can 
+connect to the VTY line.
+
+The Package Center site is split into three
+`MANAGEMENT` Vlans due to seperate broadcast domains,
+so the ACL will accept the traffic if it is from
+any of the three `MANAGEMENT` Vlans.
+
+[source]
+----
+ip access-list standard SSH
+    permit 10.2.255.0 0.0.0.255
+----
+
+This ACL must be applied onto all the VTY 
+lines for all incoming messages.
+
+==== Firewall
+
+For the firewall we are using the ASA 5506, because of it's 
+Gigabit capabilities.
+
+===== Zones
+
+The firewall is split into for zones, which is as follows:
+
+[cols="1,1,1,1,2",options="header"]
+|===
+|Interface
+|Zone
+|Security-level
+|Address
+|Description
+
+|Gig1/1
+|INSIDE1
+|100
+|10.2.200.25
+|Link to PC-CORE-MLS1
+
+|Gig1/2
+|INSIDE2
+|100
+|10.2.200.29
+|Link to PC-CORE-MLS2
+
+|Gig1/5
+|DMZ
+|50
+|10.2.250.1
+|Link to Public Linux
+
+|Gig1/8
+|OUTSIDE
+|0
+|12.12.12.2
+|Link to ISP
+|===
+
+===== Objects
+
+====== Service
+
+There is one service object needed
+allowed to enter the DMZ, containing the webserver, named
+`DMZ-SERVICES`.
+
+The allowed services are as follows:
+
+* Destination port 80 for HTTP
+* Destination port 443 for HTTPS
+
+====== Network
+
+There are four network object, for easier ACL
+creation and PAT configuration.
+
+These are:
+
+[cols="1,1,1",options="header"]
+|===
+|Name
+|Network
+|Mask
+
+|DMZ-NETWORK
+|10.2.250.2
+|255.255.255.255
+
+|DMZ-PUBLIC-IP
+|12.12.12.3
+|255.255.255.255
+
+|LAN1
+|10.2.0.0 
+|255.255.0.0
+
+|LAN2
+|10.2.0.0 
+|255.255.0.0
+|===
+
+NOTE: `LAN1` and `LAN2` are separated because NAT configuration
+occurs inside the given network object which is dependent
+on the zone, so `INSIDE1` and `INSIDE2` both needed a dedicated
+network object.
+
+===== NAT
+
+====== PAT
+
+PAT was set up for the zones, `INSIDE1` and `INSIDE2`.
+The network objects responsible for them are `LAN1` and `LAN2`.
+
+These two PAT configurations are used by the whole network
+across two different uplinks (This is why the same configuration
+is duplicated), and so they use the same address, which is `12.12.12.2`.
+
+====== SNAT
+
+SNAT is set up specifically for the `DMZ`, with the 
+responsible network object being named `DMZ-NETWORK`.
+
+The server's address (`10.2.250.2`) is being staticly 
+translated to `12.12.12.3`
 
 ==== IPv4 Addressing
 
@@ -844,15 +1747,15 @@ These interfaces are:
 |10.2.200.17
 |Null
 
-|VLAN291
+|Vlan291
 |10.2.200.1
 |Null
 
-|VLAN292
+|Vlan292
 |10.2.200.9
 |Null
 
-|VLAN331
+|Vlan331
 |10.2.255.1
 |Null
 
@@ -865,49 +1768,49 @@ These interfaces are:
 |10.2.200.21
 |Null
 
-|VLAN291
+|Vlan291
 |10.2.200.2
 |Null
 
-|VLAN292
+|Vlan292
 |10.2.200.10
 |Null
 
-|VLAN331
+|Vlan331
 |10.2.255.2
 |Null
 
 .4+.^|PC-PS-MLS1
-|VLAN210
+|Vlan210
 |10.2.10.1
 |Null
 
-|VLAN220
+|Vlan220
 |10.2.20.1
 |Null
 
-|VLAN291
+|Vlan291
 |10.2.200.3
 |Null
 
-|VLAN332
+|Vlan332
 |10.2.255.192
 |Null
 
 .4+.^|PC-PS-MLS2
-|VLAN210
+|Vlan210
 |10.2.10.2
 |Null
 
-|VLAN220
+|Vlan220
 |10.2.20.2
 |Null
 
-|VLAN292
+|Vlan292
 |10.2.200.11
 |Null
 
-|VLAN332
+|Vlan332
 |10.2.255.130
 |Null
 
@@ -929,17 +1832,17 @@ These interfaces are:
 |Null
 
 |PC-PS-S1
-|VLAN332
+|Vlan332
 |10.2.255.131
 |10.2.255.190
 
 |PC-PS-S2
-|VLAN332
+|Vlan332
 |10.2.255.132
 |10.2.255.190
 
 |PC-O-S1
-|VLAN333
+|Vlan333
 |10.2.255.194
 |10.2.255.193
 
@@ -982,30 +1885,59 @@ These interfaces are:
 
 === Network
 
+The remote package storage site consists on a 
+`SOHO Router` serving WIFI to storage workers and
+directly connecting to the ISP.
+
 ==== Topology
 
-// image::images/remote_package_storage.jpg[align="center"]
+image::images/rps-topology.png[align="center"]
 
-<<<
+==== LAN
 
-==== VLANs
+This site only serves one lan, which is `10.3.0.0/24`.
 
-[cols="1,1,1",options="header"]
-.VLANs
+==== DHCPv4
+
+The DHCP server is the `SOHO Router`, 
+providing IPv4 addresses for the following networks:
+
+[cols="1,1,1,1",options="header"]
+.IPv4 DHCP Addressing
 |===
-|VLAN ID    
-|Name          
-|Network 
+|Vlan       
+|Addressing Range   
+|Number Of Hosts
+|DNS    
+|Default-gateway
 
-|VLAN 310   
-|WORKERS       
-|10.3.10.0/23
+|10.3.0.2-254       
+|253             
+|8.8.8.8
+|10.3.0.1
+|===
 
-|VLAN 333   
-|MANAGEMENT    
-|10.3.255.0/24
+==== IPv4 Addressing
 
-|VLAN 666   
-|TRASH         
+[cols="1,1,1,1",options="header"]
+.IPv4 Addressing
+|===
+|Device             
+|Interface  
+|Address    
+|Default Gateway
+
+.2+.^|SOHO Router
+|Internet
+|13.13.13.2
+|13.13.13.1
+
+|LAN
+|10.3.0.1
 |Null
+
+|Worker Phones
+|Wifi
+|DHCP
+|10.3.0.1
 |===

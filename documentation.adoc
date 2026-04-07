@@ -134,6 +134,26 @@ All network devices must be configured with the following passwords:
 
 NOTE: The VTY lines must use the local user database
 
+.Users
+[cols="1h,1,1",options="header"]
+|===
+|Place
+|Username
+|Password
+
+|Local
+|admin
+|adminpa55
+
+|AAA
+|AAAadmin
+|AAAadminpa55
+
+|AAA
+|user
+|userpa55
+|===
+
 === Remote Access Policy
 
 Remote access is achieved through the SSH protocol,
@@ -160,6 +180,10 @@ SSH is configured with the following parameters:
 |Timeout
 |30sec
 |===
+
+NOTE: Only the MANAGEMENT Vlan and the like (in the case of the Package Center site)
+can access the vty lines. This is controlled by the `SSH` ACL placed on all
+vty lines inward.
 
 === Port-security Policies
 
@@ -237,9 +261,11 @@ stated in the documentation, found at the given site's topology section.
 to avoid accidental DNS lookup while configuring the given device.
 
 . All switch and multi-layer switch interfaces (in switch-port mode)
-must be configured with `switchport nonegotiation`
+must be configured with `switchport nonegotiation`.
 
-. All network devices must be configured with `service password-encryption`
+. All network devices must be configured with `service password-encryption`.
+
+. All network devices must be configured with `no cdp run`.
 
 <<<
 
@@ -917,6 +943,7 @@ The firewall is split into for zones, which is as follows:
 |Link to ISP
 |===
 
+[[hq_network_objects]]
 ===== Network Objects
 
 There are two network object, for easier ACL
@@ -937,6 +964,14 @@ These are:
 |LAN2
 |10.1.0.0 
 |255.255.0.0
+
+|LOCAL
+|10.1.0.0
+|255.255.0.0
+
+|REMOTE
+|10.2.0.0
+|255.255.0.0
 |===
 
 NOTE: `LAN1` and `LAN2` are separated because NAT configuration
@@ -952,6 +987,66 @@ The network objects responsible for them are `LAN1` and `LAN2`.
 These two PAT configurations are used by the whole network
 across two different uplinks (This is why the same configuration
 is duplicated), and so they use the same address, which is `11.11.11.2`.
+
+==== VPN
+
+Site-to-site VPN is set up between `HQ-ASA` and `PC-ASA` with the 
+following parameters:
+
+[cols="1h,1",options="header"]
+|===
+|Setting
+|Parameter
+
+|Key Exchange
+|IKEv1
+
+|IPsec Protocol
+|ESP
+
+|Confidentiality
+|AES
+
+|Integrity
+|SHA256
+
+|Authentication
+|PSK
+
+|Pre-shared-key
+|vpnpa55
+
+|Diffie-Hellman
+|DH2
+
+|Lifetime
+|1 Hour
+
+|Peer
+|12.12.12.2
+|===
+
+===== Transform-set
+
+The transfrom-set is configured as such:
+
+[source]
+----
+crypto ipsec ikev1 transform-set VPN-SET esp-aes 256 esp-sha-hmac
+----
+
+===== ACL
+
+To detect the interesting traffic for the VPN connection
+the following ACL is configured, named as `VPN-TRAFFIC`:
+
+[source]
+----
+access-list VPN-TRAFFIC extended permit ip object LOCAL object REMOTE
+----
+
+NOTE: For more information about the network objects, `LOCAL` and
+`REMOTE`, refer to <<hq_network_objects>>
 
 <<<
 
@@ -1648,9 +1743,7 @@ The firewall is split into for zones, which is as follows:
 |Link to ISP
 |===
 
-===== Objects
-
-====== Service
+===== Service Objects
 
 There is one service object needed
 allowed to enter the DMZ, containing the webserver, named
@@ -1661,7 +1754,8 @@ The allowed services are as follows:
 * Destination port 80 for HTTP
 * Destination port 443 for HTTPS
 
-====== Network
+[[pc_network_objects]]
+===== Network Objects
 
 There are four network object, for easier ACL
 creation and PAT configuration.
@@ -1689,6 +1783,14 @@ These are:
 |LAN2
 |10.2.0.0 
 |255.255.0.0
+
+|LOCAL
+|10.2.0.0
+|255.255.0.0
+
+|REMOTE
+|10.1.0.0
+|255.255.0.0
 |===
 
 NOTE: `LAN1` and `LAN2` are separated because NAT configuration
@@ -1714,6 +1816,68 @@ responsible network object being named `DMZ-NETWORK`.
 
 The server's address (`10.2.250.2`) is being staticly 
 translated to `12.12.12.3`
+
+==== VPN
+
+Site-to-site VPN is set up between `HQ-ASA` and `PC-ASA` with the 
+following parameters:
+
+[cols="1h,1",options="header"]
+|===
+|Setting
+|Parameter
+
+|Key Exchange
+|IKEv1
+
+|IPsec Protocol
+|ESP
+
+|Confidentiality
+|AES
+
+|Integrity
+|SHA256
+
+|Authentication
+|PSK
+
+|Pre-shared-key
+|vpnpa55
+
+|Diffie-Hellman
+|DH2
+
+|Lifetime
+|1 Hour
+
+|Peer
+|11.11.11.2
+|===
+
+===== Transform-set
+
+The transfrom-set is configured as such:
+
+[source]
+----
+crypto ipsec ikev1 transform-set VPN-SET esp-aes 256 esp-sha-hmac
+----
+
+===== ACL
+
+To detect the interesting traffic for the VPN connection
+the following ACL is configured, named as `VPN-TRAFFIC`:
+
+[source]
+----
+access-list VPN-TRAFFIC extended permit ip object LOCAL object REMOTE
+----
+
+NOTE: For more information about the network objects, `LOCAL` and
+`REMOTE`, refer to <<pc_network_objects>>
+
+<<<
 
 ==== IPv4 Addressing
 
@@ -1897,6 +2061,22 @@ image::images/rps-topology.png[align="center"]
 
 This site only serves one lan, which is `10.3.0.0/24`.
 
+==== Wifi
+
+.Wifi
+[cols="1,1,1,1",options="header"]
+|===
+|SSID               
+|Password 
+|Auth   
+|Encryption
+
+|Warehouse
+|warehousepa55
+|WPA2 Personal
+|AES
+|===
+
 ==== DHCPv4
 
 The DHCP server is the `SOHO Router`, 
@@ -1930,7 +2110,7 @@ providing IPv4 addresses for the following networks:
 .2+.^|SOHO Router
 |Internet
 |13.13.13.2
-|13.13.13.1
+|Null
 
 |LAN
 |10.3.0.1

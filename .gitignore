@@ -1,3 +1,5 @@
 *.pdf
 *.html
 *.excalidraw
+necop/.venv
+necop/modules/__pycache__

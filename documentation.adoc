@@ -105,10 +105,7 @@ More specific AAA configurations are specified within the given site.
 
 NOTE: All sites must use RADIUS as their AAA server.
 
-All network devices must be configured with the following user:
-
-* *Username*: admin
-* *Password*: adminpa55
+==== Passwords
 
 All network devices must be configured with the following passwords:
 
@@ -132,7 +129,12 @@ All network devices must be configured with the following passwords:
 |Password
 |===
 
-NOTE: The VTY lines must use the local user database
+==== Users
+
+All network devices must be configured with the following user:
+
+* *Username*: `admin`
+* *Password*: `adminpa55`
 
 .Users
 [cols="1h,1,1",options="header"]
@@ -183,7 +185,8 @@ SSH is configured with the following parameters:
 
 NOTE: Only the MANAGEMENT Vlan and the like (in the case of the Package Center site)
 can access the vty lines. This is controlled by the `SSH` ACL placed on all
-vty lines inward.
+vty lines inward. For further information, refer to <<hq_ssh, HQ SSH>> and
+<<pc_ssh, Package Cetner SSH>>
 
 === Port-security Policies
 
@@ -228,15 +231,18 @@ multi-layer switches with connections to end devices.
 * All printer and servers must be statically configured
 with it's given MAC and IP address.
 
-More information regarding the configuration is specified in 
-the given site's section.
+NOTE: For further information, refer to 
+<<hq_ip_sg, HQ IP Source Guard>> and
+<<pc_ip_sg, Package Center IP Source Guard>>
 
 === DHCP Snooping Policy
 
 DHCP snooping must me configured on all switches globally with
 a rate limit of `20` on untrusted interfaces.
 
-Further configurations are stated under the given site's section.
+NOTE: For further information, refer to 
+<<hq_dhcp_snooping, HQ DHCP Snooping>> and 
+<<pc_dhcp_snooping, Package Center DHCP Snooping>>
 
 === Dynamic ARP Inspection Policy
 
@@ -244,6 +250,18 @@ All interfaces leading to host, printer or server devices,
 should be treated as, untrusted (this applies to unused interfaces too).
 
 Interfaces leading to other network devies should be treated as trusted.
+
+ARP packets must be validated through the source and destination
+MAC addresses. This is achieved with the following command:
+
+[source]
+----
+ip arp inspection validate src-mac dst-mac
+----
+
+NOTE: For further information, refer to 
+<<hq_arp_inspection, HQ ARP Inspection>> and 
+<<pc_arp_inspection, Package Center ARP Inspection>>
 
 === Duplex Connection Policy
 
@@ -493,6 +511,7 @@ root guard are placed on the following interfaces:
 |Fa0/22
 |===
 
+[[hq_ip_sg]]
 ==== IP Source Guard
 
 NOTE: IP source guard is paired with switchport port-security,
@@ -676,6 +695,7 @@ providing IPv4 addresses for the following networks:
 
 <<<
 
+[[hq_dhcp_snooping]]
 ==== DHCP Snooping
 
 DHCP snooping is configuration is illustrated with the 
@@ -741,6 +761,7 @@ This state is achieved with the following table of trusted ports:
 NOTE: `HQ-R1` and `HQ-R2` are trusted devices because they use
 the `Private Windows` server as the helper-address.
 
+[[hq_arp_inspection]]
 ==== Dynamic ARP Inspection
 
 ARP inspection is configured on the following devices:
@@ -893,6 +914,9 @@ The passkey for all clients is `aaapa55`.
 
 ==== Access List
 
+[[hq_ssh]]
+===== SSH
+
 All network devices serving SSH, must have an ACL
 configured so that only the `MANAGEMENT` Vlan can 
 connect to the VTY line.
@@ -906,6 +930,19 @@ ip access-list standard SSH
 ----
 
 This ACL must be applied onto all the VTY lines for all incoming messages.
+
+===== VPN
+
+The following ACL is configured to identify, which packets
+should be routed within the VPN tunnel.
+
+[source]
+----
+access-list VPN-TRAFFIC extended permit ip object LOCAL object REMOTE
+----
+
+NOTE: For further information regarding these objects,
+refer to <<hq_network_objects>>
 
 ==== Firewall
 
@@ -1045,7 +1082,7 @@ the following ACL is configured, named as `VPN-TRAFFIC`:
 access-list VPN-TRAFFIC extended permit ip object LOCAL object REMOTE
 ----
 
-NOTE: For more information about the network objects, `LOCAL` and
+NOTE: For further information about the network objects, `LOCAL` and
 `REMOTE`, refer to <<hq_network_objects>>
 
 <<<
@@ -1279,7 +1316,7 @@ image::images/package_center.png[align="center"]
 |Null 
 |===
 
-NOTE: The Vlans _INTER-LAYER-1_ and _INTER-LAYER-2_ are needed to
+NOTE: The Vlans `INTER-LAYER-1` and `INTER-LAYER-2` are needed to
 connect the distribution and core layer devices as they don't have 
 a shared network.
 
@@ -1348,8 +1385,10 @@ storage workers, with the following configurations:
 |8
 |===
 
-<<<
+NOTE: All access points are configured with a frequency
+of 2.4GHz.
 
+[[pc_ip_sg]]
 ==== IP Source Guard
 
 NOTE: IP source guard is paired with switchport port-security,
@@ -1479,6 +1518,7 @@ providing IPv4 addresses for the following networks:
 
 <<<
 
+[[pc_dhcp_snooping]]
 ==== DHCP Snooping
 
 DHCP snooping is configuration is illustrated with the 
@@ -1535,6 +1575,7 @@ This state is achieved with the following table of trusted ports:
 |Gig0/2
 |===
 
+[[pc_arp_inspection]]
 ==== Dynamic ARP Inspection
 
 ARP inspection is configured on the following devices:
@@ -1683,6 +1724,9 @@ The passkey for all clients is `aaapa55`.
 
 ==== Access List
 
+[[pc_ssh]]
+===== SSH
+
 All network devices serving SSH, must have an ACL
 configured so that only the `MANAGEMENT` Vlan can 
 connect to the VTY line.
@@ -1698,8 +1742,35 @@ ip access-list standard SSH
     permit 10.2.255.0 0.0.0.255
 ----
 
-This ACL must be applied onto all the VTY 
+NOTE: This ACL must be applied onto all the VTY 
 lines for all incoming messages.
+
+===== DMZ
+
+The following ACL is configured to allow outside requests
+to enter the DMZ, and thus the the `Public Linux` server.
+
+[[source]]
+----
+access-list OUTSIDE-IN extended permit object-group DMZ-SERVICES any object DMZ-PUBLIC-IP
+access-list OUTSIDE-IN extended permit object-group DMZ-SERVICES any object DMZ-NETWORK-IPV6
+----
+
+NOTE: For further information regarding these objects,
+refer to <<pc_service_objects>> and <<pc_network_objects>>.
+
+===== VPN
+
+The following ACL is configured to identify, which packets
+should be routed within the VPN tunnel.
+
+[source]
+----
+access-list VPN-TRAFFIC extended permit ip object LOCAL object REMOTE
+----
+
+NOTE: For further information regarding these objects,
+refer to <<pc_network_objects>>.
 
 ==== Firewall
 
@@ -1743,6 +1814,7 @@ The firewall is split into for zones, which is as follows:
 |Link to ISP
 |===
 
+[[pc_service_objects]]
 ===== Service Objects
 
 There is one service object needed
@@ -1770,11 +1842,15 @@ These are:
 
 |DMZ-NETWORK
 |10.2.250.2
-|255.255.255.255
+|Host
+
+|DMZ-NETWORK-IPV6
+|2001:DB8:ACAD:CC01::100
+|Host
 
 |DMZ-PUBLIC-IP
 |12.12.12.3
-|255.255.255.255
+|Host
 
 |LAN1
 |10.2.0.0 
@@ -1797,6 +1873,23 @@ NOTE: `LAN1` and `LAN2` are separated because NAT configuration
 occurs inside the given network object which is dependent
 on the zone, so `INSIDE1` and `INSIDE2` both needed a dedicated
 network object.
+
+===== Policy Map
+
+The default policy map is additionally configured to inspect
+HTTP traffic as well.
+
+Thus the default policy map will be the following:
+
+[source]
+----
+policy-map global_policy
+ class inspection_default
+  inspect dns preset_dns_map
+  inspect ftp 
+  inspect http 
+  inspect tftp
+----
 
 ===== NAT
 
@@ -1874,7 +1967,7 @@ the following ACL is configured, named as `VPN-TRAFFIC`:
 access-list VPN-TRAFFIC extended permit ip object LOCAL object REMOTE
 ----
 
-NOTE: For more information about the network objects, `LOCAL` and
+NOTE: For further information about the network objects, `LOCAL` and
 `REMOTE`, refer to <<pc_network_objects>>
 
 <<<
@@ -2041,6 +2134,43 @@ NOTE: For more information about the network objects, `LOCAL` and
 |Worker Phones
 |Wifi
 |10.2.10.254
+|===
+
+<<<
+
+==== IPv6 Addressing
+
+IPv6 addressing is implemented only for the `Public Linux`
+webserver and `PC-ASA` firewall for the sake of alternative addressing. 
+
+Through the use of IPv6 GUA addresses, there is no need
+to configure NAT66.
+
+[cols="1,1,2,1,1",options="header"]
+.IPv6 Addressing
+|===
+|Device             
+|Interface  
+|Address    
+|Type
+|Default Gateway
+
+.2+.^|PC-ASA
+|Gig1/8
+|2001:DB8:ACAD:CC00::2/56
+|GUA
+|Null
+
+|Gig1/5
+|FE80::1
+|Link-Local
+|Null
+
+|Public Linux
+|Gig0
+|2001:DB8:ACAD:CC01::100/64
+|GUA
+|FE80::1
 |===
 
 <<<

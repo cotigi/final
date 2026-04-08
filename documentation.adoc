@@ -34,6 +34,7 @@ The task naming convention is: *<category>: <topic>*
 These categories are:
 
 - *Documentation*
+- *Programming*
 - *Network*
 - *Linux server*
 - *Windows server*
@@ -65,6 +66,7 @@ Every addition to the documentation is a new branch that has the
 following naming convention:
 
 - *Networking:* network/<site>/<topic>
+- *Programming:* prog/<topic>
 - *Server:* server/<OS>/<topic>
 - *Documentation:* docs/<topic>
 

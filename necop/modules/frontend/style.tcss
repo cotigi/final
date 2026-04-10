@@ -1,0 +1,132 @@
+$warning: #e5c890;
+$success: #a6d189;
+$error: #ea999c;
+$blue: #81c8be;
+$default: #303446;
+$light-default: #414559;
+$lighter-default: #51576d;
+
+
+#device-base-container {
+    height: 100%;
+    width: 100%;
+    overflow-y: auto;
+}
+
+#device-base-container:first-child>Static {
+    height: 100%;
+    width: 2fr;
+}
+
+.device-indicator-container {
+    height: 100%;
+    width: 1fr;
+}
+
+.device-indicator-container>LoadingIndicator {
+    color: $warning;
+}
+
+.cleanup-container {
+    position: absolute;
+    offset-y: 1;
+    height: 100h;
+    width: 100w;
+}
+
+.cleanup-container>Static {
+    height: 2fr;
+    width: 100%;
+}
+
+.cleanup-container>Static>Label {
+    height: 100%;
+    width: 100%;
+    text-style: bold;
+    content-align: center top;
+}
+
+.cleanup-container>LoadingIndicator {
+    height: 1fr;
+    width: 100%;
+    color: $blue;
+}
+
+.device-container {
+    height: 5;
+    width: 100%;
+
+    border: solid #df8e1d;
+
+    margin: 0 1;
+    padding: 0 1;
+}
+
+.device-info {
+    height: 1;
+    width: 1fr;
+
+    margin: 1 0;
+}
+
+.device-test {
+    height: 3;
+    min-width: 1;
+    width: 12; 
+}
+
+.warning-bg {
+    background: $warning;
+}
+
+.success-bg {
+    background: $success;
+}
+
+.error-bg {
+    background: $error;
+}
+
+.default-bg {
+    background: $default;
+}
+
+.light-default-bg {
+    background: $light-default;
+}
+
+.lighter-default-bg {
+    background: $lighter-default;
+}
+
+.warning-border {
+    border: solid $warning;
+}
+
+.success-border {
+    border: solid $success;
+}
+
+.error-border {
+    border: solid $error;
+}
+
+.default-border {
+    border: solid $default;
+}
+
+.light-default-border {
+    border: solid $light-default;
+}
+
+.lighter-default-border {
+    border: solid $lighter-default;
+}
+
+.display_on {
+    display: block;
+}
+
+.display_off {
+    display: none;
+}

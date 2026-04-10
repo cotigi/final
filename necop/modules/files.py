@@ -11,8 +11,10 @@ def read_devices():
     lines = file.read().splitlines()
 
     for line in lines:
-        name, ip = line.split(',')
+        location, name, ip = line.split(',')
+
         device = {
+            "location": location,
             "name": name,
             "ip": ip,
         }

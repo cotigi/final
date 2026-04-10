@@ -1,9 +1,11 @@
 """Main file responsable for program init."""
 
-from modules.frontend import orchestrator, app
+from modules.frontend.base import Base
 
 def main():
-    orchestrator.start_polling(app)
+    app = Base()
+    app.run()
+
 
 if __name__ == "__main__":
     main()

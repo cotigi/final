@@ -1,9 +1,10 @@
 """Network device connection and configuration handling."""
 
-import threading
+from ..resources import resources
+from . import tftp
 
-from necop.modules.resources import resources
-from necop.modules.network_procs import tftp
+import threading
+import os
 
 def tftp_handler():
     """Run and manage tftp connections"""
@@ -22,3 +23,8 @@ def tftp_handler():
 
     for thread in threads:
         thread.join()
+
+async def is_up(count, host):
+    response = os.system(f"ping -c {count} {host} >/dev/null")
+
+    return not bool(response)

@@ -2175,6 +2175,251 @@ to configure NAT66.
 |FE80::1
 |===
 
+== Private Windows Server in Package Center
+This windows server provides the package center office with an active directory, DNS, DHCP, printer sharing and AAA capebilities.
+
+=== Active Directory
+
+==== Domain Name
+The domain name for the active directory is 
+`bitbox.com`.
+
+==== Organizational Units
+The organizational units are as follows:
+
+.Organizational Units
+[cols="1,1,1",options="header"]
+|===
+|Name
+|Description
+|Groups
+
+|FRONTDESK
+|Contains all the frontdesk users and devices
+|Frontdesk Users
+
+|PS-MANAGEMENT
+|Contains all the PS-MANAGEMENT users and devices
+|PS-MANAGEMENT Users
+
+|WORKERS
+|Contains all the WORKERS users and devices
+|WORKERS Users
+|===
+
+==== Frontdesk Group policy
+This policy is applied to all users and devices in the `FRONTDESK` organizational unit.
+
+User Configuration:
+
+Automatic software installation:
+
+* Install the company system software on all frontdesk PCs and keep it updated
+
+Printers: 
+
+* Allow access to the frontdesk printer only
+* Disable adding new printers
+* Disable removing printers
+
+Start Menu & Taskbar:
+
+* Remove access to:
+    ** Control Panel
+    ** Settings
+    ** Run
+* Lock Start Menu Layout(predefined by the administrator)
+* Disable taskbar context menu
+
+Browser Restrictions:
+
+* Set homepage to the company system
+* Disable access to the following websites:
+    ** Social media
+    ** Entertainment
+* Disable extensions and plugins
+* Disable downloading files
+
+Control panel & CMD:
+
+* Disable access to command prompt
+* Disable access to powershell
+* Disable access to registry editor
+* Disable access to task manager
+
+Windows Settings:
+
+* Disable changing desktop background
+* Disable access to settings
+
+Computer Configuration:
+
+Removeable Media:
+
+* Disable usb storage device reading and writing
+
+Application Control:
+
+* Package management software
+* Browser
+
+* Disable local admin access for users
+* Minimum password requirements:
+    ** Minimum length of 12 characters
+    ** Must contain uppercase letters, lowercase letters, numbers and special characters
+    ** Password expiration every 90 days
+    ** Account lockout after 5 failed login attempts
+    ** Any failed attempts are all audited
+
+
+
+Updates:
+
+* Disable user access to updates
+* All updates are automatically installed outside of working hours
+
+Auditing & Monitoring:
+
+* Audit account lockout
+* Audit failed login attempts
+* Audit successful logins
+* Audit file share access
+* Audit file system access
+* At logon wait for the network before allowing the user to log in, to ensure that the latest policies are applied and that the user is not logging in with cached credentials, which may be a security risk if the user is using a different device or if their account has been compromised.
+
+==== Workers Group policy
+
+This policy is applied to all users and devices in the `WORKERS` organizational unit.
+
+User Configuration:
+
+* Allow access to removable media but it is monitored and audited
+* Remove Run menu from start menu
+* Disable access to control panel and settings
+* Enable only certain control panel items such as devices nad Printers, network
+* Disable access to command prompt, powershell, registry editor and task manager.
+Browser Restrictions:
+
+* Set homepage to the company system
+* Disable access to the following websites:
+    ** Social media
+    ** Entertainment
+* Allow only whitelisted extensions and plugins
+* Download directory is set to a monitored and audited folder
+* Print access is only allowed to the shared printer in the storage area
+* Only users in the `WORKERS` organizational unit have access to the shared printer in the storage area
+*At startup run the package management software and scanner software
+
+Computer Configuration:
+
+* Application control:
+    *** Allowed:
+        ** Package management software
+        ** Scanner software
+        ** Label printing software
+        ** Browser
+    *** Denied:
+        ** Deny unknown applications not explicitly allowed
+* Windows Updates:
+    *** Disable user access to updates
+    *** All updates are automatically installed outside of working hours
+ * At logon wait for the network before allowing the user to log in, to ensure that the latest policies are applied and that the user is not logging in with cached credentials, which may be a security risk if the user is using a different device or if their account has been compromised.
+ * Auditing & Monitoring:
+    *** Audit account lockout
+    *** Audit failed login attempts
+    *** Audit successful logins
+    *** Audit file share access
+    *** Audit file system access
+    *** Audit removable media access
+    *** Audit browser download folder activity
+    *** Audit printer access
+
+==== PS-MANAGEMENT Group policy
+
+User Configuration:
+
+* Browser Control:
+    ** Set homepage to the company system
+    ** Allow access to all websites but monitor and audit access
+    ** Allow extensions and plugins but monitor and audit access
+    ** Allow downloading files but set the download directory to a monitored and audited folder
+
+* Printer Access:
+    ** Allow access to all printers but monitor and audit access
+    ** Allow adding and removing printers but monitor and audit access
+
+Computer Configuration:
+
+* Application control:
+    *** Allowed:
+        ** Allow only the necessary management software for the PS-MANAGEMENT team, such as remote desktop software, monitoring software and management consoles.
+    *** Denied:
+        ** Deny unknown applications not explicitly allowed
+* Remote Desktop Access:
+    *** Only allow remote desktop access to devices in the `PS-MANAGEMENT` organizational unit
+    *** Only allow users in the `PS-MANAGEMENT` organizational unit to initiate remote desktop sessions
+* Removable Media:
+    *** Allow access to removable media but it is monitored and audited
+* Windows Updates:
+    *** Allow user to schedule updates but all updates must be installed outside of working hours
+    *** However updates are configured automatically
+* Security Hardening:
+    *** Enable User Account Control:
+        ** Run all administrators in Admin Approval Mode
+        ** Prompt for creditials when ther is an elevation request
+        ** Prompt for credentials on the secure desktop
+* Credintial Guard:
+    *** Enable Credential Guard to protect against credential theft attacks, such as Pass-the-Hash and Pass-the-Ticket, by isolating and protecting user credentials in a secure environment.
+    *** Disallow storage of passwords local device to prevent credential theft in case of device compromise.
+* Auditing & Monitoring:
+    *** Audit account lockout
+    *** Audit failed login attempts
+    *** Audit successful logins
+    *** Audit file share access
+    *** Audit file system access
+    *** Audit removable media access
+    *** Audit browser download folder activity
+    *** Audit printer access
+    *** Audit privileged User activity, such as access to sensitive files and folders, use of administrative tools and changes to user accounts and group memberships.
+
+=== DHCP
+
+The DHCP serves the `WORKERS`, `FRONTDESK` and `PS-MANAGEMENT` Vlans,.
+
+==== DHCP Configurations
+
+Configurations for the DHCP scopes for each Vlan are as follows:
+
+.DHCP Configurations
+[cols="1,1,1,1,1",options="header"]
+|===
+|Name
+|Addressing Range
+|DNS server
+|Domain Name
+|Default Gateway
+
+|Frontdesk
+|10.1.30.2 - 10.1.30.30
+|10.2.20.10
+|bitbox.com
+|10.2.30.1
+
+|WORKERS
+|10.2.10.3 - 10.2.10.253
+|10.2.20.10
+|bitbox.com
+|10.2.10.254
+
+|PS-MANAGEMENT
+|10.2.255.133 - 10.2.255.189
+|10.2.20.10
+|bitbox.com
+|10.2.255.190
+|===
+
+
+
 <<<
 
 == Remote Package Storage
@@ -2253,3 +2498,4 @@ providing IPv4 addresses for the following networks:
 |DHCP
 |10.3.0.1
 |===
+

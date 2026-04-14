@@ -1709,21 +1709,6 @@ These interfaces are:
 
 |===
 
-==== AAA
-
-The AAA RADIUS server is `Private Linux` (`10.2.20.10`) with the following clients:
-
-* PC-CORE-MLS1
-* PC-CORE-MLS2
-* PC-O-R1
-* PC-O-S1
-* PC-PS-MLS1
-* PC-PS-MLS2
-* PC-PS-S1
-* PC-PS-S2
-
-The passkey for all clients is `aaapa55`.
-
 ==== Access List
 
 [[pc_ssh]]
@@ -2418,6 +2403,34 @@ Configurations for the DHCP scopes for each Vlan are as follows:
 |10.2.255.190
 |===
 
+=== File Backup
+
+There is a seperate drive for file backup in the server, which is shared across the network and only accessible to users in the Administrators group, to ensure that only authorized personnel have access to sensitive data.
+
+Every shared folder in the server is backed up to this drive, and the backup is scheduled to run every day outside of working hours, to minimize disruption to users.
+
+=== File Sharing
+
+File sharing is achieved through shared folders on the server, with access permissions set according to the organizational units and groups in Active Directory.
+
+Users in the `FRONTDESK` organizational unit have a maxiumum 2GB of storage space, users in the `WORKERS` organizational unit have a maximum of 5GB of storage space and users in the `PS-MANAGEMENT` organizational unit have a maximum of 10GB of storage space, to ensure that storage resources are allocated efficiently and to prevent any one user from consuming excessive amounts of storage.
+
+=== AAA
+
+AAA is configured on the server to provide centralized authentication, authorization and accounting for users accessing network resources.
+
+The RADIUS server has the following RADIUS clients:
+
+* PC-CORE-MLS1
+* PC-CORE-MLS2
+* PC-O-R1
+* PC-O-S1
+* PC-PS-MLS1
+* PC-PS-MLS2
+* PC-PS-S1
+* PC-PS-S2
+
+The passkey for all clients is `Passw0rd`.
 
 
 <<<

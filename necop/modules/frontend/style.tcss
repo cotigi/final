@@ -123,10 +123,10 @@ $lighter-default: #51576d;
     border: solid $lighter-default;
 }
 
-.display_on {
+.display-on {
     display: block;
 }
 
-.display_off {
+.display-off {
     display: none;
 }

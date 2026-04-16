@@ -1,28 +1,61 @@
 """Network device connection and configuration handling."""
 
+from netmiko.exceptions import NetmikoTimeoutException
 from ..resources import resources
-from . import tftp
 
-import threading
 import os
+from netmiko import ConnectHandler
 
-def tftp_handler():
-    """Run and manage tftp connections"""
+async def save_to_tftp(hostname, ip):
+    device = {
+            "device_type": "cisco_ios",
+            "host": ip,
+            "username": resources.user["username"],
+            "password": resources.user["password"],
+            "secret": resources.enable_password
+    }
 
-    conn_infos = resources.gen_conn_infos()
-    threads = []
+    try:
+        conn = ConnectHandler(**device)
+    except NetmikoTimeoutException:
+        return (False, "Null")
 
-    # Generate a thread for each connection
-    for conn_info in conn_infos:
-        threads.append(
-            threading.Thread(target=tftp.tftp, args=(conn_info))
+    conn.enable()
+
+    response = conn.send_command_timing(
+        command_string="copy running-config tftp:",
+        strip_command=False,
+        strip_prompt=False
+    )
+
+    if "Address or name of remote host" in response:
+        response = conn.send_command_timing(
+            command_string=resources.tftp_server,
+            strip_command=False,
+            strip_prompt=False
         )
 
-    for thread in threads:
-        thread.start()
+    if "Destination filename" in response:
+        response = conn.send_command_timing(
+            command_string=f"{hostname.lower()}-confg",
+            strip_command=False,
+            strip_prompt=False
+        )
 
-    for thread in threads:
-        thread.join()
+    conn.disconnect()
+
+    if "OK" in response:
+        bytes_uploaded = str(response)\
+                            .splitlines()[1]\
+                            .lstrip("[")\
+                            .rstrip("]")\
+                            .split("-")[1]\
+                            .rstrip("bytes")\
+                            .strip()
+
+        return (True, bytes_uploaded)
+
+    return (False, "Null")
 
 async def is_up(count, host):
     response = os.system(f"ping -c {count} {host} >/dev/null")

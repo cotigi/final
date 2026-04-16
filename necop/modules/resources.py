@@ -15,6 +15,7 @@ class Resources:
         self.update_devices()
         self.user = user
         self.enable_password = enable_password
+        self.tftp_server = "192.168.0.100" # Placeholder
 
     def update_devices(self):
         """Calls the file reader from the files module."""

@@ -1,6 +1,7 @@
 """File responsable for frontend"""
 
 from .devices import Devices
+from .tftp import TFTP
 
 from textual.app import (
     App,
@@ -46,7 +47,7 @@ class Base(App):
             with TabPane("Devices", id="devices",):
                 yield Devices()
             with TabPane("TFTP", id="tftp"):
-                yield Label("TFTP")
+                yield TFTP()
 
     def on_mount(self) -> None:
         self.theme = "catppuccin-frappe"

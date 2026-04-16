@@ -1,7 +1,7 @@
-"""Responsable for the Devices panel"""
+"""Responsable for the TFTP"""
 
 from ..resources import resources
-from ..network.network import is_up
+from ..network.network import save_to_tftp
 
 from textual.app import ComposeResult
 from textual.containers import (
@@ -17,7 +17,7 @@ from textual.widgets import (
 )
 from textual import work
  
-class Devices(Container):
+class TFTP(Container):
     CSS_PATH = "style.tcss"
 
     def compose(self) -> ComposeResult:
@@ -28,21 +28,22 @@ class Devices(Container):
                 yield Label("IPv4 address", classes="device-info")
                 yield Static(classes="device-indicator-container")
                 yield Button(
-                    "Test All",
+                    "Save All",
                     classes="device-test",
                     id=f"all",
                 )
             for id, device in enumerate(resources.devices):
-                with Horizontal(classes="device-container light-default-border", id=f"device-{id}-container"):
-                    yield Label(device["location"], classes="device-info", id=f"device-{id}-location")
-                    yield Label(device["name"], classes="device-info", id=f"device-{id}-hostname")
-                    yield Label(device["ip"], classes="device-info", id=f"device-{id}-ip")
+                with Horizontal(classes="device-container light-default-border", id=f"tftp-{id}-container"):
+                    yield Label(device["location"], classes="device-info", id=f"tftp-{id}-location")
+                    yield Label(device["name"], classes="device-info", id=f"tftp-{id}-hostname")
+                    yield Label(device["ip"], classes="device-info", id=f"tftp-{id}-ip")
                     with Static(classes="device-indicator-container"):
-                        yield LoadingIndicator(classes="device-test-indicator display-off", id=f"device-{id}-indicator")
+                        yield Label(classes=f"display-off", id=f"tftp-{id}-bytes")
+                        yield LoadingIndicator(classes="device-test-indicator display-off", id=f"tftp-{id}-indicator")
                     yield Button(
-                        "Test",
+                        "Save",
                         classes="device-test",
-                        id=f"device-{id}-button",
+                        id=f"tftp-{id}-button",
                     )
 
     async def on_button_pressed(self, event: Button.Pressed) -> None:
@@ -50,23 +51,32 @@ class Devices(Container):
 
         if button_id != "all":
             id = button_id.split("-")[1]
-            self.test_device(id)
+            self.save_device(id)
         else:
             for id in range(len(resources.devices)):
-                self.test_device(id)
+                self.save_device(id)
 
     @work(thread=True)
-    async def test_device(self, id):
-        container = self.query_one(f"#device-{id}-container", Horizontal)
-        indicator = self.query_one(f"#device-{id}-indicator", LoadingIndicator)
-        ip = self.query_one(f"#device-{id}-ip", Label).content
+    async def save_device(self, id):
+        container = self.query_one(f"#tftp-{id}-container", Horizontal)
+        indicator = self.query_one(f"#tftp-{id}-indicator", LoadingIndicator)
+        bytes_label = self.query_one(f"#tftp-{id}-bytes", Label)
+        hostname = self.query_one(f"#tftp-{id}-hostname", Label).content
+
+        ip = resources.devices[int(id)]["ip"]
 
         container.set_classes("device-container warning-border")
         indicator.set_classes("device-test-indicator display-on")
+        bytes_label.set_classes("display-off")
 
-        if await is_up(2, ip):
+        status, bytes_str = await save_to_tftp(hostname, ip)
+
+        indicator.set_classes("device-test-indicator display-off")
+
+        if status:
+            bytes_label.update(bytes_str+"B")
+            bytes_label.set_classes("display-on")
+
             container.add_class("success-border")
         else:
             container.add_class("error-border")
-
-        indicator.set_classes("test-indicator display-off")

@@ -111,6 +111,14 @@ NOTE: All sites must use RADIUS as their AAA server.
 
 All network devices must be configured with the following passwords:
 
+==== Windows and application Updates
+
+All of the users system and applications updates at 1 AM every day
+
+==== File backup
+
+Every user's file is backed up at 1 AM every day on which are stored in the network folders.
+
 .Device Passwords
 [cols="1h,1,1",options="header"]
 |===

@@ -6920,3 +6920,654 @@ end
 
 [appendix]
 == Network Programming (Necop)
+=== Files
+==== main.py
+
+*Location*: `necop/main.py`
+
+Responsable for starting the frontend modules.
+
+[source, python]
+----
+"""Main file responsable for program init."""
+
+from modules.frontend.base import Base
+
+def main():
+    app = Base()
+    app.run()
+
+
+if __name__ == "__main__":
+    main()
+----
+
+==== Resources
+===== devices.txt
+*Location*: `necop/resources/devices.txt`
+
+Stores registered devices.
+
+[source]
+----
+Head Quarters,HQ-R1,10.1.255.1
+Head Quarters,HQ-R2,10.1.255.2
+Head Quarters,HQ-S1,10.1.255.3
+Head Quarters,HQ-S2,10.1.255.4
+Head Quarters,HQ-F0-S1,10.1.255.5
+Head Quarters,HQ-F1-S1,10.1.255.6
+Head Quarters,HQ-F1-S2,10.1.255.7
+Head Quarters,HQ-F2-S1,10.1.255.8
+Head Quarters,HQ-F2-S2,10.1.255.9
+Package Center,PC-CORE-MLS1,10.2.255.1
+Package Center,PC-CORE-MLS2,10.2.255.2
+Package Center,PC-PS-MLS1,10.2.255.129
+Package Center,PC-PS-MLS2,10.2.255.130
+Package Center,PC-PS-S1,10.2.255.131
+Package Center,PC-PS-S2,10.2.255.132
+Package Center,PC-O-R1,10.2.255.193
+Package Center,PC-O-R1,10.2.255.194
+----
+
+===== ssh
+*Location*: `necop/resources/ssh`
+
+config for legacy SSH connections.
+
+[source]
+----
+Host 10.*.*.*
+    KexAlgorithms +diffie-hellman-group1-sha1
+    HostKeyAlgorithms +ssh-rsa
+    PubkeyAcceptedAlgorithms +ssh-rsa
+    Ciphers +aes128-cbc,aes192-cbc,aes256-cbc,3des-cbc
+----
+
+==== Modules
+
+===== resources.py
+
+*Location*: `necop/modules/resources.py`
+
+Responsable for data storage to avoid unnecessary read operations.
+
+[source, python]
+----
+"""Responsable for data storage to avoid unnecessary read operations."""
+
+from . import files
+
+class Resources:
+    def __init__(
+            self, 
+            user = {
+                "username": "root",
+                "password": "rootpa55",
+            },
+            enable_password = "enpa55"
+        ):
+
+        self.update_devices()
+        self.user = user
+        self.enable_password = enable_password
+        self.tftp_server = "192.168.100.11" # Placeholder
+
+    def update_devices(self):
+        """Calls the file reader from the files module."""
+        self.devices = files.read_devices()
+
+    def gen_conn_infos(self):
+        """Generates the necessary connection information and returns it."""
+        conn_infos = []
+
+        for device in self.devices:
+            conn_infos.append({
+                "general_info": device,
+                "thread_info": {
+                    "device_type": "cisco_ios",
+                    "host": device["ip"],
+                    "username": self.user["username"],
+                    "password": self.user["password"]
+                }
+            })
+
+        return conn_infos
+
+    def update_user(self, username, password):
+        """Updates the user."""
+        self.user["username"] = username
+        self.user["password"] = password
+
+    def update_enable_password(self, enable_password):
+        """Updates the enable password."""
+        self.enable_password = enable_password
+
+resources = Resources()
+----
+
+===== files.py
+
+*Location*: `necop/modules/files.py`
+
+Responsable for handling file reading and writing.
+
+[source, python]
+----
+"""This module is responsable for handling file reading and writing."""
+
+def read_devices():
+    """Read all the device informations out into a dictionary.
+    Returns: Dict containing the names and ip addresses
+    """
+
+    devices = []
+    file = open('resources/devices.txt', 'r') 
+
+    lines = file.read().splitlines()
+
+    for line in lines:
+        location, name, ip = line.split(',')
+
+        device = {
+            "location": location,
+            "name": name,
+            "ip": ip,
+        }
+
+        devices.append(device)
+
+    file.close()
+
+    return devices
+
+def log(message):
+    file = open("log.txt", "a")
+
+    file.write(message)
+
+    file.close()
+----
+
+===== network.py
+
+*Location*: `necop/modules/network.py`
+
+Responsable for network related tasks like pinging and SSH.
+
+[source, python]
+----
+"""Network device connection and configuration handling."""
+
+from netmiko.exceptions import NetmikoTimeoutException
+from ..resources import resources
+from ..files import log
+
+import os
+from netmiko import ConnectHandler
+
+async def save_to_tftp(hostname, ip):
+    device = {
+            "device_type": "cisco_ios",
+            "host": ip,
+            "username": resources.user["username"],
+            "password": resources.user["password"],
+            "secret": resources.enable_password,
+            "disabled_algorithms": {
+                "kex": [],
+                "keys": [],
+            },
+            "ssh_config_file": "~/Projects/final/necop/resources/ssh"
+    }
+
+    try:
+        conn = ConnectHandler(**device)
+    except NetmikoTimeoutException:
+        return (False, "Null")
+
+    conn.enable()
+
+    response = conn.send_command_timing(
+        command_string="copy running-config tftp:",
+        strip_command=False,
+        strip_prompt=False
+    )
+
+    log(str(response))
+
+    if "Address or name of remote host" in response:
+        response = conn.send_command_timing(
+            command_string=resources.tftp_server,
+            strip_command=False,
+            strip_prompt=False
+        )
+
+    log(str(response))
+
+    if "Destination filename" in response:
+        response = conn.send_command_timing(
+            command_string=f"{hostname.lower()}-confg",
+            strip_command=False,
+            strip_prompt=False,
+            last_read=5.0,
+            read_timeout=120.0
+        )
+    log(str(response))
+
+    conn.disconnect()
+
+    if "OK" in response:
+        bytes_uploaded = str(response)\
+                            .splitlines()[1]\
+                            .lstrip("[")\
+                            .rstrip("]")\
+                            .split("-")[1]\
+                            .rstrip("bytes")\
+                            .strip()
+
+        return (True, bytes_uploaded)
+    log(str(response))
+
+    return (False, "Null")
+
+async def is_up(count, host):
+    response = os.system(f"ping -c {count} {host} >/dev/null")
+
+    return not bool(response)
+----
+
+===== frontend/base.py
+
+*Location*: `necop/modules/frontend/base.py`
+
+Responsable for the base screen.
+
+[source, python]
+----
+"""File responsable for frontend"""
+
+from .devices import Devices
+from .tftp import TFTP
+
+from textual.app import (
+    App,
+    ComposeResult,
+)
+from textual.widgets import (
+    Footer, 
+    Header,
+    Static, 
+    TabbedContent,
+    TabPane,
+    Label,
+    LoadingIndicator
+)
+from textual.worker import WorkerCancelled
+from textual.compose import compose
+import asyncio
+
+class Base(App):
+    """A Textual app to manage network configurations."""
+
+    BINDINGS = [("q", "quit", "Quit")]
+    
+    CSS_PATH = "style.tcss"
+
+    """
+    def get_system_commands(self, screen: Screen) -> Iterable[SystemCommand]:
+        yield from super().get_system_commands(screen)  
+        yield SystemCommand(
+            "Devices",
+            "Show currently registered devices",
+            self.devices
+        )
+    """
+        
+    def compose(self) -> ComposeResult:
+        """Create child widgets for the app."""
+            
+        yield Header()
+        yield Footer()
+
+        with TabbedContent():
+            with TabPane("Devices", id="devices",):
+                yield Devices()
+            with TabPane("TFTP", id="tftp"):
+                yield TFTP()
+
+    def on_mount(self) -> None:
+        self.theme = "catppuccin-frappe"
+
+    async def action_quit(self) -> None:
+        widgets = compose(self, self.cleanup_screen())
+        await self.mount_all(widgets)
+
+        await self.workers.wait_for_complete()
+        
+        self.exit()
+
+    def cleanup_screen(self) -> ComposeResult:
+        with Static(classes="cleanup-container default-bg"):
+            yield Static()
+            yield LoadingIndicator()
+            with Static():
+                yield Label("Waiting for worker completion")
+----
+
+===== frontend/devices.py
+
+*Location*: `necop/modules/frontend/devices.py`
+
+Responsable for the device testing screen.
+
+[source, python]
+----
+"""Responsable for the Devices panel"""
+
+from ..resources import resources
+from ..network.network import is_up
+
+from textual.app import ComposeResult
+from textual.containers import (
+    Container,
+    Horizontal,
+    Vertical
+)
+from textual.widgets import (
+    Label,
+    Button,
+    LoadingIndicator,
+    Static
+)
+from textual import work
+ 
+class Devices(Container):
+    CSS_PATH = "style.tcss"
+
+    def compose(self) -> ComposeResult:
+        with Vertical(id="device-base-container"):
+            with Horizontal(classes="device-container lighter-default-border"):
+                yield Label("Location", classes="device-info")
+                yield Label("Hostname", classes="device-info")
+                yield Label("IPv4 address", classes="device-info")
+                yield Static(classes="device-indicator-container")
+                yield Button(
+                    "Test All",
+                    classes="device-test",
+                    id=f"all",
+                )
+            for id, device in enumerate(resources.devices):
+                with Horizontal(classes="device-container light-default-border", id=f"device-{id}-container"):
+                    yield Label(device["location"], classes="device-info", id=f"device-{id}-location")
+                    yield Label(device["name"], classes="device-info", id=f"device-{id}-hostname")
+                    yield Label(device["ip"], classes="device-info", id=f"device-{id}-ip")
+                    with Static(classes="device-indicator-container"):
+                        yield LoadingIndicator(classes="device-test-indicator display-off", id=f"device-{id}-indicator")
+                    yield Button(
+                        "Test",
+                        classes="device-test",
+                        id=f"device-{id}-button",
+                    )
+
+    async def on_button_pressed(self, event: Button.Pressed) -> None:
+        button_id = str(event.button.id)
+
+        if button_id != "all":
+            id = button_id.split("-")[1]
+            self.test_device(id)
+        else:
+            for id in range(len(resources.devices)):
+                self.test_device(id)
+
+    @work(thread=True)
+    async def test_device(self, id):
+        container = self.query_one(f"#device-{id}-container", Horizontal)
+        indicator = self.query_one(f"#device-{id}-indicator", LoadingIndicator)
+        ip = self.query_one(f"#device-{id}-ip", Label).content
+
+        container.set_classes("device-container warning-border")
+        indicator.set_classes("device-test-indicator display-on")
+
+        if await is_up(2, ip):
+            container.add_class("success-border")
+        else:
+            container.add_class("error-border")
+
+        indicator.set_classes("test-indicator display-off")
+----
+
+===== frontend/tftp.py
+
+*Location*: `necop/modules/frontend/devices.py`
+
+Responsable for saving running configurations onto a given tftp server.
+
+[source, python]
+----
+"""Responsable for the TFTP"""
+
+from ..resources import resources
+from ..network.network import save_to_tftp
+
+from textual.app import ComposeResult
+from textual.containers import (
+    Container,
+    Horizontal,
+    Vertical
+)
+from textual.widgets import (
+    Label,
+    Button,
+    LoadingIndicator,
+    Static
+)
+from textual import work
+ 
+class TFTP(Container):
+    CSS_PATH = "style.tcss"
+
+    def compose(self) -> ComposeResult:
+        with Vertical(id="device-base-container"):
+            with Horizontal(classes="device-container lighter-default-border"):
+                yield Label("Location", classes="device-info")
+                yield Label("Hostname", classes="device-info")
+                yield Label("IPv4 address", classes="device-info")
+                yield Static(classes="device-indicator-container")
+                yield Button(
+                    "Save All",
+                    classes="device-test",
+                    id=f"all",
+                )
+            for id, device in enumerate(resources.devices):
+                with Horizontal(classes="device-container light-default-border", id=f"tftp-{id}-container"):
+                    yield Label(device["location"], classes="device-info", id=f"tftp-{id}-location")
+                    yield Label(device["name"], classes="device-info", id=f"tftp-{id}-hostname")
+                    yield Label(device["ip"], classes="device-info", id=f"tftp-{id}-ip")
+                    with Static(classes="device-indicator-container"):
+                        yield Label(classes=f"display-off", id=f"tftp-{id}-bytes")
+                        yield LoadingIndicator(classes="device-test-indicator display-off", id=f"tftp-{id}-indicator")
+                    yield Button(
+                        "Save",
+                        classes="device-test",
+                        id=f"tftp-{id}-button",
+                    )
+
+    async def on_button_pressed(self, event: Button.Pressed) -> None:
+        button_id = str(event.button.id)
+
+        if button_id != "all":
+            id = button_id.split("-")[1]
+            self.save_device(id)
+        else:
+            for id in range(len(resources.devices)):
+                self.save_device(id)
+
+    @work(thread=True)
+    async def save_device(self, id):
+        container = self.query_one(f"#tftp-{id}-container", Horizontal)
+        indicator = self.query_one(f"#tftp-{id}-indicator", LoadingIndicator)
+        bytes_label = self.query_one(f"#tftp-{id}-bytes", Label)
+        hostname = self.query_one(f"#tftp-{id}-hostname", Label).content
+
+        ip = resources.devices[int(id)]["ip"]
+
+        container.set_classes("device-container warning-border")
+        indicator.set_classes("device-test-indicator display-on")
+        bytes_label.set_classes("display-off")
+
+        status, bytes_str = await save_to_tftp(hostname, ip)
+
+        indicator.set_classes("device-test-indicator display-off")
+
+        if status:
+            bytes_label.update(bytes_str+"B")
+            bytes_label.set_classes("display-on")
+
+            container.add_class("success-border")
+        else:
+            container.add_class("error-border")
+----
+
+===== frontend/style.tcss
+
+*Location*: `necop/modules/frontend/style.tcss`
+
+Stores style settings for all frontend related files.
+
+[source, scss]
+----
+$warning: #e5c890;
+$success: #a6d189;
+$error: #ea999c;
+$blue: #81c8be;
+$default: #303446;
+$light-default: #414559;
+$lighter-default: #51576d;
+
+
+#device-base-container {
+    height: 100%;
+    width: 100%;
+    overflow-y: auto;
+}
+
+#device-base-container:first-child>Static {
+    height: 100%;
+    width: 2fr;
+}
+
+.device-indicator-container {
+    height: 100%;
+    width: 1fr;
+}
+
+.device-indicator-container>LoadingIndicator {
+    color: $warning;
+}
+
+.cleanup-container {
+    position: absolute;
+    offset-y: 1;
+    height: 100h;
+    width: 100w;
+}
+
+.cleanup-container>Static {
+    height: 2fr;
+    width: 100%;
+}
+
+.cleanup-container>Static>Label {
+    height: 100%;
+    width: 100%;
+    text-style: bold;
+    content-align: center top;
+}
+
+.cleanup-container>LoadingIndicator {
+    height: 1fr;
+    width: 100%;
+    color: $blue;
+}
+
+.device-container {
+    height: 5;
+    width: 100%;
+
+    border: solid #df8e1d;
+
+    margin: 0 1;
+    padding: 0 1;
+}
+
+.device-info {
+    height: 1;
+    width: 1fr;
+
+    margin: 1 0;
+}
+
+.device-test {
+    height: 3;
+    min-width: 1;
+    width: 12; 
+}
+
+.warning-bg {
+    background: $warning;
+}
+
+.success-bg {
+    background: $success;
+}
+
+.error-bg {
+    background: $error;
+}
+
+.default-bg {
+    background: $default;
+}
+
+.light-default-bg {
+    background: $light-default;
+}
+
+.lighter-default-bg {
+    background: $lighter-default;
+}
+
+.warning-border {
+    border: solid $warning;
+}
+
+.success-border {
+    border: solid $success;
+}
+
+.error-border {
+    border: solid $error;
+}
+
+.default-border {
+    border: solid $default;
+}
+
+.light-default-border {
+    border: solid $light-default;
+}
+
+.lighter-default-border {
+    border: solid $lighter-default;
+}
+
+.display-on {
+    display: block;
+}
+
+.display-off {
+    display: none;
+}
+----
+
+=== Classes and Methods
+

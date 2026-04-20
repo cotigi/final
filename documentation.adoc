@@ -2274,6 +2274,7 @@ providing IPv4 addresses for the following networks:
 ASA Version 9.6(1)
 !
 hostname HQ-ASA
+enable password DzaLrtot/vx63hrf encrypted
 names
 !
 interface GigabitEthernet1/1
@@ -2342,8 +2343,10 @@ object network REMOTE
 route OUTSIDE 0.0.0.0 0.0.0.0 11.11.11.1 1
 !
 access-list VPN-TRAFFIC extended permit ip object LOCAL object REMOTE
+access-list OUTSIDE-IN extended permit ip object REMOTE object LOCAL
 !
 !
+access-group OUTSIDE-IN in interface OUTSIDE
 !
 !
 class-map inspection_default
@@ -2364,9 +2367,11 @@ telnet timeout 5
 ssh timeout 5
 !
 !
+crypto ipsec ikev1 transform-set VPN-SET esp-aes 256 esp-sha-hmac
 !
 crypto map omap 10 match address VPN-TRAFFIC
 crypto map omap 10 set peer 12.12.12.2 
+crypto map omap 10 set ikev1 transform-set VPN-SET 
 crypto map omap interface OUTSIDE
 crypto ikev1 enable OUTSIDE
 crypto ikev1 policy 10
@@ -2393,7 +2398,7 @@ router ospf 1
 ----
 Building configuration...
 
-Current configuration : 3210 bytes
+Current configuration : 3211 bytes
 !
 version 15.1
 no service timestamps log datetime msec
@@ -2540,14 +2545,14 @@ router ospf 1
  log-adjacency-changes
  passive-interface default
  no passive-interface GigabitEthernet0/2
- network 10.2.10.0 0.0.0.31 area 1
- network 10.2.20.0 0.0.0.63 area 1
- network 10.2.30.0 0.0.0.31 area 1
- network 10.2.40.0 0.0.0.15 area 1
- network 10.2.50.0 0.0.0.7 area 1
- network 10.2.60.0 0.0.0.15 area 1
- network 10.2.255.0 0.0.0.31 area 1
- network 10.2.200.0 0.0.0.3 area 0
+ network 10.1.10.0 0.0.0.31 area 0
+ network 10.1.20.0 0.0.0.63 area 0
+ network 10.1.30.0 0.0.0.31 area 0
+ network 10.1.40.0 0.0.0.15 area 0
+ network 10.1.50.0 0.0.0.7 area 0
+ network 10.1.60.0 0.0.0.15 area 0
+ network 10.1.255.0 0.0.0.31 area 0
+ network 10.1.200.0 0.0.0.31 area 0
 !
 ip classless
 !
@@ -2723,14 +2728,14 @@ router ospf 1
  log-adjacency-changes
  passive-interface default
  no passive-interface GigabitEthernet0/2
- network 10.1.10.0 0.0.0.31 area 1
- network 10.1.20.0 0.0.0.63 area 1
- network 10.1.30.0 0.0.0.31 area 1
- network 10.1.40.0 0.0.0.15 area 1
- network 10.1.50.0 0.0.0.7 area 1
- network 10.1.60.0 0.0.0.15 area 1
- network 10.1.255.0 0.0.0.31 area 1
  network 10.1.200.4 0.0.0.3 area 0
+ network 10.1.10.0 0.0.0.31 area 0
+ network 10.1.20.0 0.0.0.63 area 0
+ network 10.1.30.0 0.0.0.31 area 0
+ network 10.1.40.0 0.0.0.15 area 0
+ network 10.1.50.0 0.0.0.7 area 0
+ network 10.1.60.0 0.0.0.15 area 0
+ network 10.1.255.0 0.0.0.31 area 0
 !
 ip classless
 !
@@ -2773,7 +2778,7 @@ end
 ----
 Building configuration...
 
-Current configuration : 6029 bytes
+Current configuration : 5917 bytes
 !
 version 15.0
 no service timestamps log datetime msec
@@ -3011,10 +3016,7 @@ interface GigabitEthernet0/2
  ip dhcp snooping limit rate 20
  switchport mode access
  switchport nonegotiate
- switchport port-security mac-address 00D0.9756.36C6
  switchport port-security aging time 5
- authentication port-control auto
- dot1x pae authenticator
  spanning-tree portfast
  spanning-tree bpduguard enable
 !
@@ -4616,6 +4618,7 @@ end
 ASA Version 9.6(1)
 !
 hostname PC-ASA
+enable password DzaLrtot/vx63hrf encrypted
 names
 !
 interface GigabitEthernet1/1
@@ -4699,6 +4702,7 @@ object network REMOTE
 route OUTSIDE 0.0.0.0 0.0.0.0 12.12.12.1 1
 !
 access-list OUTSIDE-IN extended permit object-group DMZ-SERVICES any object DMZ-PUBLIC-IP
+access-list OUTSIDE-IN extended permit ip object REMOTE object LOCAL
 access-list VPN-TRAFFIC extended permit ip object LOCAL object REMOTE
 !
 !
@@ -4724,9 +4728,11 @@ telnet timeout 5
 ssh timeout 5
 !
 !
+crypto ipsec ikev1 transform-set VPN-SET esp-aes 256 esp-sha-hmac
 !
 crypto map omap 10 match address VPN-TRAFFIC
 crypto map omap 10 set peer 11.11.11.2 
+crypto map omap 10 set ikev1 transform-set VPN-SET 
 crypto map omap interface OUTSIDE
 crypto ikev1 enable OUTSIDE
 crypto ikev1 policy 10

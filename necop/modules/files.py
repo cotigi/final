@@ -24,3 +24,10 @@ def read_devices():
     file.close()
 
     return devices
+
+def log(message):
+    file = open("log.txt", "a")
+
+    file.write(message)
+
+    file.close()

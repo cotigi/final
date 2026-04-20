@@ -16,4 +16,6 @@ Package Center,PC-PS-S2,10.2.255.132
 Package Center,PC-O-R1,10.2.255.193
 Package Center,PC-O-R1,10.2.255.194
 OMIKK,Tibi Telefon,10.108.172.82
+Pataky,R1,192.168.100.1
+Pataky,S1,192.168.100.11
 Local,Local,127.0.0.1

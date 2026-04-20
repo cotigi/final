@@ -346,6 +346,7 @@ providing IPv4 addresses for the following networks:
 
 <<<
 
+[#hq-ip-addressing]
 ==== IPv4 Addressing
 
 [cols="1,1,1,1",options="header"]
@@ -752,6 +753,7 @@ This is achieved through the following parameters:
 
 <<<
 
+[#pc-ip-addressing]
 ==== IPv4 Addressing
 
 [cols="1,1,1,1",options="header"]
@@ -823,7 +825,7 @@ This is achieved through the following parameters:
 |Null
 
 |VLAN332
-|10.2.255.192
+|10.2.255.129
 |Null
 
 .4+.^|PC-PS-MLS2
@@ -941,3 +943,65 @@ This is achieved through the following parameters:
 |TRASH         
 |Null
 |===
+
+<<<
+
+== Network Programming (Necop)
+For the automatic network configuration section, we developed a TUI
+program that can login to registered devices and save the running-configuration
+to a certain TFTP server.
+
+[#device_response]
+=== Device Responses
+The buttons corresponding to the given device has four states 
+shown by the border's color. 
+These are:
+
+- *Gray*: Default
+- *Orange*: Loading
+- *Green*: Success
+- *Red*: Error
+
+NOTE: When an action is being performed on a certain device
+a loading indicator will also appear with orange color.
+
+The interface is split into two tabs, which are `Devices` and `TFTP`.
+
+=== Devices Tab
+The `Devices` tab is responsible for testing the registered devices 
+by pinging the given ip address with 2 counts.
+
+=== TFTP Tab
+The `TFTP` tab is responsible for saving the running-configuration 
+of the given device to a certain TFTP server.
+
+==== Action Response
+In addition to the repsonses already stated in <<device_response>>,
+the `TFTP` tab introduces a label that shows the amount of bytes written in the
+case that the device successfully copied the running-configuration to the TFTP server.
+
+<<<
+
+=== Device Registration
+Devices can be registered by adding it's details into the `resources/devices.txt` file,
+separated by a `,` character.
+
+The following details must be stated:
+
+- *Location*
+- *Hostname*
+- *IPv4 Address*
+
+*Format:* `<Location>,<Hostname>,<IPv4 Address>`
+
+WARNING: The ASA devices don't have ip addresses in the management vlan
+so if you want to add an ASA device to the list you must choose an ip address
+from the already configured non-management ip addresses.
+For further information, refer to <<hq-ip-addressing, HQ IPv4 Addressing>>
+and <<pc-ip-addressing, Package Center IPv4 Addressing>>.
+ 
+=== Exit Screen
+If the user wants to exit while network actions like pings or SSH connections
+are still active, a loading screen will appear that will wait for the worker threads
+to finnish.
+

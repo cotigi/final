@@ -2,6 +2,7 @@
 
 from netmiko.exceptions import NetmikoTimeoutException
 from ..resources import resources
+from ..files import log
 
 import os
 from netmiko import ConnectHandler
@@ -12,7 +13,12 @@ async def save_to_tftp(hostname, ip):
             "host": ip,
             "username": resources.user["username"],
             "password": resources.user["password"],
-            "secret": resources.enable_password
+            "secret": resources.enable_password,
+            "disabled_algorithms": {
+                "kex": [],
+                "keys": [],
+            },
+            "ssh_config_file": "~/Projects/final/necop/resources/ssh"
     }
 
     try:
@@ -28,6 +34,8 @@ async def save_to_tftp(hostname, ip):
         strip_prompt=False
     )
 
+    log(str(response))
+
     if "Address or name of remote host" in response:
         response = conn.send_command_timing(
             command_string=resources.tftp_server,
@@ -35,12 +43,17 @@ async def save_to_tftp(hostname, ip):
             strip_prompt=False
         )
 
+    log(str(response))
+
     if "Destination filename" in response:
         response = conn.send_command_timing(
             command_string=f"{hostname.lower()}-confg",
             strip_command=False,
-            strip_prompt=False
+            strip_prompt=False,
+            last_read=5.0,
+            read_timeout=120.0
         )
+    log(str(response))
 
     conn.disconnect()
 
@@ -54,6 +67,7 @@ async def save_to_tftp(hostname, ip):
                             .strip()
 
         return (True, bytes_uploaded)
+    log(str(response))
 
     return (False, "Null")
 

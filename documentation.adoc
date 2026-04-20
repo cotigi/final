@@ -2217,7 +2217,6 @@ providing IPv4 addresses for the following networks:
 [cols="1,1,1,1",options="header"]
 .IPv4 DHCP Addressing
 |===
-|Vlan       
 |Addressing Range   
 |Number Of Hosts
 |DNS    
@@ -2253,3 +2252,4671 @@ providing IPv4 addresses for the following networks:
 |DHCP
 |10.3.0.1
 |===
+
+[appendix]
+== Testing
+=== Network
+==== HQ
+==== Package Center
+
+=== Server
+==== HQ
+==== Package Center
+
+[appendix]
+== Network Device Configurations
+=== HQ
+==== HQ-ASA
+[source]
+----
+: Saved
+:
+ASA Version 9.6(1)
+!
+hostname HQ-ASA
+names
+!
+interface GigabitEthernet1/1
+ nameif INSIDE1
+ security-level 100
+ ip address 10.1.200.1 255.255.255.252
+!
+interface GigabitEthernet1/2
+ nameif INSIDE2
+ security-level 100
+ ip address 10.1.200.5 255.255.255.252
+!
+interface GigabitEthernet1/3
+ no nameif
+ no security-level
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/4
+ no nameif
+ no security-level
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/5
+ no nameif
+ no security-level
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/6
+ no nameif
+ no security-level
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/7
+ no nameif
+ no security-level
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/8
+ nameif OUTSIDE
+ security-level 0
+ ip address 11.11.11.2 255.255.255.252
+!
+interface Management1/1
+ management-only
+ no nameif
+ no security-level
+ no ip address
+ shutdown
+!
+object network LAN1
+ subnet 10.1.0.0 255.255.0.0
+ nat (INSIDE1,OUTSIDE) dynamic interface
+object network LAN2
+ subnet 10.1.0.0 255.255.0.0
+ nat (INSIDE2,OUTSIDE) dynamic interface
+object network LOCAL
+ subnet 10.1.0.0 255.255.0.0
+object network REMOTE
+ subnet 10.2.0.0 255.255.0.0
+!
+route OUTSIDE 0.0.0.0 0.0.0.0 11.11.11.1 1
+!
+access-list VPN-TRAFFIC extended permit ip object LOCAL object REMOTE
+!
+!
+!
+!
+class-map inspection_default
+ match default-inspection-traffic
+!
+policy-map type inspect dns preset_dns_map
+ parameters
+  message-length maximum 512
+policy-map global_policy
+ class inspection_default
+  inspect dns preset_dns_map
+  inspect ftp 
+  inspect tftp 
+!
+service-policy global_policy global
+!
+telnet timeout 5
+ssh timeout 5
+!
+!
+!
+crypto map omap 10 match address VPN-TRAFFIC
+crypto map omap 10 set peer 12.12.12.2 
+crypto map omap interface OUTSIDE
+crypto ikev1 enable OUTSIDE
+crypto ikev1 policy 10
+ encr aes
+ authentication pre-share
+ group 2
+ lifetime 3600
+!
+tunnel-group 12.12.12.2 type ipsec-l2l
+tunnel-group 12.12.12.2 ipsec-attributes
+ ikev1 pre-shared-key vpnpa55
+!
+router ospf 1
+ router-id 0.0.0.1
+ log-adjacency-changes
+ network 10.1.200.0 255.255.255.252 area 0
+ network 10.1.200.4 255.255.255.252 area 0
+ default-information originate
+!
+----
+
+==== HQ-R1
+[source]
+----
+Building configuration...
+
+Current configuration : 3210 bytes
+!
+version 15.1
+no service timestamps log datetime msec
+no service timestamps debug datetime msec
+service password-encryption
+!
+hostname HQ-R1
+!
+!
+!
+enable secret 5 $1$mERr$STCVvBm3rx8XD5gcSxKFC/
+!
+!
+!
+!
+!
+aaa new-model
+!
+aaa authentication login default group radius local-case 
+!
+!
+!
+!
+!
+!
+!
+ip cef
+no ipv6 cef
+!
+!
+!
+username admin privilege 15 secret 5 $1$mERr$YDWMoxSY4R79.r8uptM1C0
+!
+!
+license udi pid CISCO2911/K9 sn FTX1524DDFG-
+!
+!
+!
+!
+!
+!
+!
+!
+!
+ip ssh version 2
+ip ssh authentication-retries 2
+ip ssh time-out 30
+no ip domain-lookup
+ip domain-name bitbox.hu
+!
+!
+spanning-tree mode pvst
+!
+!
+!
+!
+!
+!
+interface GigabitEthernet0/0
+ no ip address
+ duplex auto
+ speed auto
+ shutdown
+!
+interface GigabitEthernet0/1
+ no ip address
+ duplex auto
+ speed auto
+!
+interface GigabitEthernet0/1.110
+ encapsulation dot1Q 110
+ ip address 10.1.10.1 255.255.255.224
+ ip helper-address 10.1.50.5
+ standby version 2
+ standby 0 ip 10.1.10.30
+ standby priority 200
+ standby preempt
+!
+interface GigabitEthernet0/1.120
+ encapsulation dot1Q 120
+ ip address 10.1.20.1 255.255.255.192
+ ip helper-address 10.1.50.5
+ standby version 2
+ standby 0 ip 10.1.20.62
+ standby priority 200
+ standby preempt
+!
+interface GigabitEthernet0/1.130
+ encapsulation dot1Q 130
+ ip address 10.1.30.1 255.255.255.224
+ ip helper-address 10.1.50.5
+ standby version 2
+ standby 0 ip 10.1.30.30
+ standby priority 200
+ standby preempt
+!
+interface GigabitEthernet0/1.140
+ encapsulation dot1Q 140
+ ip address 10.1.40.1 255.255.255.240
+ ip helper-address 10.1.50.5
+ standby version 2
+ standby 0 ip 10.1.40.14
+ standby priority 200
+ standby preempt
+!
+interface GigabitEthernet0/1.150
+ encapsulation dot1Q 150
+ ip address 10.1.50.1 255.255.255.248
+ ip helper-address 10.1.50.5
+ standby version 2
+ standby 0 ip 10.1.50.6
+ standby priority 200
+ standby preempt
+!
+interface GigabitEthernet0/1.160
+ encapsulation dot1Q 160
+ ip address 10.1.60.1 255.255.255.240
+ ip helper-address 10.1.50.5
+ standby version 2
+ standby 0 ip 10.1.60.14
+ standby priority 200
+ standby preempt
+!
+interface GigabitEthernet0/1.333
+ encapsulation dot1Q 333
+ ip address 10.1.255.1 255.255.255.224
+ ip helper-address 10.1.50.5
+ standby version 2
+ standby 0 ip 10.1.255.30
+ standby priority 200
+ standby preempt
+!
+interface GigabitEthernet0/2
+ ip address 10.1.200.2 255.255.255.252
+ duplex auto
+ speed auto
+!
+interface Vlan1
+ no ip address
+ shutdown
+!
+router ospf 1
+ router-id 1.1.1.1
+ log-adjacency-changes
+ passive-interface default
+ no passive-interface GigabitEthernet0/2
+ network 10.2.10.0 0.0.0.31 area 1
+ network 10.2.20.0 0.0.0.63 area 1
+ network 10.2.30.0 0.0.0.31 area 1
+ network 10.2.40.0 0.0.0.15 area 1
+ network 10.2.50.0 0.0.0.7 area 1
+ network 10.2.60.0 0.0.0.15 area 1
+ network 10.2.255.0 0.0.0.31 area 1
+ network 10.2.200.0 0.0.0.3 area 0
+!
+ip classless
+!
+ip flow-export version 9
+!
+!
+ip access-list standard SSH
+ permit 10.1.255.0 0.0.0.31
+!
+no cdp run
+!
+!
+radius server 10.1.50.5
+ address ipv4 10.1.50.5 auth-port 1645
+ key aaapa55
+!
+!
+!
+line con 0
+ login authentication default
+!
+line aux 0
+!
+line vty 0 4
+ access-class SSH in
+ login authentication default
+ transport input ssh
+line vty 5 15
+ access-class SSH in
+ login authentication default
+ transport input ssh
+!
+!
+!
+end
+----
+
+==== HQ-R2
+[source]
+----
+Building configuration...
+
+Current configuration : 2937 bytes
+!
+version 15.1
+no service timestamps log datetime msec
+no service timestamps debug datetime msec
+service password-encryption
+!
+hostname HQ-R2
+!
+!
+!
+enable secret 5 $1$mERr$STCVvBm3rx8XD5gcSxKFC/
+!
+!
+!
+!
+!
+aaa new-model
+!
+aaa authentication login default group radius local-case 
+!
+!
+!
+!
+!
+!
+!
+ip cef
+no ipv6 cef
+!
+!
+!
+username admin privilege 15 secret 5 $1$mERr$YDWMoxSY4R79.r8uptM1C0
+!
+!
+license udi pid CISCO2911/K9 sn FTX1524M1OR-
+!
+!
+!
+!
+!
+!
+!
+!
+!
+ip ssh version 2
+ip ssh authentication-retries 2
+ip ssh time-out 30
+no ip domain-lookup
+ip domain-name bitbox.hu
+!
+!
+spanning-tree mode pvst
+!
+!
+!
+!
+!
+!
+interface GigabitEthernet0/0
+ no ip address
+ duplex auto
+ speed auto
+ shutdown
+!
+interface GigabitEthernet0/1
+ no ip address
+ duplex auto
+ speed auto
+!
+interface GigabitEthernet0/1.110
+ encapsulation dot1Q 110
+ ip address 10.1.10.2 255.255.255.224
+ ip helper-address 10.1.50.5
+ standby version 2
+ standby 0 ip 10.1.10.30
+!
+interface GigabitEthernet0/1.120
+ encapsulation dot1Q 120
+ ip address 10.1.20.2 255.255.255.192
+ ip helper-address 10.1.50.5
+ standby version 2
+ standby 0 ip 10.1.20.62
+!
+interface GigabitEthernet0/1.130
+ encapsulation dot1Q 130
+ ip address 10.1.30.2 255.255.255.224
+ ip helper-address 10.1.50.5
+ standby version 2
+ standby 0 ip 10.1.30.30
+!
+interface GigabitEthernet0/1.140
+ encapsulation dot1Q 140
+ ip address 10.1.40.2 255.255.255.240
+ ip helper-address 10.1.50.5
+ standby version 2
+ standby 0 ip 10.1.40.14
+!
+interface GigabitEthernet0/1.150
+ encapsulation dot1Q 150
+ ip address 10.1.50.2 255.255.255.248
+ ip helper-address 10.1.50.5
+ standby version 2
+ standby 0 ip 10.1.50.6
+!
+interface GigabitEthernet0/1.160
+ encapsulation dot1Q 160
+ ip address 10.1.60.2 255.255.255.240
+ ip helper-address 10.1.50.5
+ standby version 2
+ standby 0 ip 10.1.60.14
+!
+interface GigabitEthernet0/1.333
+ encapsulation dot1Q 333
+ ip address 10.1.255.2 255.255.255.224
+ ip helper-address 10.1.50.5
+ standby version 2
+ standby 0 ip 10.1.255.30
+!
+interface GigabitEthernet0/2
+ ip address 10.1.200.6 255.255.255.252
+ duplex auto
+ speed auto
+!
+interface Vlan1
+ no ip address
+ shutdown
+!
+router ospf 1
+ router-id 1.1.1.2
+ log-adjacency-changes
+ passive-interface default
+ no passive-interface GigabitEthernet0/2
+ network 10.1.10.0 0.0.0.31 area 1
+ network 10.1.20.0 0.0.0.63 area 1
+ network 10.1.30.0 0.0.0.31 area 1
+ network 10.1.40.0 0.0.0.15 area 1
+ network 10.1.50.0 0.0.0.7 area 1
+ network 10.1.60.0 0.0.0.15 area 1
+ network 10.1.255.0 0.0.0.31 area 1
+ network 10.1.200.4 0.0.0.3 area 0
+!
+ip classless
+!
+ip flow-export version 9
+!
+!
+ip access-list standard SSH
+ permit 10.1.255.0 0.0.0.31
+!
+no cdp run
+!
+!
+radius server 10.1.50.5
+ address ipv4 10.1.50.5 auth-port 1645
+ key aaapa55
+!
+!
+!
+line con 0
+ login authentication default
+!
+line aux 0
+!
+line vty 0 4
+ access-class SSH in
+ login authentication default
+ transport input ssh
+line vty 5 15
+ access-class SSH in
+ login authentication default
+ transport input ssh
+!
+!
+!
+end
+----
+
+==== HQ-S1
+[source]
+----
+Building configuration...
+
+Current configuration : 6029 bytes
+!
+version 15.0
+no service timestamps log datetime msec
+no service timestamps debug datetime msec
+service password-encryption
+!
+hostname HQ-S1
+!
+enable secret 5 $1$mERr$STCVvBm3rx8XD5gcSxKFC/
+!
+!
+!
+!
+!
+aaa new-model
+!
+aaa authentication dot1x default group radius 
+aaa authentication login default group radius local-case 
+!
+!
+!
+!
+ip ssh version 2
+ip ssh authentication-retries 2
+ip ssh time-out 30
+no ip domain-lookup
+ip domain-name bitbox.hu
+!
+username admin secret 5 $1$mERr$YDWMoxSY4R79.r8uptM1C0
+!
+ip arp inspection vlan 150
+ip arp inspection validate src-mac dst-mac ip
+!
+ip dhcp snooping
+!
+dot1x system-auth-control
+spanning-tree mode rapid-pvst
+spanning-tree extend system-id
+spanning-tree vlan 110,120,130,140,150,160,333,666 priority 24576
+!
+interface Port-channel1
+ switchport trunk native vlan 666
+ switchport trunk allowed vlan 110,120,130,140,150,160,333
+ switchport mode trunk
+ switchport nonegotiate
+!
+interface FastEthernet0/1
+ switchport trunk native vlan 666
+ switchport trunk allowed vlan 110,120,130,140,150,160,333
+ ip arp inspection trust
+ ip dhcp snooping trust
+ ip dhcp snooping limit rate 20
+ switchport mode trunk
+ switchport nonegotiate
+ spanning-tree guard root
+!
+interface FastEthernet0/2
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/3
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/4
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/5
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/6
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/7
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/8
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/9
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/10
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/11
+ switchport trunk native vlan 666
+ switchport trunk allowed vlan 110,120,130,140,150,160,333
+ ip arp inspection trust
+ ip dhcp snooping trust
+ ip dhcp snooping limit rate 20
+ switchport mode trunk
+ switchport nonegotiate
+ spanning-tree guard root
+!
+interface FastEthernet0/12
+ switchport trunk native vlan 666
+ switchport trunk allowed vlan 110,120,130,140,150,160,333
+ ip arp inspection trust
+ ip dhcp snooping trust
+ ip dhcp snooping limit rate 20
+ switchport mode trunk
+ switchport nonegotiate
+ spanning-tree guard root
+!
+interface FastEthernet0/13
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/14
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/15
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/16
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/17
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/18
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/19
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/20
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/21
+ switchport trunk native vlan 666
+ switchport trunk allowed vlan 110,120,130,140,150,160,333
+ ip arp inspection trust
+ ip dhcp snooping trust
+ ip dhcp snooping limit rate 20
+ switchport mode trunk
+ switchport nonegotiate
+ spanning-tree guard root
+!
+interface FastEthernet0/22
+ switchport trunk native vlan 666
+ switchport trunk allowed vlan 110,120,130,140,150,160,333
+ ip arp inspection trust
+ ip dhcp snooping trust
+ ip dhcp snooping limit rate 20
+ switchport mode trunk
+ switchport nonegotiate
+ spanning-tree guard root
+!
+interface FastEthernet0/23
+ switchport trunk native vlan 666
+ switchport trunk allowed vlan 110,120,130,140,150,160,333
+ ip arp inspection trust
+ ip dhcp snooping trust
+ ip dhcp snooping limit rate 20
+ switchport mode trunk
+ switchport nonegotiate
+ channel-group 1 mode active
+ spanning-tree link-type point-to-point
+!
+interface FastEthernet0/24
+ switchport trunk native vlan 666
+ switchport trunk allowed vlan 110,120,130,140,150,160,333
+ ip arp inspection trust
+ ip dhcp snooping trust
+ ip dhcp snooping limit rate 20
+ switchport mode trunk
+ switchport nonegotiate
+ channel-group 1 mode active
+ spanning-tree link-type point-to-point
+!
+interface GigabitEthernet0/1
+ switchport trunk native vlan 666
+ switchport trunk allowed vlan 110,120,130,140,150,160,333
+ ip arp inspection trust
+ ip dhcp snooping trust
+ ip dhcp snooping limit rate 20
+ switchport mode trunk
+ switchport nonegotiate
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+!
+interface GigabitEthernet0/2
+ switchport access vlan 150
+ ip dhcp snooping trust
+ ip dhcp snooping limit rate 20
+ switchport mode access
+ switchport nonegotiate
+ switchport port-security mac-address 00D0.9756.36C6
+ switchport port-security aging time 5
+ authentication port-control auto
+ dot1x pae authenticator
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+!
+interface Vlan1
+ no ip address
+ shutdown
+!
+interface Vlan333
+ ip address 10.1.255.3 255.255.255.224
+!
+ip default-gateway 10.1.255.30
+!
+no cdp run
+!
+radius-server host 10.1.50.5 auth-port 1645 key aaapa55
+!
+!
+!
+ip access-list standard SSH
+ permit 10.1.255.0 0.0.0.31
+line con 0
+ login
+!
+line vty 0 4
+ access-class SSH in
+ login authentication default
+ transport input ssh
+line vty 5 15
+ access-class SSH in
+ login authentication default
+ transport input ssh
+!
+!
+!
+!
+end
+----
+
+==== HQ-S2
+[source]
+----
+Building configuration...
+
+Current configuration : 5557 bytes
+!
+version 15.0
+no service timestamps log datetime msec
+no service timestamps debug datetime msec
+service password-encryption
+!
+hostname HQ-S2
+!
+enable secret 5 $1$mERr$STCVvBm3rx8XD5gcSxKFC/
+!
+!
+!
+!
+!
+aaa new-model
+!
+aaa authentication login default group radius local-case 
+!
+!
+!
+!
+ip ssh version 2
+ip ssh authentication-retries 2
+ip ssh time-out 30
+ip domain-name bitbox.hu
+!
+username admin secret 5 $1$mERr$YDWMoxSY4R79.r8uptM1C0
+!
+!
+ip dhcp snooping
+!
+spanning-tree mode rapid-pvst
+spanning-tree extend system-id
+spanning-tree vlan 110,120,130,140,150,160,333,666 priority 28672
+!
+interface Port-channel1
+ switchport trunk native vlan 666
+ switchport trunk allowed vlan 110,120,130,140,150,160,333
+ switchport mode trunk
+ switchport nonegotiate
+!
+interface FastEthernet0/1
+ switchport trunk native vlan 666
+ switchport trunk allowed vlan 110,120,130,140,150,160,333
+ ip dhcp snooping trust
+ ip dhcp snooping limit rate 20
+ switchport mode trunk
+ switchport nonegotiate
+ spanning-tree guard root
+!
+interface FastEthernet0/2
+ switchport access vlan 666
+ switchport trunk native vlan 666
+ switchport trunk allowed vlan 110,120,130,140,150,333
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/3
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/4
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/5
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/6
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/7
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/8
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/9
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/10
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/11
+ switchport trunk native vlan 666
+ switchport trunk allowed vlan 110,120,130,140,150,160,333
+ ip dhcp snooping trust
+ ip dhcp snooping limit rate 20
+ switchport mode trunk
+ switchport nonegotiate
+ spanning-tree guard root
+!
+interface FastEthernet0/12
+ switchport trunk native vlan 666
+ switchport trunk allowed vlan 110,120,130,140,150,160,333
+ ip dhcp snooping trust
+ ip dhcp snooping limit rate 20
+ switchport mode trunk
+ switchport nonegotiate
+ spanning-tree guard root
+!
+interface FastEthernet0/13
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/14
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/15
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/16
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/17
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/18
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/19
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/20
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/21
+ switchport trunk native vlan 666
+ switchport trunk allowed vlan 110,120,130,140,150,160,333
+ ip dhcp snooping trust
+ ip dhcp snooping limit rate 20
+ switchport mode trunk
+ switchport nonegotiate
+ spanning-tree guard root
+!
+interface FastEthernet0/22
+ switchport trunk native vlan 666
+ switchport trunk allowed vlan 110,120,130,140,150,160,333
+ ip dhcp snooping trust
+ ip dhcp snooping limit rate 20
+ switchport mode trunk
+ switchport nonegotiate
+ spanning-tree guard root
+!
+interface FastEthernet0/23
+ switchport trunk native vlan 666
+ switchport trunk allowed vlan 110,120,130,140,150,160,333
+ ip dhcp snooping trust
+ ip dhcp snooping limit rate 20
+ switchport mode trunk
+ switchport nonegotiate
+ channel-group 1 mode passive
+ spanning-tree link-type point-to-point
+!
+interface FastEthernet0/24
+ switchport trunk native vlan 666
+ switchport trunk allowed vlan 110,120,130,140,150,160,333
+ ip dhcp snooping trust
+ ip dhcp snooping limit rate 20
+ switchport mode trunk
+ switchport nonegotiate
+ channel-group 1 mode passive
+ spanning-tree link-type point-to-point
+!
+interface GigabitEthernet0/1
+ switchport trunk native vlan 666
+ switchport trunk allowed vlan 110,120,130,140,150,160,333
+ ip dhcp snooping trust
+ ip dhcp snooping limit rate 20
+ switchport mode trunk
+ switchport nonegotiate
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+!
+interface GigabitEthernet0/2
+ switchport access vlan 666
+ ip dhcp snooping trust
+ ip dhcp snooping limit rate 20
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface Vlan1
+ no ip address
+ shutdown
+!
+interface Vlan333
+ ip address 10.1.255.4 255.255.255.224
+!
+ip default-gateway 10.1.255.30
+!
+no cdp run
+!
+radius-server host 10.1.50.5 auth-port 1645 key aaapa55
+!
+!
+!
+ip access-list standard SSH
+ permit 10.1.255.0 0.0.0.31
+line con 0
+ login
+!
+line vty 0 4
+ access-class SSH in
+ login authentication default
+ transport input ssh
+line vty 5 15
+ access-class SSH in
+ login authentication default
+ transport input ssh
+!
+!
+!
+!
+end
+----
+
+==== HQ-F0-S1
+[source]
+----
+Building configuration...
+
+Current configuration : 5159 bytes
+!
+version 15.0
+no service timestamps log datetime msec
+no service timestamps debug datetime msec
+service password-encryption
+!
+hostname HQ-F0-S1
+!
+enable secret 5 $1$mERr$STCVvBm3rx8XD5gcSxKFC/
+!
+!
+!
+!
+!
+aaa new-model
+!
+aaa authentication dot1x default group radius 
+aaa authentication login default group radius local-case 
+!
+!
+!
+!
+ip ssh version 2
+ip ssh authentication-retries 2
+ip ssh time-out 30
+no ip domain-lookup
+ip domain-name bitbox.hu
+!
+username admin secret 5 $1$mERr$YDWMoxSY4R79.r8uptM1C0
+!
+ip arp inspection vlan 160
+ip arp inspection validate src-mac dst-mac ip
+!
+ip dhcp snooping
+!
+dot1x system-auth-control
+spanning-tree mode rapid-pvst
+spanning-tree extend system-id
+!
+interface FastEthernet0/1
+ switchport trunk native vlan 666
+ switchport trunk allowed vlan 110,120,130,140,150,160,333
+ ip arp inspection trust
+ ip dhcp snooping trust
+ ip dhcp snooping limit rate 20
+ switchport mode trunk
+ switchport nonegotiate
+!
+interface FastEthernet0/2
+ switchport trunk native vlan 666
+ switchport trunk allowed vlan 110,120,130,140,150,160,333
+ ip arp inspection trust
+ ip dhcp snooping trust
+ ip dhcp snooping limit rate 20
+ switchport mode trunk
+ switchport nonegotiate
+!
+interface FastEthernet0/3
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/4
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/5
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/6
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/7
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/8
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/9
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/10
+ switchport access vlan 160
+ switchport mode access
+ switchport nonegotiate
+ switchport port-security
+ switchport port-security maximum 2
+ switchport port-security violation restrict 
+ switchport port-security aging time 5
+ authentication port-control auto
+ dot1x pae authenticator
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+!
+interface FastEthernet0/11
+ switchport access vlan 160
+ switchport mode access
+ switchport nonegotiate
+ switchport port-security
+ switchport port-security maximum 2
+ switchport port-security violation restrict 
+ switchport port-security aging time 5
+ authentication port-control auto
+ dot1x pae authenticator
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+!
+interface FastEthernet0/12
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/13
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/14
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/15
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/16
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/17
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/18
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/19
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/20
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/21
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/22
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/23
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/24
+ switchport access vlan 160
+ switchport mode access
+ switchport nonegotiate
+ switchport port-security
+ switchport port-security mac-address sticky 
+ switchport port-security aging time 5
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+!
+interface GigabitEthernet0/1
+ switchport access vlan 666
+ switchport trunk native vlan 666
+ switchport trunk allowed vlan 110,120,130,140,333
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet0/2
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface Vlan1
+ no ip address
+ shutdown
+!
+interface Vlan333
+ ip address 10.1.255.5 255.255.255.224
+!
+ip default-gateway 10.1.255.30
+!
+no cdp run
+!
+radius-server host 10.1.50.5 auth-port 1645 key aaapa55
+!
+!
+!
+ip access-list standard SSH
+ permit 10.1.255.0 0.0.0.31
+line con 0
+ login
+!
+line vty 0 4
+ access-class SSH in
+ login authentication default
+ transport input ssh
+line vty 5 15
+ access-class SSH in
+ login authentication default
+ transport input ssh
+!
+!
+!
+!
+end
+----
+
+==== HQ-F1-S1
+[source]
+----
+Building configuration...
+
+Current configuration : 5060 bytes
+!
+version 15.0
+no service timestamps log datetime msec
+no service timestamps debug datetime msec
+service password-encryption
+!
+hostname HQ-F1-S1
+!
+enable secret 5 $1$mERr$STCVvBm3rx8XD5gcSxKFC/
+!
+!
+!
+!
+!
+aaa new-model
+!
+aaa authentication dot1x default group radius 
+aaa authentication login default group radius local-case 
+!
+!
+!
+!
+ip ssh version 2
+ip ssh authentication-retries 2
+ip ssh time-out 30
+no ip domain-lookup
+ip domain-name bitbox.hu
+!
+username admin secret 5 $1$mERr$YDWMoxSY4R79.r8uptM1C0
+!
+ip arp inspection vlan 110,130,140
+ip arp inspection validate src-mac dst-mac ip
+!
+ip dhcp snooping
+!
+dot1x system-auth-control
+spanning-tree mode rapid-pvst
+spanning-tree extend system-id
+!
+interface FastEthernet0/1
+ switchport trunk native vlan 666
+ switchport trunk allowed vlan 110,120,130,140,150,160,333
+ ip arp inspection trust
+ ip dhcp snooping trust
+ ip dhcp snooping limit rate 20
+ switchport mode trunk
+ switchport nonegotiate
+!
+interface FastEthernet0/2
+ switchport trunk native vlan 666
+ switchport trunk allowed vlan 110,120,130,140,150,160,333
+ ip arp inspection trust
+ ip dhcp snooping trust
+ ip dhcp snooping limit rate 20
+ switchport mode trunk
+ switchport nonegotiate
+!
+interface FastEthernet0/3
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/4
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/5
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/6
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/7
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/8
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/9
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/10
+ switchport access vlan 140
+ switchport mode access
+ switchport nonegotiate
+ switchport port-security
+ switchport port-security maximum 2
+ switchport port-security violation restrict 
+ switchport port-security aging time 5
+ authentication port-control auto
+ dot1x pae authenticator
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+!
+interface FastEthernet0/11
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/12
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/13
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/14
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/15
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/16
+ switchport access vlan 130
+ switchport mode access
+ switchport nonegotiate
+ switchport port-security
+ switchport port-security maximum 2
+ switchport port-security violation restrict 
+ switchport port-security aging time 5
+ authentication port-control auto
+ dot1x pae authenticator
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+!
+interface FastEthernet0/17
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/18
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/19
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/20
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/21
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/22
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/23
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/24
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet0/1
+ switchport trunk native vlan 666
+ switchport trunk allowed vlan 110,120,130,140,150,160,333
+ ip arp inspection trust
+ ip dhcp snooping trust
+ ip dhcp snooping limit rate 20
+ switchport mode trunk
+ switchport nonegotiate
+!
+interface GigabitEthernet0/2
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface Vlan1
+ no ip address
+ shutdown
+!
+interface Vlan333
+ ip address 10.1.255.6 255.255.255.224
+!
+ip default-gateway 10.1.255.30
+!
+no cdp run
+!
+radius-server host 10.1.50.5 auth-port 1645 key aaapa55
+!
+!
+!
+ip access-list standard SSH
+ permit 10.1.255.0 0.0.0.31
+line con 0
+ login
+!
+line vty 0 4
+ access-class SSH in
+ login authentication default
+ transport input ssh
+line vty 5 15
+ access-class SSH in
+ login authentication default
+ transport input ssh
+!
+!
+!
+!
+end
+----
+
+==== HQ-F1-S2
+[source]
+----
+Building configuration...
+
+Current configuration : 5044 bytes
+!
+version 15.0
+no service timestamps log datetime msec
+no service timestamps debug datetime msec
+service password-encryption
+!
+hostname HQ-F1-S2
+!
+enable secret 5 $1$mERr$STCVvBm3rx8XD5gcSxKFC/
+!
+!
+!
+!
+!
+aaa new-model
+!
+aaa authentication dot1x default group radius 
+aaa authentication login default group radius local-case 
+!
+!
+!
+!
+ip ssh version 2
+ip ssh authentication-retries 2
+ip ssh time-out 30
+no ip domain-lookup
+ip domain-name bitbox.hu
+!
+username admin secret 5 $1$mERr$YDWMoxSY4R79.r8uptM1C0
+!
+ip arp inspection vlan 110,130,140
+ip arp inspection validate src-mac dst-mac ip
+!
+ip dhcp snooping
+!
+dot1x system-auth-control
+spanning-tree mode rapid-pvst
+spanning-tree extend system-id
+!
+interface FastEthernet0/1
+ switchport trunk native vlan 666
+ switchport trunk allowed vlan 110,120,130,140,150,160,333
+ ip arp inspection trust
+ ip dhcp snooping trust
+ ip dhcp snooping limit rate 20
+ switchport mode trunk
+ switchport nonegotiate
+!
+interface FastEthernet0/2
+ switchport trunk native vlan 666
+ switchport trunk allowed vlan 110,120,130,140,150,160,333
+ ip arp inspection trust
+ ip dhcp snooping trust
+ ip dhcp snooping limit rate 20
+ switchport mode trunk
+ switchport nonegotiate
+!
+interface FastEthernet0/3
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/4
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/5
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/6
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/7
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/8
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/9
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/10
+ switchport access vlan 110
+ switchport mode access
+ switchport nonegotiate
+ switchport port-security maximum 2
+ switchport port-security violation restrict 
+ switchport port-security aging time 5
+ authentication port-control auto
+ dot1x pae authenticator
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+!
+interface FastEthernet0/11
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/12
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/13
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/14
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/15
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/16
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/17
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/18
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/19
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/20
+ switchport access vlan 130
+ switchport mode access
+ switchport nonegotiate
+ switchport port-security mac-address sticky 
+ switchport port-security aging time 5
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+!
+interface FastEthernet0/21
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/22
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/23
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/24
+ switchport access vlan 140
+ switchport mode access
+ switchport nonegotiate
+ switchport port-security mac-address sticky 
+ switchport port-security aging time 5
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+!
+interface GigabitEthernet0/1
+ switchport trunk native vlan 666
+ switchport trunk allowed vlan 110,120,130,140,150,160,333
+ ip arp inspection trust
+ ip dhcp snooping trust
+ ip dhcp snooping limit rate 20
+ switchport mode trunk
+ switchport nonegotiate
+!
+interface GigabitEthernet0/2
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface Vlan1
+ no ip address
+ shutdown
+!
+interface Vlan333
+ ip address 10.1.255.7 255.255.255.224
+!
+ip default-gateway 10.1.255.30
+!
+no cdp run
+!
+radius-server host 10.1.50.5 auth-port 1645 key aaapa55
+!
+!
+!
+ip access-list standard SSH
+ permit 10.1.255.0 0.0.0.31
+line con 0
+ login
+!
+line vty 0 4
+ access-class SSH in
+ login authentication default
+ transport input ssh
+line vty 5 15
+ access-class SSH in
+ login authentication default
+ transport input ssh
+!
+!
+!
+!
+end
+
+----
+
+==== HQ-F2-S1
+[source]
+----
+Building configuration...
+
+Current configuration : 4778 bytes
+!
+version 15.0
+no service timestamps log datetime msec
+no service timestamps debug datetime msec
+service password-encryption
+!
+hostname HQ-F2-S1
+!
+enable secret 5 $1$mERr$STCVvBm3rx8XD5gcSxKFC/
+!
+!
+!
+!
+!
+aaa new-model
+!
+aaa authentication dot1x default group radius 
+aaa authentication login default group radius local-case 
+!
+!
+!
+!
+ip ssh version 2
+ip ssh authentication-retries 2
+ip ssh time-out 30
+no ip domain-lookup
+ip domain-name bitbox.hu
+!
+username admin secret 5 $1$mERr$YDWMoxSY4R79.r8uptM1C0
+!
+ip arp inspection vlan 120,333
+ip arp inspection validate src-mac dst-mac ip
+!
+ip dhcp snooping
+!
+dot1x system-auth-control
+spanning-tree mode rapid-pvst
+spanning-tree extend system-id
+!
+interface FastEthernet0/1
+ switchport trunk native vlan 666
+ switchport trunk allowed vlan 110,120,130,140,150,160,333
+ ip arp inspection trust
+ ip dhcp snooping trust
+ ip dhcp snooping limit rate 20
+ switchport mode trunk
+ switchport nonegotiate
+!
+interface FastEthernet0/2
+ switchport trunk native vlan 666
+ switchport trunk allowed vlan 110,120,130,140,150,160,333
+ ip arp inspection trust
+ ip dhcp snooping trust
+ ip dhcp snooping limit rate 20
+ switchport mode trunk
+ switchport nonegotiate
+!
+interface FastEthernet0/3
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/4
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/5
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/6
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/7
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/8
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/9
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/10
+ switchport access vlan 120
+ switchport mode access
+ switchport nonegotiate
+ switchport port-security maximum 2
+ switchport port-security violation restrict 
+ switchport port-security aging time 5
+ authentication port-control auto
+ dot1x pae authenticator
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+!
+interface FastEthernet0/11
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/12
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/13
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/14
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/15
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/16
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/17
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/18
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/19
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/20
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/21
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/22
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/23
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/24
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet0/1
+ switchport trunk native vlan 666
+ switchport trunk allowed vlan 110,120,130,140,150,160,333
+ ip arp inspection trust
+ ip dhcp snooping trust
+ ip dhcp snooping limit rate 20
+ switchport mode trunk
+ switchport nonegotiate
+!
+interface GigabitEthernet0/2
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface Vlan1
+ no ip address
+ shutdown
+!
+interface Vlan333
+ ip address 10.1.255.8 255.255.255.224
+!
+ip default-gateway 10.1.255.30
+!
+no cdp run
+!
+radius-server host 10.1.50.5 auth-port 1645 key aaapa55
+!
+!
+!
+ip access-list standard SSH
+ permit 10.1.255.0 0.0.0.31
+line con 0
+ login
+!
+line vty 0 4
+ access-class SSH in
+ login authentication default
+ transport input ssh
+line vty 5 15
+ access-class SSH in
+ login authentication default
+ transport input ssh
+!
+!
+!
+!
+end
+
+----
+
+==== HQ-F2-S2
+[source]
+----
+Building configuration...
+
+Current configuration : 4925 bytes
+!
+version 15.0
+no service timestamps log datetime msec
+no service timestamps debug datetime msec
+service password-encryption
+!
+hostname HQ-F2-S2
+!
+enable secret 5 $1$mERr$STCVvBm3rx8XD5gcSxKFC/
+!
+!
+!
+!
+!
+aaa new-model
+!
+aaa authentication dot1x default group radius 
+aaa authentication login default group radius local-case 
+!
+!
+!
+!
+ip ssh version 2
+ip ssh authentication-retries 2
+ip ssh time-out 30
+no ip domain-lookup
+ip domain-name bitbox.hu
+!
+username admin secret 5 $1$mERr$YDWMoxSY4R79.r8uptM1C0
+!
+ip arp inspection vlan 120,333
+ip arp inspection validate src-mac dst-mac ip
+!
+ip dhcp snooping
+!
+dot1x system-auth-control
+spanning-tree mode rapid-pvst
+spanning-tree extend system-id
+!
+interface FastEthernet0/1
+ switchport trunk native vlan 666
+ switchport trunk allowed vlan 110,120,130,140,150,160,333
+ ip arp inspection trust
+ ip dhcp snooping trust
+ ip dhcp snooping limit rate 20
+ switchport mode trunk
+ switchport nonegotiate
+!
+interface FastEthernet0/2
+ switchport trunk native vlan 666
+ switchport trunk allowed vlan 110,120,130,140,150,160,333
+ ip arp inspection trust
+ ip dhcp snooping trust
+ ip dhcp snooping limit rate 20
+ switchport mode trunk
+ switchport nonegotiate
+!
+interface FastEthernet0/3
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/4
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/5
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/6
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/7
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/8
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/9
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/10
+ switchport access vlan 333
+ switchport mode access
+ switchport nonegotiate
+ switchport port-security maximum 2
+ switchport port-security violation restrict 
+ switchport port-security aging time 5
+ authentication port-control auto
+ dot1x pae authenticator
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+!
+interface FastEthernet0/11
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/12
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/13
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/14
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/15
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/16
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/17
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/18
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/19
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/20
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+!
+interface FastEthernet0/21
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/22
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/23
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/24
+ switchport access vlan 120
+ switchport mode access
+ switchport nonegotiate
+ switchport port-security
+ switchport port-security mac-address sticky 
+ switchport port-security aging time 5
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+!
+interface GigabitEthernet0/1
+ switchport trunk native vlan 666
+ switchport trunk allowed vlan 110,120,130,140,150,160,333
+ ip arp inspection trust
+ ip dhcp snooping trust
+ ip dhcp snooping limit rate 20
+ switchport mode trunk
+ switchport nonegotiate
+!
+interface GigabitEthernet0/2
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface Vlan1
+ no ip address
+ shutdown
+!
+interface Vlan333
+ ip address 10.1.255.9 255.255.255.224
+!
+ip default-gateway 10.1.255.30
+!
+no cdp run
+!
+radius-server host 10.1.50.5 auth-port 1645 key aaapa55
+!
+!
+!
+ip access-list standard SSH
+ permit 10.1.255.0 0.0.0.31
+line con 0
+ login
+!
+line vty 0 4
+ access-class SSH in
+ login authentication default
+ transport input ssh
+line vty 5 15
+ access-class SSH in
+ login authentication default
+ transport input ssh
+!
+!
+!
+!
+end
+----
+
+=== Package Center
+==== PC-ASA
+[source]
+----
+: Saved
+:
+ASA Version 9.6(1)
+!
+hostname PC-ASA
+names
+!
+interface GigabitEthernet1/1
+ nameif INSIDE1
+ security-level 100
+ ip address 10.2.200.25 255.255.255.252
+!
+interface GigabitEthernet1/2
+ nameif INSIDE2
+ security-level 100
+ ip address 10.2.200.29 255.255.255.252
+!
+interface GigabitEthernet1/3
+ no nameif
+ no security-level
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/4
+ no nameif
+ no security-level
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/5
+ nameif DMZ
+ security-level 50
+ ip address 10.2.250.1 255.255.255.252
+ ipv6 enable
+!
+interface GigabitEthernet1/6
+ no nameif
+ no security-level
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/7
+ no nameif
+ no security-level
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/8
+ nameif OUTSIDE
+ security-level 0
+ ip address 12.12.12.2 255.255.255.248
+ ipv6 address 2001:DB8:ACAD:CC00::2/56
+ ipv6 enable
+!
+interface Management1/1
+ management-only
+ no nameif
+ no security-level
+ no ip address
+ shutdown
+!
+object network DMZ-NETWORK
+ host 10.2.250.2
+ nat (DMZ,OUTSIDE) static 12.12.12.3
+object network DMZ-NETWORK-IPV6
+ host 2001:DB8:ACAD:CC01::100
+object network DMZ-PUBLIC-IP
+ host 12.12.12.3
+object-group service DMZ-SERVICES
+ description SERVICES ALLOWED TO ENTER THE DMZ
+ service-object tcp destination eq 80
+ service-object tcp destination eq 443
+object network LAN1
+ subnet 10.2.0.0 255.255.0.0
+ nat (INSIDE1,OUTSIDE) dynamic interface
+ description LAN THROUGH PC-CORE-MLS1
+object network LAN2
+ subnet 10.2.0.0 255.255.0.0
+ nat (INSIDE2,OUTSIDE) dynamic interface
+ description LAN THROUGH PC-CORE-MLS2
+object network LOCAL
+ subnet 10.2.0.0 255.255.0.0
+object network REMOTE
+ subnet 10.1.0.0 255.255.0.0
+!
+route OUTSIDE 0.0.0.0 0.0.0.0 12.12.12.1 1
+!
+access-list OUTSIDE-IN extended permit object-group DMZ-SERVICES any object DMZ-PUBLIC-IP
+access-list VPN-TRAFFIC extended permit ip object LOCAL object REMOTE
+!
+!
+access-group OUTSIDE-IN in interface OUTSIDE
+!
+!
+class-map inspection_default
+ match default-inspection-traffic
+!
+policy-map type inspect dns preset_dns_map
+ parameters
+  message-length maximum 512
+policy-map global_policy
+ class inspection_default
+  inspect dns preset_dns_map
+  inspect ftp 
+  inspect http 
+  inspect tftp 
+!
+service-policy global_policy global
+!
+telnet timeout 5
+ssh timeout 5
+!
+!
+!
+crypto map omap 10 match address VPN-TRAFFIC
+crypto map omap 10 set peer 11.11.11.2 
+crypto map omap interface OUTSIDE
+crypto ikev1 enable OUTSIDE
+crypto ikev1 policy 10
+ encr aes
+ authentication pre-share
+ group 2
+ lifetime 3600
+!
+tunnel-group 11.11.11.2 type ipsec-l2l
+tunnel-group 11.11.11.2 ipsec-attributes
+ ikev1 pre-shared-key vpnpa55
+!
+router ospf 1
+ router-id 0.0.0.3
+ log-adjacency-changes
+ network 10.2.200.24 255.255.255.252 area 0
+ network 10.2.200.28 255.255.255.252 area 0
+ default-information originate
+!
+----
+
+==== PC-CORE-MLS1
+[source]
+----
+Building configuration...
+
+Current configuration : 5620 bytes
+!
+version 16.3.2
+no service timestamps log datetime msec
+no service timestamps debug datetime msec
+service password-encryption
+!
+hostname PC-CORE-MLS1
+!
+!
+enable secret 5 $1$mERr$STCVvBm3rx8XD5gcSxKFC/
+!
+!
+!
+!
+!
+aaa new-model
+!
+aaa authentication login default group radius local-case 
+!
+!
+!
+!
+!
+!
+!
+no ip cef
+ip routing
+!
+no ipv6 cef
+!
+!
+!
+username admin privilege 15 secret 5 $1$mERr$YDWMoxSY4R79.r8uptM1C0
+!
+!
+!
+!
+!
+!
+!
+!
+!
+ip dhcp snooping
+!
+ip ssh version 2
+ip ssh authentication-retries 2
+ip ssh time-out 30
+no ip domain-lookup
+ip domain-name bitbox.hu
+!
+!
+spanning-tree mode pvst
+!
+!
+!
+!
+!
+!
+interface Port-channel1
+ switchport access vlan 291
+ switchport mode access
+ switchport nonegotiate
+!
+interface Port-channel2
+ switchport access vlan 292
+ switchport mode access
+ switchport nonegotiate
+!
+interface GigabitEthernet1/0/1
+ no switchport
+ ip address 10.2.200.26 255.255.255.252
+ duplex auto
+ speed auto
+!
+interface GigabitEthernet1/0/2
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/0/3
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/0/4
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/0/5
+ no switchport
+ ip address 10.2.200.17 255.255.255.252
+ duplex auto
+ speed auto
+!
+interface GigabitEthernet1/0/6
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/0/7
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/0/8
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/0/9
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/0/10
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/0/11
+ ip dhcp snooping trust
+ ip dhcp snooping limit rate 20
+ switchport access vlan 291
+ switchport mode access
+ switchport nonegotiate
+ channel-group 1 mode active
+!
+interface GigabitEthernet1/0/12
+ ip dhcp snooping trust
+ ip dhcp snooping limit rate 20
+ switchport access vlan 291
+ switchport mode access
+ switchport nonegotiate
+ channel-group 1 mode active
+!
+interface GigabitEthernet1/0/13
+ ip dhcp snooping trust
+ ip dhcp snooping limit rate 20
+ switchport access vlan 292
+ switchport mode access
+ switchport nonegotiate
+ channel-group 2 mode active
+!
+interface GigabitEthernet1/0/14
+ ip dhcp snooping trust
+ ip dhcp snooping limit rate 20
+ switchport access vlan 292
+ switchport mode access
+ switchport nonegotiate
+ channel-group 2 mode active
+!
+interface GigabitEthernet1/0/15
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/0/16
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/0/17
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/0/18
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/0/19
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/0/20
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/0/21
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/0/22
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/0/23
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/0/24
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/1/1
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/1/2
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/1/3
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/1/4
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface Vlan1
+ no ip address
+ shutdown
+!
+interface Vlan291
+ mac-address 0001.4317.b501
+ ip address 10.2.200.1 255.255.255.248
+!
+interface Vlan292
+ mac-address 0001.4317.b502
+ ip address 10.2.200.9 255.255.255.248
+!
+interface Vlan331
+ mac-address 0001.4317.b503
+ ip address 10.2.255.1 255.255.255.128
+!
+router ospf 1
+ router-id 0.0.0.1
+ log-adjacency-changes
+ passive-interface default
+ no passive-interface GigabitEthernet1/0/1
+ no passive-interface GigabitEthernet1/0/5
+ no passive-interface Vlan291
+ no passive-interface Vlan292
+ no passive-interface Vlan331
+ network 10.2.200.0 0.0.0.7 area 0
+ network 10.2.200.8 0.0.0.7 area 0
+ network 10.2.200.16 0.0.0.3 area 0
+ network 10.2.200.24 0.0.0.3 area 0
+ network 10.2.255.0 0.0.0.127 area 0
+!
+ip classless
+!
+ip flow-export version 9
+!
+!
+ip access-list standard SSH
+ permit 10.2.255.0 0.0.0.255
+!
+no cdp run
+!
+!
+radius server RADIUS
+ address ipv4 10.2.20.10 auth-port 1645
+ key aaapa55
+!
+!
+!
+line con 0
+ login authentication default
+!
+line aux 0
+!
+line vty 0 4
+ access-class SSH in
+ login authentication default
+ transport input ssh
+line vty 5 15
+ access-class SSH in
+ login authentication default
+ transport input ssh
+!
+!
+!
+!
+end
+----
+
+==== PC-CORE-MLS2
+[source]
+----
+Building configuration...
+
+Current configuration : 5621 bytes
+!
+version 16.3.2
+no service timestamps log datetime msec
+no service timestamps debug datetime msec
+service password-encryption
+!
+hostname PC-CORE-MLS2
+!
+!
+enable secret 5 $1$mERr$STCVvBm3rx8XD5gcSxKFC/
+!
+!
+!
+!
+!
+aaa new-model
+!
+aaa authentication login default group radius local-case 
+!
+!
+!
+!
+!
+!
+!
+no ip cef
+ip routing
+!
+no ipv6 cef
+!
+!
+!
+username admin privilege 15 secret 5 $1$mERr$YDWMoxSY4R79.r8uptM1C0
+!
+!
+!
+!
+!
+!
+!
+!
+!
+ip dhcp snooping
+!
+ip ssh version 2
+ip ssh authentication-retries 2
+ip ssh time-out 30
+no ip domain-lookup
+ip domain-name bitbox.hu
+!
+!
+spanning-tree mode pvst
+!
+!
+!
+!
+!
+!
+interface Port-channel3
+ switchport access vlan 291
+ switchport mode access
+ switchport nonegotiate
+!
+interface Port-channel4
+ switchport access vlan 292
+ switchport mode access
+ switchport nonegotiate
+!
+interface GigabitEthernet1/0/1
+ no switchport
+ ip address 10.2.200.30 255.255.255.252
+ duplex auto
+ speed auto
+!
+interface GigabitEthernet1/0/2
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/0/3
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/0/4
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/0/5
+ no switchport
+ ip address 10.2.200.21 255.255.255.252
+ duplex auto
+ speed auto
+!
+interface GigabitEthernet1/0/6
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/0/7
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/0/8
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/0/9
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/0/10
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/0/11
+ ip dhcp snooping trust
+ ip dhcp snooping limit rate 20
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/0/12
+ ip dhcp snooping trust
+ ip dhcp snooping limit rate 20
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/0/13
+ ip dhcp snooping trust
+ ip dhcp snooping limit rate 20
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/0/14
+ ip dhcp snooping trust
+ ip dhcp snooping limit rate 20
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/0/15
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/0/16
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/0/17
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/0/18
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/0/19
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/0/20
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/0/21
+ switchport access vlan 291
+ switchport mode access
+ switchport nonegotiate
+ channel-group 3 mode active
+!
+interface GigabitEthernet1/0/22
+ switchport access vlan 291
+ switchport mode access
+ switchport nonegotiate
+ channel-group 3 mode active
+!
+interface GigabitEthernet1/0/23
+ switchport access vlan 292
+ switchport mode access
+ switchport nonegotiate
+ channel-group 4 mode active
+!
+interface GigabitEthernet1/0/24
+ switchport access vlan 292
+ switchport mode access
+ switchport nonegotiate
+ channel-group 4 mode active
+!
+interface GigabitEthernet1/1/1
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/1/2
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/1/3
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/1/4
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface Vlan1
+ no ip address
+ shutdown
+!
+interface Vlan291
+ mac-address 0001.6459.5201
+ ip address 10.2.200.2 255.255.255.248
+!
+interface Vlan292
+ mac-address 0001.6459.5202
+ ip address 10.2.200.10 255.255.255.248
+!
+interface Vlan331
+ mac-address 0001.6459.5203
+ ip address 10.2.255.2 255.255.255.128
+!
+router ospf 1
+ router-id 0.0.0.2
+ log-adjacency-changes
+ passive-interface default
+ no passive-interface GigabitEthernet1/0/1
+ no passive-interface GigabitEthernet1/0/5
+ no passive-interface Vlan291
+ no passive-interface Vlan292
+ no passive-interface Vlan331
+ network 10.2.200.0 0.0.0.7 area 0
+ network 10.2.200.8 0.0.0.7 area 0
+ network 10.2.200.20 0.0.0.3 area 0
+ network 10.2.200.28 0.0.0.3 area 0
+ network 10.2.255.0 0.0.0.127 area 0
+!
+ip classless
+!
+ip flow-export version 9
+!
+!
+ip access-list standard SSH
+ permit 10.2.255.0 0.0.0.255
+!
+no cdp run
+!
+!
+radius server RADIUS
+ address ipv4 10.2.20.10 auth-port 1645
+ key aaapa55
+!
+!
+!
+line con 0
+ login authentication default
+!
+line aux 0
+!
+line vty 0 4
+ access-class SSH in
+ login authentication default
+ transport input ssh
+line vty 5 15
+ access-class SSH in
+ login authentication default
+ transport input ssh
+!
+!
+!
+!
+end
+----
+
+==== PC-PS-MLS1
+[source]
+----
+Building configuration...
+
+Current configuration : 6031 bytes
+!
+version 16.3.2
+no service timestamps log datetime msec
+no service timestamps debug datetime msec
+service password-encryption
+!
+hostname PC-PS-MLS1
+!
+!
+enable secret 5 $1$mERr$STCVvBm3rx8XD5gcSxKFC/
+!
+!
+!
+!
+!
+aaa new-model
+!
+aaa authentication login default group radius local-case 
+!
+!
+!
+!
+!
+!
+!
+no ip cef
+ip routing
+!
+no ipv6 cef
+!
+!
+!
+username admin privilege 15 secret 5 $1$mERr$YDWMoxSY4R79.r8uptM1C0
+!
+!
+!
+!
+!
+!
+!
+!
+!
+ip dhcp snooping
+!
+ip ssh version 2
+ip ssh authentication-retries 2
+ip ssh time-out 30
+no ip domain-lookup
+ip domain-name bitbox.hu
+!
+!
+spanning-tree mode pvst
+!
+!
+!
+!
+!
+!
+interface Port-channel1
+ switchport access vlan 291
+ switchport mode access
+ switchport nonegotiate
+!
+interface Port-channel3
+ switchport access vlan 291
+ switchport mode access
+ switchport nonegotiate
+!
+interface GigabitEthernet1/0/1
+ ip dhcp snooping trust
+ ip dhcp snooping limit rate 20
+ switchport trunk native vlan 666
+ switchport trunk allowed vlan 210,220,332
+ switchport mode trunk
+ switchport nonegotiate
+!
+interface GigabitEthernet1/0/2
+ ip dhcp snooping trust
+ ip dhcp snooping limit rate 20
+ switchport trunk native vlan 666
+ switchport trunk allowed vlan 210,220,332
+ switchport mode trunk
+ switchport nonegotiate
+!
+interface GigabitEthernet1/0/3
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/0/4
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/0/5
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/0/6
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/0/7
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/0/8
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/0/9
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/0/10
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/0/11
+ ip dhcp snooping trust
+ ip dhcp snooping limit rate 20
+ switchport access vlan 291
+ switchport mode access
+ switchport nonegotiate
+ channel-group 1 mode passive
+!
+interface GigabitEthernet1/0/12
+ ip dhcp snooping trust
+ ip dhcp snooping limit rate 20
+ switchport access vlan 291
+ switchport mode access
+ switchport nonegotiate
+ channel-group 1 mode passive
+!
+interface GigabitEthernet1/0/13
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/0/14
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/0/15
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/0/16
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/0/17
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/0/18
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/0/19
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/0/20
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/0/21
+ ip dhcp snooping trust
+ ip dhcp snooping limit rate 20
+ switchport access vlan 291
+ switchport mode access
+ switchport nonegotiate
+ channel-group 3 mode passive
+!
+interface GigabitEthernet1/0/22
+ ip dhcp snooping trust
+ ip dhcp snooping limit rate 20
+ switchport access vlan 291
+ switchport mode access
+ switchport nonegotiate
+ channel-group 3 mode passive
+!
+interface GigabitEthernet1/0/23
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/0/24
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/1/1
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/1/2
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/1/3
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/1/4
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface Vlan1
+ no ip address
+ shutdown
+!
+interface Vlan210
+ mac-address 0003.e417.c201
+ ip address 10.2.10.1 255.255.255.0
+ ip helper-address 10.2.20.10
+ standby version 2
+ standby 0 ip 10.2.10.254
+ standby 0 priority 200
+ standby 0 preempt
+!
+interface Vlan220
+ mac-address 0003.e417.c202
+ ip address 10.2.20.1 255.255.255.240
+ standby version 2
+ standby 1 ip 10.2.20.14
+ standby 1 priority 200
+ standby 1 preempt
+!
+interface Vlan291
+ mac-address 0003.e417.c203
+ ip address 10.2.200.3 255.255.255.248
+!
+interface Vlan332
+ mac-address 0003.e417.c204
+ ip address 10.2.255.129 255.255.255.192
+ ip helper-address 10.2.20.10
+ standby version 2
+ standby 2 ip 10.2.255.190
+ standby 2 priority 200
+ standby 2 preempt
+!
+router ospf 1
+ log-adjacency-changes
+ passive-interface default
+ no passive-interface Vlan291
+ network 10.2.10.0 0.0.0.255 area 1
+ network 10.2.20.0 0.0.0.15 area 1
+ network 10.2.255.128 0.0.0.63 area 1
+ network 10.2.200.0 0.0.0.7 area 0
+!
+ip classless
+!
+ip flow-export version 9
+!
+!
+ip access-list standard SSH
+ permit 10.2.255.0 0.0.0.255
+!
+no cdp run
+!
+!
+radius server RADIUS
+ address ipv4 10.2.20.10 auth-port 1645
+ key aaapa55
+!
+!
+!
+line con 0
+ login authentication default
+!
+line aux 0
+!
+line vty 0 4
+ access-class SSH in
+ login authentication default
+ transport input ssh
+line vty 5 15
+ access-class SSH in
+ login authentication default
+ transport input ssh
+!
+!
+!
+!
+end
+----
+
+==== PC-PS-MLS2
+[source]
+----
+Building configuration...
+
+Current configuration : 5862 bytes
+!
+version 16.3.2
+no service timestamps log datetime msec
+no service timestamps debug datetime msec
+service password-encryption
+!
+hostname PC-PS-MLS2
+!
+!
+enable secret 5 $1$mERr$STCVvBm3rx8XD5gcSxKFC/
+!
+!
+!
+!
+!
+aaa new-model
+!
+aaa authentication login default group radius local-case 
+!
+!
+!
+!
+!
+!
+!
+no ip cef
+ip routing
+!
+no ipv6 cef
+!
+!
+!
+username admin privilege 15 secret 5 $1$mERr$YDWMoxSY4R79.r8uptM1C0
+!
+!
+!
+!
+!
+!
+!
+!
+!
+ip dhcp snooping
+!
+ip ssh version 2
+ip ssh authentication-retries 2
+ip ssh time-out 30
+no ip domain-lookup
+ip domain-name bitbox.hu
+!
+!
+spanning-tree mode pvst
+!
+!
+!
+!
+!
+!
+interface Port-channel2
+ switchport access vlan 292
+ switchport mode access
+ switchport nonegotiate
+!
+interface Port-channel4
+ switchport access vlan 292
+ switchport mode access
+ switchport nonegotiate
+!
+interface GigabitEthernet1/0/1
+ ip dhcp snooping trust
+ ip dhcp snooping limit rate 20
+ switchport trunk native vlan 666
+ switchport trunk allowed vlan 210,220,332
+ switchport mode trunk
+ switchport nonegotiate
+!
+interface GigabitEthernet1/0/2
+ ip dhcp snooping trust
+ ip dhcp snooping limit rate 20
+ switchport trunk native vlan 666
+ switchport trunk allowed vlan 210,220,332
+ switchport mode trunk
+ switchport nonegotiate
+!
+interface GigabitEthernet1/0/3
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/0/4
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/0/5
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/0/6
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/0/7
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/0/8
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/0/9
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/0/10
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/0/11
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/0/12
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/0/13
+ ip dhcp snooping trust
+ ip dhcp snooping limit rate 20
+ switchport access vlan 292
+ switchport mode access
+ switchport nonegotiate
+ channel-group 2 mode passive
+!
+interface GigabitEthernet1/0/14
+ ip dhcp snooping trust
+ ip dhcp snooping limit rate 20
+ switchport access vlan 292
+ switchport mode access
+ switchport nonegotiate
+ channel-group 2 mode passive
+!
+interface GigabitEthernet1/0/15
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/0/16
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/0/17
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/0/18
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/0/19
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/0/20
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/0/21
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/0/22
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/0/23
+ ip dhcp snooping trust
+ ip dhcp snooping limit rate 20
+ switchport access vlan 292
+ switchport mode access
+ switchport nonegotiate
+ channel-group 4 mode passive
+!
+interface GigabitEthernet1/0/24
+ ip dhcp snooping trust
+ ip dhcp snooping limit rate 20
+ switchport access vlan 292
+ switchport mode access
+ switchport nonegotiate
+ channel-group 4 mode passive
+!
+interface GigabitEthernet1/1/1
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/1/2
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/1/3
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet1/1/4
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface Vlan1
+ no ip address
+ shutdown
+!
+interface Vlan210
+ mac-address 00e0.a353.3501
+ ip address 10.2.10.2 255.255.255.0
+ standby version 2
+ standby 0 ip 10.2.10.254
+!
+interface Vlan220
+ mac-address 00e0.a353.3502
+ ip address 10.2.20.2 255.255.255.240
+ standby version 2
+ standby 1 ip 10.2.20.14
+!
+interface Vlan292
+ mac-address 00e0.a353.3503
+ ip address 10.2.200.11 255.255.255.248
+!
+interface Vlan332
+ mac-address 00e0.a353.3504
+ ip address 10.2.255.130 255.255.255.192
+ standby version 2
+ standby 2 ip 10.2.255.190
+!
+router ospf 1
+ router-id 1.1.1.2
+ log-adjacency-changes
+ passive-interface default
+ no passive-interface Vlan292
+ network 10.2.10.0 0.0.0.255 area 1
+ network 10.2.20.0 0.0.0.15 area 1
+ network 10.2.255.128 0.0.0.63 area 1
+ network 10.2.200.8 0.0.0.7 area 0
+!
+ip classless
+!
+ip flow-export version 9
+!
+!
+ip access-list standard SSH
+ permit 10.2.255.0 0.0.0.255
+!
+no cdp run
+!
+!
+radius server RADIUS
+ address ipv4 10.2.20.10 auth-port 1645
+ key aaapa55
+!
+!
+!
+line con 0
+ login authentication default
+!
+line aux 0
+!
+line vty 0 4
+ access-class SSH in
+ login authentication default
+ transport input ssh
+line vty 5 15
+ access-class SSH in
+ login authentication default
+ transport input ssh
+!
+!
+!
+!
+end
+----
+
+==== PC-O-R1
+[source]
+----
+Building configuration...
+
+Current configuration : 1895 bytes
+!
+version 15.1
+no service timestamps log datetime msec
+no service timestamps debug datetime msec
+service password-encryption
+!
+hostname PC-O-R1
+!
+!
+!
+enable secret 5 $1$mERr$STCVvBm3rx8XD5gcSxKFC/
+!
+!
+!
+!
+!
+aaa new-model
+!
+aaa authentication login default group radius local-case 
+!
+!
+!
+!
+!
+!
+!
+ip cef
+no ipv6 cef
+!
+!
+!
+username admin privilege 15 secret 5 $1$mERr$YDWMoxSY4R79.r8uptM1C0
+!
+!
+license udi pid CISCO2911/K9 sn FTX1524D2T4-
+!
+!
+!
+!
+!
+!
+!
+!
+!
+ip ssh version 2
+ip ssh authentication-retries 2
+ip ssh time-out 30
+no ip domain-lookup
+ip domain-name bitbox.hu
+!
+!
+spanning-tree mode pvst
+!
+!
+!
+!
+!
+!
+interface GigabitEthernet0/0
+ no ip address
+ duplex auto
+ speed auto
+!
+interface GigabitEthernet0/0.230
+ encapsulation dot1Q 230
+ ip address 10.2.30.1 255.255.255.224
+ ip helper-address 10.2.20.10
+!
+interface GigabitEthernet0/0.333
+ encapsulation dot1Q 333
+ ip address 10.2.255.193 255.255.255.192
+!
+interface GigabitEthernet0/1
+ ip address 10.2.200.18 255.255.255.252
+ duplex auto
+ speed auto
+!
+interface GigabitEthernet0/2
+ ip address 10.2.200.22 255.255.255.252
+ duplex auto
+ speed auto
+!
+interface Vlan1
+ no ip address
+ shutdown
+!
+router ospf 1
+ router-id 2.2.2.1
+ log-adjacency-changes
+ passive-interface default
+ no passive-interface GigabitEthernet0/1
+ no passive-interface GigabitEthernet0/2
+ network 10.2.200.16 0.0.0.3 area 0
+ network 10.2.200.20 0.0.0.3 area 0
+ network 10.2.255.192 0.0.0.63 area 2
+ network 10.2.30.0 0.0.0.31 area 2
+!
+ip classless
+!
+ip flow-export version 9
+!
+!
+ip access-list standard SSH
+ permit 10.2.255.0 0.0.0.255
+!
+no cdp run
+!
+!
+radius server 10.2.20.10
+ address ipv4 10.2.20.10 auth-port 1645
+ key aaapa55
+!
+!
+!
+line con 0
+ login authentication default
+!
+line aux 0
+!
+line vty 0 4
+ access-class SSH in
+ login authentication default
+ transport input ssh
+line vty 5 15
+ access-class SSH in
+ login authentication default
+ transport input ssh
+!
+!
+!
+end
+----
+
+==== PC-O-S1
+[source]
+----
+Building configuration...
+
+Current configuration : 4542 bytes
+!
+version 15.0
+no service timestamps log datetime msec
+no service timestamps debug datetime msec
+service password-encryption
+!
+hostname PS-O-S1
+!
+enable secret 5 $1$mERr$STCVvBm3rx8XD5gcSxKFC/
+!
+!
+!
+!
+!
+aaa new-model
+!
+aaa authentication dot1x default group radius 
+aaa authentication login default group radius local-case 
+!
+!
+!
+!
+ip ssh version 2
+ip ssh authentication-retries 2
+ip ssh time-out 30
+no ip domain-lookup
+ip domain-name bitbox.hu
+!
+username admin secret 5 $1$mERr$YDWMoxSY4R79.r8uptM1C0
+!
+ip arp inspection vlan 230
+ip arp inspection validate src-mac dst-mac ip
+!
+ip dhcp snooping
+!
+dot1x system-auth-control
+spanning-tree mode pvst
+spanning-tree extend system-id
+!
+interface FastEthernet0/1
+ switchport access vlan 230
+ switchport mode access
+ switchport nonegotiate
+ switchport port-security maximum 2
+ switchport port-security violation restrict 
+ switchport port-security aging time 5
+ authentication port-control auto
+ dot1x pae authenticator
+!
+interface FastEthernet0/2
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/3
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/4
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/5
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/6
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/7
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/8
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/9
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/10
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/11
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/12
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/13
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/14
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/15
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/16
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/17
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/18
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/19
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/20
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/21
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/22
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/23
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/24
+ switchport access vlan 230
+ switchport mode access
+ switchport nonegotiate
+ switchport port-security mac-address sticky 
+ switchport port-security aging time 5
+!
+interface GigabitEthernet0/1
+ switchport trunk native vlan 666
+ switchport trunk allowed vlan 230,333
+ ip arp inspection trust
+ ip dhcp snooping trust
+ ip dhcp snooping limit rate 20
+ switchport mode trunk
+ switchport nonegotiate
+!
+interface GigabitEthernet0/2
+ switchport access vlan 230
+ switchport mode access
+ switchport nonegotiate
+ switchport port-security mac-address sticky 
+ switchport port-security aging time 5
+!
+interface Vlan1
+ no ip address
+ shutdown
+!
+interface Vlan333
+ ip address 10.2.255.194 255.255.255.192
+!
+no cdp run
+!
+radius-server host 10.2.20.10 auth-port 1645 key aaapa55
+!
+!
+!
+ip access-list standard SSH
+ permit 10.2.255.0 0.0.0.255
+line con 0
+ login
+!
+line vty 0 4
+ access-class SSH in
+ login authentication default
+ transport input ssh
+line vty 5 15
+ access-class SSH in
+ login authentication default
+ transport input ssh
+!
+!
+!
+!
+end
+----
+
+==== PC-PC-S1
+[source]
+----
+Building configuration...
+
+Current configuration : 4684 bytes
+!
+version 15.0
+no service timestamps log datetime msec
+no service timestamps debug datetime msec
+service password-encryption
+!
+hostname PC-PS-S1
+!
+enable secret 5 $1$mERr$STCVvBm3rx8XD5gcSxKFC/
+!
+!
+!
+!
+!
+aaa new-model
+!
+aaa authentication dot1x default group radius 
+aaa authentication login default group radius local-case 
+!
+!
+!
+!
+ip ssh version 2
+ip ssh authentication-retries 2
+ip ssh time-out 30
+no ip domain-lookup
+ip domain-name bitbox.hu
+!
+username admin secret 5 $1$mERr$YDWMoxSY4R79.r8uptM1C0
+!
+ip arp inspection vlan 220,332
+ip arp inspection validate src-mac dst-mac ip
+!
+ip dhcp snooping
+!
+dot1x system-auth-control
+spanning-tree mode pvst
+spanning-tree extend system-id
+!
+interface FastEthernet0/1
+ switchport access vlan 332
+ switchport mode access
+ switchport nonegotiate
+ switchport port-security maximum 2
+ switchport port-security violation restrict 
+ switchport port-security aging time 5
+ authentication port-control auto
+ dot1x pae authenticator
+!
+interface FastEthernet0/2
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/3
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/4
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/5
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/6
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/7
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/8
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/9
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/10
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/11
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/12
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/13
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/14
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/15
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/16
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/17
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/18
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/19
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/20
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/21
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/22
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/23
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/24
+ switchport access vlan 220
+ ip dhcp snooping trust
+ ip dhcp snooping limit rate 20
+ switchport mode access
+ switchport nonegotiate
+ switchport port-security mac-address 0060.7035.2DB1
+ switchport port-security aging time 5
+!
+interface GigabitEthernet0/1
+ switchport trunk native vlan 666
+ switchport trunk allowed vlan 220,332
+ ip arp inspection trust
+ ip dhcp snooping trust
+ ip dhcp snooping limit rate 20
+ switchport mode trunk
+ switchport nonegotiate
+!
+interface GigabitEthernet0/2
+ switchport trunk native vlan 666
+ switchport trunk allowed vlan 220,332
+ ip arp inspection trust
+ ip dhcp snooping trust
+ ip dhcp snooping limit rate 20
+ switchport mode trunk
+ switchport nonegotiate
+!
+interface Vlan1
+ no ip address
+ shutdown
+!
+interface Vlan332
+ ip address 10.2.255.131 255.255.255.192
+!
+ip default-gateway 10.2.255.190
+!
+no cdp run
+!
+radius-server host 10.2.20.10 auth-port 1645 key aaapa55
+!
+!
+!
+ip access-list standard SSH
+ permit 10.2.255.0 0.0.0.255
+line con 0
+ login
+!
+line vty 0 4
+ access-class SSH in
+ login authentication default
+ transport input ssh
+line vty 5 15
+ access-class SSH in
+ login authentication default
+ transport input ssh
+!
+!
+!
+!
+end
+----
+
+==== PC-PC-S2
+[source]
+----
+Building configuration...
+
+Current configuration : 4449 bytes
+!
+version 15.0
+no service timestamps log datetime msec
+no service timestamps debug datetime msec
+service password-encryption
+!
+hostname PC-PS-S2
+!
+enable secret 5 $1$mERr$STCVvBm3rx8XD5gcSxKFC/
+!
+!
+!
+!
+!
+aaa new-model
+!
+aaa authentication login default group radius local-case 
+!
+!
+!
+!
+ip ssh version 2
+ip ssh authentication-retries 2
+ip ssh time-out 30
+no ip domain-lookup
+ip domain-name bitbox.hu
+!
+username admin secret 5 $1$mERr$YDWMoxSY4R79.r8uptM1C0
+!
+ip arp inspection vlan 210
+ip arp inspection validate src-mac dst-mac ip
+!
+ip dhcp snooping
+!
+spanning-tree mode pvst
+spanning-tree extend system-id
+!
+interface FastEthernet0/1
+ switchport access vlan 210
+ switchport mode access
+ switchport nonegotiate
+ switchport port-security mac-address sticky 
+ switchport port-security aging time 5
+!
+interface FastEthernet0/2
+ switchport access vlan 210
+ switchport mode access
+ switchport nonegotiate
+ switchport port-security mac-address sticky 
+ switchport port-security aging time 5
+!
+interface FastEthernet0/3
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/4
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/5
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/6
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/7
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/8
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/9
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/10
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/11
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/12
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/13
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/14
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/15
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/16
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/17
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/18
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/19
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/20
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/21
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/22
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/23
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface FastEthernet0/24
+ switchport access vlan 666
+ switchport mode access
+ switchport nonegotiate
+ shutdown
+!
+interface GigabitEthernet0/1
+ switchport trunk native vlan 666
+ switchport trunk allowed vlan 210,332
+ ip arp inspection trust
+ ip dhcp snooping trust
+ ip dhcp snooping limit rate 20
+ switchport mode trunk
+ switchport nonegotiate
+!
+interface GigabitEthernet0/2
+ switchport trunk native vlan 666
+ switchport trunk allowed vlan 210,332
+ ip arp inspection trust
+ ip dhcp snooping trust
+ ip dhcp snooping limit rate 20
+ switchport mode trunk
+ switchport nonegotiate
+!
+interface Vlan1
+ no ip address
+ shutdown
+!
+interface Vlan332
+ ip address 10.2.255.132 255.255.255.192
+!
+ip default-gateway 10.2.255.190
+!
+no cdp run
+!
+radius-server host 10.2.20.10 auth-port 1645 key aaapa55
+!
+!
+!
+ip access-list standard SSH
+ permit 10.2.255.0 0.0.0.255
+line con 0
+ login
+!
+line vty 0 4
+ access-class SSH in
+ login authentication default
+ transport input ssh
+line vty 5 15
+ access-class SSH in
+ login authentication default
+ transport input ssh
+!
+!
+!
+!
+end
+----
+
+[appendix]
+== Network Programming (Necop)

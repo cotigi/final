@@ -926,6 +926,22 @@ access-list VPN-TRAFFIC extended permit ip object LOCAL object REMOTE
 NOTE: For further information regarding these objects,
 refer to <<hq_network_objects>>
 
+===== Inward Flowing Traffic
+
+The following ACL allows VPN packets to enter the network
+
+[source]
+----
+access-list OUTSIDE-IN extended permit ip object REMOTE object LOCAL
+----
+
+This ACL must be configured on the `OUTSIDE` interface, inwards.
+
+[source]
+----
+access-group OUTSIDE-IN in interface OUTSIDE
+----
+
 ==== Firewall
 
 For the firewall we are using the ASA 5506, because of it's 
@@ -1734,19 +1750,28 @@ ip access-list standard SSH
 NOTE: This ACL must be applied onto all the VTY 
 lines for all incoming messages.
 
-===== DMZ
+===== Inward Flowing Traffic
 
 The following ACL is configured to allow outside requests
-to enter the DMZ, and thus the the `Public Linux` server.
+to enter the DMZ, and thus the the `Public Linux` server, and to allow 
+VPN traffic to enter the network.
 
 [[source]]
 ----
 access-list OUTSIDE-IN extended permit object-group DMZ-SERVICES any object DMZ-PUBLIC-IP
 access-list OUTSIDE-IN extended permit object-group DMZ-SERVICES any object DMZ-NETWORK-IPV6
+access-list OUTSIDE-IN extended permit ip object REMOTE object LOCAL
 ----
 
 NOTE: For further information regarding these objects,
 refer to <<pc_service_objects>> and <<pc_network_objects>>.
+
+This ACL must be configured on the `OUTSIDE` interface, inwards.
+
+[source]
+----
+access-group OUTSIDE-IN in interface OUTSIDE
+----
 
 ===== VPN
 

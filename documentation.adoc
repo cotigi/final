@@ -203,7 +203,7 @@ aging time of 5 minutes.
 ==== Dot1x
 
 All switch interfaces connecting to a
-PC, laptop or server must use Dot1x port authentication
+PC, laptop must use Dot1x port authentication
 through the given AAA RADIUS server.
 
 ==== IP Source Guard

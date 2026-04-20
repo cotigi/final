@@ -109,27 +109,8 @@ NOTE: All sites must use RADIUS as their AAA server.
 
 ==== Passwords
 
-All network devices must be configured with the following passwords:
-
-.Device Passwords
-[cols="1h,1,1",options="header"]
-|===
-|Place
-|Password
-|Applied As
-
-|Priviliged 
-|enpa55
-|Secret
-
-|Console
-|conpa55
-|Password
-
-|Aux
-|auxpa55
-|Password
-|===
+All network devices must be configured with the 
+following enable secret: `enpa55`
 
 ==== Users
 
@@ -240,7 +221,7 @@ NOTE: For further information, refer to
 === DHCP Snooping Policy
 
 DHCP snooping must me configured on all switches globally with
-a rate limit of `20` on untrusted interfaces.
+a rate limit of `20` on upstream links towards the given DHCP server.
 
 NOTE: For further information, refer to 
 <<hq_dhcp_snooping, HQ DHCP Snooping>> and 
@@ -248,8 +229,8 @@ NOTE: For further information, refer to
 
 === Dynamic ARP Inspection Policy
 
-All interfaces leading to host, printer or server devices, 
-should be treated as, untrusted (this applies to unused interfaces too).
+All interfaces leading to host, access point, printer or server devices, 
+should be treated as untrusted (this applies to unused interfaces too).
 
 Interfaces leading to other network devies should be treated as trusted.
 
@@ -258,7 +239,7 @@ MAC addresses. This is achieved with the following command:
 
 [source]
 ----
-ip arp inspection validate src-mac dst-mac
+ip arp inspection validate src-mac dst-mac ip
 ----
 
 NOTE: For further information, refer to 
@@ -417,10 +398,9 @@ These are:
 |HQ-S1
 |Gig0/2
 
-.4+.^|HQ-F0-S1
+.3+.^|HQ-F0-S1
 |Fa0/10
 |Fa0/11
-|Fa0/20
 |Fa0/24
 
 .2+.^|HQ-F1-S1
@@ -1268,7 +1248,7 @@ NOTE: For further information about the network objects, `LOCAL` and
 
 ==== Topology
 
-image::images/package_center.png[align="center"]
+image::images/package-center.png[align="center"]
 
 <<<
 
@@ -1430,7 +1410,7 @@ Static IP source guard is configured as follows:
 |Fa0/24
 |10.2.20.10
 |0060.7035.2DB1
-|Private Linux
+|PC Private Windows
 
 |PC-O-S1
 |Fa0/24
@@ -1489,7 +1469,7 @@ This is achieved through the following parameters:
 
 
 ==== DHCPv4
-The DHCP server is the `Private Linux` host, 
+The DHCP server is the `PC Private Windows` host, 
 providing IPv4 addresses for the following networks:
 
 [cols="1,1,1,1,1",options="header"]
@@ -1591,6 +1571,9 @@ ARP inspection is configured on the following devices:
 |PC-PS-S1
 |220,332
 
+|PC-PS-S2
+|210
+
 |PC-O-S1
 |230
 |===
@@ -1604,6 +1587,10 @@ The trusted interfaces for these devices are:
 |Interface
 
 .2+.^|PC-PS-S1
+|Gig0/1
+|Gig0/2
+
+.2+.^|PC-PS-S2
 |Gig0/1
 |Gig0/2
 
@@ -1711,7 +1698,7 @@ These interfaces are:
 
 ==== AAA
 
-The AAA RADIUS server is `Private Linux` (`10.2.20.10`) with the following clients:
+The AAA RADIUS server is `PC Private Windows` (`10.2.20.10`) with the following clients:
 
 * PC-CORE-MLS1
 * PC-CORE-MLS2
@@ -2110,7 +2097,7 @@ NOTE: For further information about the network objects, `LOCAL` and
 |10.2.250.2
 |10.2.250.1
 
-|Private Linux
+|PC Private Windows
 |Fa0
 |10.2.20.10
 |10.2.20.14
@@ -2217,7 +2204,6 @@ providing IPv4 addresses for the following networks:
 [cols="1,1,1,1",options="header"]
 .IPv4 DHCP Addressing
 |===
-|Vlan       
 |Addressing Range   
 |Number Of Hosts
 |DNS    

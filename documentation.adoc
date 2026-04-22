@@ -256,6 +256,7 @@ Interfaces leading to other network devies should be treated as trusted.
 ARP packets must be validated through the source and destination
 MAC addresses. This is achieved with the following command:
 
+.ARP Inspection
 [source]
 ----
 ip arp inspection validate src-mac dst-mac
@@ -299,6 +300,7 @@ image::images/hq.png[align="center"]
 
 <<<
 
+[#hq-vlans]
 ==== Vlans
 
 [cols="1,1,1",options="header"]
@@ -363,6 +365,7 @@ taking up the client role.
 |2
 |===
 
+[#hq-etherchannel]
 ==== Etherchannel
 
 Etherchannel is set up between `HQ-S1` and `HQ-S2`, with LACP
@@ -381,6 +384,7 @@ Etherchannel is set up between `HQ-S1` and `HQ-S2`, with LACP
 
 <<<
 
+[#hq-rpvst]
 ==== Rapid-PVST
 
 Rapid-PVST is used between all the switches in the network.
@@ -925,6 +929,7 @@ connect to the VTY line.
 
 This is achieved with the following ACL
 
+.SSH Access
 [source]
 ----
 ip access-list standard SSH
@@ -938,6 +943,7 @@ This ACL must be applied onto all the VTY lines for all incoming messages.
 The following ACL is configured to identify, which packets
 should be routed within the VPN tunnel.
 
+.VPN Traffic
 [source]
 ----
 access-list VPN-TRAFFIC extended permit ip object LOCAL object REMOTE
@@ -1069,6 +1075,7 @@ following parameters:
 
 The transfrom-set is configured as such:
 
+.VPN Transform Set
 [source]
 ----
 crypto ipsec ikev1 transform-set VPN-SET esp-aes 256 esp-sha-hmac
@@ -1079,6 +1086,7 @@ crypto ipsec ikev1 transform-set VPN-SET esp-aes 256 esp-sha-hmac
 To detect the interesting traffic for the VPN connection
 the following ACL is configured, named as `VPN-TRAFFIC`:
 
+.VPN Traffic
 [source]
 ----
 access-list VPN-TRAFFIC extended permit ip object LOCAL object REMOTE
@@ -1738,6 +1746,7 @@ The Package Center site is split into three
 so the ACL will accept the traffic if it is from
 any of the three `MANAGEMENT` Vlans.
 
+.SSH Access
 [source]
 ----
 ip access-list standard SSH
@@ -1752,6 +1761,7 @@ lines for all incoming messages.
 The following ACL is configured to allow outside requests
 to enter the DMZ, and thus the the `Public Linux` server.
 
+.Inward Access
 [[source]]
 ----
 access-list OUTSIDE-IN extended permit object-group DMZ-SERVICES any object DMZ-PUBLIC-IP
@@ -1766,6 +1776,7 @@ refer to <<pc_service_objects>> and <<pc_network_objects>>.
 The following ACL is configured to identify, which packets
 should be routed within the VPN tunnel.
 
+.VPN Traffic
 [source]
 ----
 access-list VPN-TRAFFIC extended permit ip object LOCAL object REMOTE
@@ -1883,6 +1894,7 @@ HTTP traffic as well.
 
 Thus the default policy map will be the following:
 
+.Policy Map
 [source]
 ----
 policy-map global_policy
@@ -1954,6 +1966,7 @@ following parameters:
 
 The transfrom-set is configured as such:
 
+.VPN Transform Set
 [source]
 ----
 crypto ipsec ikev1 transform-set VPN-SET esp-aes 256 esp-sha-hmac
@@ -1964,6 +1977,7 @@ crypto ipsec ikev1 transform-set VPN-SET esp-aes 256 esp-sha-hmac
 To detect the interesting traffic for the VPN connection
 the following ACL is configured, named as `VPN-TRAFFIC`:
 
+.VPN Traffic
 [source]
 ----
 access-list VPN-TRAFFIC extended permit ip object LOCAL object REMOTE
@@ -2257,16 +2271,1281 @@ providing IPv4 addresses for the following networks:
 == Testing
 === Network
 ==== HQ
+
+===== Vlan
+All switches should have all the vlans in their database.
+`HQ-S1` should take up the server role in sharing these vlans
+with the VTP protocol, with all other switches taking up the 
+client role.
+
+These configurations are stated in <<hq-vlans, HQ Vlans>>
+
+This is proved by the following outputs from the commands
+`show vlan`, `show interfaces trunk`, `show vtp status` and `show vtp counters`.
+
+====== HQ-S1
+.Vlan
+[source]
+----
+HQ-S1#show vlan 
+
+VLAN Name                             Status    Ports
+---- -------------------------------- --------- -------------------------------
+1    default                          active    
+110  DEVELOPERS                       active    
+120  HR                               active    
+130  ACCOUNTING                       active    
+140  MARKETING                        active    
+150  SERVER                           active    Gig0/2
+160  FRONTDESK                        active    
+333  MANAGEMENT                       active    
+666  TRASH                            active    Fa0/2, Fa0/3, Fa0/4, Fa0/5
+                                                Fa0/6, Fa0/7, Fa0/8, Fa0/9
+                                                Fa0/10, Fa0/13, Fa0/14, Fa0/15
+                                                Fa0/16, Fa0/17, Fa0/18, Fa0/19
+                                                Fa0/20
+1002 fddi-default                     active    
+1003 token-ring-default               active    
+1004 fddinet-default                  active    
+1005 trnet-default                    active    
+
+VLAN Type  SAID       MTU   Parent RingNo BridgeNo Stp  BrdgMode Trans1 Trans2
+---- ----- ---------- ----- ------ ------ -------- ---- -------- ------ ------
+1    enet  100001     1500  -      -      -        -    -        0      0
+110  enet  100110     1500  -      -      -        -    -        0      0
+120  enet  100120     1500  -      -      -        -    -        0      0
+130  enet  100130     1500  -      -      -        -    -        0      0
+140  enet  100140     1500  -      -      -        -    -        0      0
+150  enet  100150     1500  -      -      -        -    -        0      0
+160  enet  100160     1500  -      -      -        -    -        0      0
+333  enet  100333     1500  -      -      -        -    -        0      0
+666  enet  100666     1500  -      -      -        -    -        0      0
+1002 fddi  101002     1500  -      -      -        -    -        0      0   
+1003 tr    101003     1500  -      -      -        -    -        0      0   
+1004 fdnet 101004     1500  -      -      -        ieee -        0      0   
+1005 trnet 101005     1500  -      -      -        ibm  -        0      0   
+
+VLAN Type  SAID       MTU   Parent RingNo BridgeNo Stp  BrdgMode Trans1 Trans2
+---- ----- ---------- ----- ------ ------ -------- ---- -------- ------ ------
+
+Remote SPAN VLANs
+------------------------------------------------------------------------------
+
+Primary Secondary Type              Ports
+------- --------- ----------------- ------------------------------------------
+----
+
+.Trunk
+[source]
+----
+HQ-S1#show interfaces trunk 
+Port        Mode         Encapsulation  Status        Native vlan
+Po1         on           802.1q         trunking      666
+Fa0/1       on           802.1q         trunking      666
+Fa0/11      on           802.1q         trunking      666
+Fa0/12      on           802.1q         trunking      666
+Fa0/21      on           802.1q         trunking      666
+Fa0/22      on           802.1q         trunking      666
+Gig0/1      on           802.1q         trunking      666
+
+Port        Vlans allowed on trunk
+Po1         110,120,130,140,150,160,333
+Fa0/1       110,120,130,140,150,160,333
+Fa0/11      110,120,130,140,150,160,333
+Fa0/12      110,120,130,140,150,160,333
+Fa0/21      110,120,130,140,150,160,333
+Fa0/22      110,120,130,140,150,160,333
+Gig0/1      110,120,130,140,150,160,333
+
+Port        Vlans allowed and active in management domain
+Po1         110,120,130,140,150,160,333
+Fa0/1       110,120,130,140,150,160,333
+Fa0/11      110,120,130,140,150,160,333
+Fa0/12      110,120,130,140,150,160,333
+Fa0/21      110,120,130,140,150,160,333
+Fa0/22      110,120,130,140,150,160,333
+Gig0/1      110,120,130,140,150,160,333
+
+Port        Vlans in spanning tree forwarding state and not pruned
+Po1         110,120,130,140,150,160,333
+Fa0/1       110,120,130,140,150,160,333
+Fa0/11      110,120,130,140,150,160,333
+Fa0/12      110,120,130,140,150,160,333
+Fa0/21      110,120,130,140,150,160,333
+Fa0/22      110,120,130,140,150,160,333
+Gig0/1      110,120,130,140,150,160,333
+----
+
+.VTP Status
+[source]
+----
+HQ-S1#show vtp status 
+VTP Version capable             : 1 to 2
+VTP version running             : 2
+VTP Domain Name                 : hq.vtp
+VTP Pruning Mode                : Disabled
+VTP Traps Generation            : Disabled
+Device ID                       : 0002.1794.6200
+Configuration last modified by 0.0.0.0 at 3-1-93 00:32:14
+Local updater ID is 10.1.255.3 on interface Vl333 (lowest numbered VLAN interface found)
+
+Feature VLAN : 
+--------------
+VTP Operating Mode                : Server
+Maximum VLANs supported locally   : 255
+Number of existing VLANs          : 13
+Configuration Revision            : 0
+MD5 digest                        : 0x29 0x91 0xD8 0x7D 0x93 0x68 0x68 0x42 
+                                    0x93 0xAE 0xE8 0x72 0x7C 0x7B 0xB1 0x39
+----
+
+.VTP Counter
+[source]
+----
+HQ-S1#show vtp counters 
+VTP statistics:
+Summary advertisements received    : 345
+Subset advertisements received     : 282
+Request advertisements received    : 139
+Summary advertisements transmitted : 173
+Subset advertisements transmitted  : 156
+Request advertisements transmitted : 0
+Number of config revision errors   : 0
+Number of config digest errors     : 0
+Number of V1 summary errors        : 0
+
+
+VTP pruning statistics:
+
+Trunk            Join Transmitted Join Received    Summary advts received from
+                                                   non-pruning-capable device
+---------------- ---------------- ---------------- ---------------------------
+----
+
+====== HQ-S2
+.Vlan
+[source]
+----
+HQ-S2#show vlan 
+
+VLAN Name                             Status    Ports
+---- -------------------------------- --------- -------------------------------
+1    default                          active    
+110  DEVELOPERS                       active    
+120  HR                               active    
+130  ACCOUNTING                       active    
+140  MARKETING                        active    
+150  SERVER                           active    
+160  FRONTDESK                        active    
+333  MANAGEMENT                       active    
+666  TRASH                            active    Fa0/2, Fa0/3, Fa0/4, Fa0/5
+                                                Fa0/6, Fa0/7, Fa0/8, Fa0/9
+                                                Fa0/10, Fa0/13, Fa0/14, Fa0/15
+                                                Fa0/16, Fa0/17, Fa0/18, Fa0/19
+                                                Fa0/20, Gig0/2
+1002 fddi-default                     active    
+1003 token-ring-default               active    
+1004 fddinet-default                  active    
+1005 trnet-default                    active    
+
+VLAN Type  SAID       MTU   Parent RingNo BridgeNo Stp  BrdgMode Trans1 Trans2
+---- ----- ---------- ----- ------ ------ -------- ---- -------- ------ ------
+1    enet  100001     1500  -      -      -        -    -        0      0
+110  enet  100110     1500  -      -      -        -    -        0      0
+120  enet  100120     1500  -      -      -        -    -        0      0
+130  enet  100130     1500  -      -      -        -    -        0      0
+140  enet  100140     1500  -      -      -        -    -        0      0
+150  enet  100150     1500  -      -      -        -    -        0      0
+160  enet  100160     1500  -      -      -        -    -        0      0
+333  enet  100333     1500  -      -      -        -    -        0      0
+666  enet  100666     1500  -      -      -        -    -        0      0
+1002 fddi  101002     1500  -      -      -        -    -        0      0   
+1003 tr    101003     1500  -      -      -        -    -        0      0   
+1004 fdnet 101004     1500  -      -      -        ieee -        0      0   
+1005 trnet 101005     1500  -      -      -        ibm  -        0      0   
+
+VLAN Type  SAID       MTU   Parent RingNo BridgeNo Stp  BrdgMode Trans1 Trans2
+---- ----- ---------- ----- ------ ------ -------- ---- -------- ------ ------
+
+Remote SPAN VLANs
+------------------------------------------------------------------------------
+
+Primary Secondary Type              Ports
+------- --------- ----------------- ------------------------------------------
+----
+
+.Trunk
+[source]
+----
+HQ-S2#show interfaces trunk 
+Port        Mode         Encapsulation  Status        Native vlan
+Po1         on           802.1q         trunking      666
+Fa0/1       on           802.1q         trunking      666
+Fa0/11      on           802.1q         trunking      666
+Fa0/12      on           802.1q         trunking      666
+Fa0/21      on           802.1q         trunking      666
+Fa0/22      on           802.1q         trunking      666
+Gig0/1      on           802.1q         trunking      666
+
+Port        Vlans allowed on trunk
+Po1         110,120,130,140,150,160,333
+Fa0/1       110,120,130,140,150,160,333
+Fa0/11      110,120,130,140,150,160,333
+Fa0/12      110,120,130,140,150,160,333
+Fa0/21      110,120,130,140,150,160,333
+Fa0/22      110,120,130,140,150,160,333
+Gig0/1      110,120,130,140,150,160,333
+
+Port        Vlans allowed and active in management domain
+Po1         110,120,130,140,150,160,333
+Fa0/1       110,120,130,140,150,160,333
+Fa0/11      110,120,130,140,150,160,333
+Fa0/12      110,120,130,140,150,160,333
+Fa0/21      110,120,130,140,150,160,333
+Fa0/22      110,120,130,140,150,160,333
+Gig0/1      110,120,130,140,150,160,333
+
+Port        Vlans in spanning tree forwarding state and not pruned
+Po1         110,120,130,140,150,160,333
+Fa0/1       110,120,130,140,150,160,333
+Fa0/11      110,120,130,140,150,160,333
+Fa0/12      110,120,130,140,150,160,333
+Fa0/21      110,120,130,140,150,160,333
+Fa0/22      110,120,130,140,150,160,333
+Gig0/1      110,120,130,140,150,160,333
+----
+
+.VTP Status
+[source]
+----
+HQ-S2#show vtp status 
+VTP Version capable             : 1 to 2
+VTP version running             : 2
+VTP Domain Name                 : hq.vtp
+VTP Pruning Mode                : Disabled
+VTP Traps Generation            : Disabled
+Device ID                       : 000A.F3BE.6800
+Configuration last modified by 0.0.0.0 at 3-1-93 00:32:14
+
+Feature VLAN : 
+--------------
+VTP Operating Mode                : Client
+Maximum VLANs supported locally   : 255
+Number of existing VLANs          : 13
+Configuration Revision            : 0
+MD5 digest                        : 0x29 0x91 0xD8 0x7D 0x93 0x68 0x68 0x42 
+                                    0x93 0xAE 0xE8 0x72 0x7C 0x7B 0xB1 0x39
+----
+
+.VTP Counter
+[source]
+----
+HQ-S2#show vtp counters 
+VTP statistics:
+Summary advertisements received    : 471
+Subset advertisements received     : 416
+Request advertisements received    : 105
+Summary advertisements transmitted : 128
+Subset advertisements transmitted  : 106
+Request advertisements transmitted : 16
+Number of config revision errors   : 0
+Number of config digest errors     : 0
+Number of V1 summary errors        : 0
+
+
+VTP pruning statistics:
+
+Trunk            Join Transmitted Join Received    Summary advts received from
+                                                   non-pruning-capable device
+---------------- ---------------- ---------------- ---------------------------
+----
+
+====== HQ-F0-S1
+.Vlan
+[source]
+----
+HQ-F0-S1#show vlan 
+
+VLAN Name                             Status    Ports
+---- -------------------------------- --------- -------------------------------
+1    default                          active    
+110  DEVELOPERS                       active    
+120  HR                               active    
+130  ACCOUNTING                       active    
+140  MARKETING                        active    
+150  SERVER                           active    
+160  FRONTDESK                        active    Fa0/10, Fa0/11, Fa0/24
+333  MANAGEMENT                       active    
+666  TRASH                            active    Fa0/3, Fa0/4, Fa0/5, Fa0/6
+                                                Fa0/7, Fa0/8, Fa0/9, Fa0/12
+                                                Fa0/13, Fa0/14, Fa0/15, Fa0/16
+                                                Fa0/17, Fa0/18, Fa0/19, Fa0/20
+                                                Fa0/21, Fa0/22, Fa0/23, Gig0/1
+                                                Gig0/2
+1002 fddi-default                     active    
+1003 token-ring-default               active    
+1004 fddinet-default                  active    
+1005 trnet-default                    active    
+
+VLAN Type  SAID       MTU   Parent RingNo BridgeNo Stp  BrdgMode Trans1 Trans2
+---- ----- ---------- ----- ------ ------ -------- ---- -------- ------ ------
+1    enet  100001     1500  -      -      -        -    -        0      0
+110  enet  100110     1500  -      -      -        -    -        0      0
+120  enet  100120     1500  -      -      -        -    -        0      0
+130  enet  100130     1500  -      -      -        -    -        0      0
+140  enet  100140     1500  -      -      -        -    -        0      0
+150  enet  100150     1500  -      -      -        -    -        0      0
+160  enet  100160     1500  -      -      -        -    -        0      0
+333  enet  100333     1500  -      -      -        -    -        0      0
+666  enet  100666     1500  -      -      -        -    -        0      0
+1002 fddi  101002     1500  -      -      -        -    -        0      0   
+1003 tr    101003     1500  -      -      -        -    -        0      0   
+1004 fdnet 101004     1500  -      -      -        ieee -        0      0   
+1005 trnet 101005     1500  -      -      -        ibm  -        0      0   
+
+VLAN Type  SAID       MTU   Parent RingNo BridgeNo Stp  BrdgMode Trans1 Trans2
+---- ----- ---------- ----- ------ ------ -------- ---- -------- ------ ------
+
+Remote SPAN VLANs
+------------------------------------------------------------------------------
+
+Primary Secondary Type              Ports
+------- --------- ----------------- ------------------------------------------
+----
+
+.Trunk
+[source]
+----
+HQ-F0-S1#show interfaces trunk 
+Port        Mode         Encapsulation  Status        Native vlan
+Fa0/1       on           802.1q         trunking      666
+Fa0/2       on           802.1q         trunking      666
+
+Port        Vlans allowed on trunk
+Fa0/1       110,120,130,140,150,160,333
+Fa0/2       110,120,130,140,150,160,333
+
+Port        Vlans allowed and active in management domain
+Fa0/1       110,120,130,140,150,160,333
+Fa0/2       110,120,130,140,150,160,333
+
+Port        Vlans in spanning tree forwarding state and not pruned
+Fa0/1       110,120,130,140,150,160,333
+Fa0/2       none
+----
+
+.VTP Status
+[source]
+----
+HQ-F0-S1#show vtp status 
+VTP Version capable             : 1 to 2
+VTP version running             : 2
+VTP Domain Name                 : hq.vtp
+VTP Pruning Mode                : Disabled
+VTP Traps Generation            : Disabled
+Device ID                       : 00D0.BC73.1300
+Configuration last modified by 0.0.0.0 at 3-1-93 00:32:14
+
+Feature VLAN : 
+--------------
+VTP Operating Mode                : Client
+Maximum VLANs supported locally   : 255
+Number of existing VLANs          : 13
+Configuration Revision            : 0
+MD5 digest                        : 0x29 0x91 0xD8 0x7D 0x93 0x68 0x68 0x42 
+                                    0x93 0xAE 0xE8 0x72 0x7C 0x7B 0xB1 0x39
+----
+
+.VTP Counter
+[source]
+----
+HQ-F0-S1#show vtp counters 
+VTP statistics:
+Summary advertisements received    : 225
+Subset advertisements received     : 177
+Request advertisements received    : 15
+Summary advertisements transmitted : 24
+Subset advertisements transmitted  : 16
+Request advertisements transmitted : 22
+Number of config revision errors   : 0
+Number of config digest errors     : 0
+Number of V1 summary errors        : 0
+
+
+VTP pruning statistics:
+
+Trunk            Join Transmitted Join Received    Summary advts received from
+                                                   non-pruning-capable device
+---------------- ---------------- ---------------- ---------------------------
+----
+
+====== HQ-F1-S1
+.Vlan
+[source]
+----
+HQ-F1-S1#show vlan 
+
+VLAN Name                             Status    Ports
+---- -------------------------------- --------- -------------------------------
+1    default                          active    
+110  DEVELOPERS                       active    
+120  HR                               active    
+130  ACCOUNTING                       active    Fa0/16
+140  MARKETING                        active    Fa0/10
+150  SERVER                           active    
+160  FRONTDESK                        active    
+333  MANAGEMENT                       active    
+666  TRASH                            active    Fa0/3, Fa0/4, Fa0/5, Fa0/6
+                                                Fa0/7, Fa0/8, Fa0/9, Fa0/11
+                                                Fa0/12, Fa0/13, Fa0/14, Fa0/15
+                                                Fa0/17, Fa0/18, Fa0/19, Fa0/20
+                                                Fa0/21, Fa0/22, Fa0/23, Fa0/24
+                                                Gig0/2
+1002 fddi-default                     active    
+1003 token-ring-default               active    
+1004 fddinet-default                  active    
+1005 trnet-default                    active    
+
+VLAN Type  SAID       MTU   Parent RingNo BridgeNo Stp  BrdgMode Trans1 Trans2
+---- ----- ---------- ----- ------ ------ -------- ---- -------- ------ ------
+1    enet  100001     1500  -      -      -        -    -        0      0
+110  enet  100110     1500  -      -      -        -    -        0      0
+120  enet  100120     1500  -      -      -        -    -        0      0
+130  enet  100130     1500  -      -      -        -    -        0      0
+140  enet  100140     1500  -      -      -        -    -        0      0
+150  enet  100150     1500  -      -      -        -    -        0      0
+160  enet  100160     1500  -      -      -        -    -        0      0
+333  enet  100333     1500  -      -      -        -    -        0      0
+666  enet  100666     1500  -      -      -        -    -        0      0
+1002 fddi  101002     1500  -      -      -        -    -        0      0   
+1003 tr    101003     1500  -      -      -        -    -        0      0   
+1004 fdnet 101004     1500  -      -      -        ieee -        0      0   
+1005 trnet 101005     1500  -      -      -        ibm  -        0      0   
+
+VLAN Type  SAID       MTU   Parent RingNo BridgeNo Stp  BrdgMode Trans1 Trans2
+---- ----- ---------- ----- ------ ------ -------- ---- -------- ------ ------
+
+Remote SPAN VLANs
+------------------------------------------------------------------------------
+
+Primary Secondary Type              Ports
+------- --------- ----------------- ------------------------------------------
+----
+
+.Trunk
+[source]
+----
+HQ-F1-S1#show interfaces trunk 
+Port        Mode         Encapsulation  Status        Native vlan
+Fa0/1       on           802.1q         trunking      666
+Fa0/2       on           802.1q         trunking      666
+Gig0/1      on           802.1q         trunking      666
+
+Port        Vlans allowed on trunk
+Fa0/1       110,120,130,140,150,160,333
+Fa0/2       110,120,130,140,150,160,333
+Gig0/1      110,120,130,140,150,160,333
+
+Port        Vlans allowed and active in management domain
+Fa0/1       110,120,130,140,150,160,333
+Fa0/2       110,120,130,140,150,160,333
+Gig0/1      110,120,130,140,150,160,333
+
+Port        Vlans in spanning tree forwarding state and not pruned
+Fa0/1       110,120,130,140,150,160,333
+Fa0/2       none
+Gig0/1      none
+----
+
+.VTP Status
+[source]
+----
+HQ-F1-S1#show vtp status 
+VTP Version capable             : 1 to 2
+VTP version running             : 2
+VTP Domain Name                 : hq.vtp
+VTP Pruning Mode                : Disabled
+VTP Traps Generation            : Disabled
+Device ID                       : 00D0.D3B8.C000
+Configuration last modified by 0.0.0.0 at 3-1-93 00:32:14
+
+Feature VLAN : 
+--------------
+VTP Operating Mode                : Client
+Maximum VLANs supported locally   : 255
+Number of existing VLANs          : 13
+Configuration Revision            : 0
+MD5 digest                        : 0x29 0x91 0xD8 0x7D 0x93 0x68 0x68 0x42 
+                                    0x93 0xAE 0xE8 0x72 0x7C 0x7B 0xB1 0x39
+----
+
+.VTP Counter
+[source]
+----
+HQ-F1-S1#show vtp counters 
+VTP statistics:
+Summary advertisements received    : 253
+Subset advertisements received     : 198
+Request advertisements received    : 36
+Summary advertisements transmitted : 43
+Subset advertisements transmitted  : 37
+Request advertisements transmitted : 25
+Number of config revision errors   : 0
+Number of config digest errors     : 0
+Number of V1 summary errors        : 0
+
+
+VTP pruning statistics:
+
+Trunk            Join Transmitted Join Received    Summary advts received from
+                                                   non-pruning-capable device
+---------------- ---------------- ---------------- ---------------------------
+----
+
+====== HQ-F1-S2
+.Vlan
+[source]
+----
+HQ-F1-S2#show vlan 
+
+VLAN Name                             Status    Ports
+---- -------------------------------- --------- -------------------------------
+1    default                          active    
+110  DEVELOPERS                       active    Fa0/10
+120  HR                               active    
+130  ACCOUNTING                       active    Fa0/20
+140  MARKETING                        active    Fa0/24
+150  SERVER                           active    
+160  FRONTDESK                        active    
+333  MANAGEMENT                       active    
+666  TRASH                            active    Fa0/3, Fa0/4, Fa0/5, Fa0/6
+                                                Fa0/7, Fa0/8, Fa0/9, Fa0/11
+                                                Fa0/12, Fa0/13, Fa0/14, Fa0/15
+                                                Fa0/16, Fa0/17, Fa0/18, Fa0/19
+                                                Fa0/21, Fa0/22, Fa0/23, Gig0/2
+1002 fddi-default                     active    
+1003 token-ring-default               active    
+1004 fddinet-default                  active    
+1005 trnet-default                    active    
+
+VLAN Type  SAID       MTU   Parent RingNo BridgeNo Stp  BrdgMode Trans1 Trans2
+---- ----- ---------- ----- ------ ------ -------- ---- -------- ------ ------
+1    enet  100001     1500  -      -      -        -    -        0      0
+110  enet  100110     1500  -      -      -        -    -        0      0
+120  enet  100120     1500  -      -      -        -    -        0      0
+130  enet  100130     1500  -      -      -        -    -        0      0
+140  enet  100140     1500  -      -      -        -    -        0      0
+150  enet  100150     1500  -      -      -        -    -        0      0
+160  enet  100160     1500  -      -      -        -    -        0      0
+333  enet  100333     1500  -      -      -        -    -        0      0
+666  enet  100666     1500  -      -      -        -    -        0      0
+1002 fddi  101002     1500  -      -      -        -    -        0      0   
+1003 tr    101003     1500  -      -      -        -    -        0      0   
+1004 fdnet 101004     1500  -      -      -        ieee -        0      0   
+1005 trnet 101005     1500  -      -      -        ibm  -        0      0   
+
+VLAN Type  SAID       MTU   Parent RingNo BridgeNo Stp  BrdgMode Trans1 Trans2
+---- ----- ---------- ----- ------ ------ -------- ---- -------- ------ ------
+
+Remote SPAN VLANs
+------------------------------------------------------------------------------
+
+Primary Secondary Type              Ports
+------- --------- ----------------- ------------------------------------------
+----
+
+.Trunk
+[source]
+----
+HQ-F1-S2#show interfaces trunk 
+Port        Mode         Encapsulation  Status        Native vlan
+Fa0/1       on           802.1q         trunking      666
+Fa0/2       on           802.1q         trunking      666
+Gig0/1      on           802.1q         trunking      666
+
+Port        Vlans allowed on trunk
+Fa0/1       110,120,130,140,150,160,333
+Fa0/2       110,120,130,140,150,160,333
+Gig0/1      110,120,130,140,150,160,333
+
+Port        Vlans allowed and active in management domain
+Fa0/1       110,120,130,140,150,160,333
+Fa0/2       110,120,130,140,150,160,333
+Gig0/1      110,120,130,140,150,160,333
+
+Port        Vlans in spanning tree forwarding state and not pruned
+Fa0/1       110,120,130,140,150,160,333
+Fa0/2       none
+Gig0/1      110,120,130,140,150,160,333
+----
+
+.VTP Status
+[source]
+----
+HQ-F1-S2#show vtp status 
+VTP Version capable             : 1 to 2
+VTP version running             : 2
+VTP Domain Name                 : hq.vtp
+VTP Pruning Mode                : Disabled
+VTP Traps Generation            : Disabled
+Device ID                       : 000C.CF6D.0B00
+Configuration last modified by 0.0.0.0 at 3-1-93 00:32:14
+
+Feature VLAN : 
+--------------
+VTP Operating Mode                : Client
+Maximum VLANs supported locally   : 255
+Number of existing VLANs          : 13
+Configuration Revision            : 0
+MD5 digest                        : 0x29 0x91 0xD8 0x7D 0x93 0x68 0x68 0x42 
+                                    0x93 0xAE 0xE8 0x72 0x7C 0x7B 0xB1 0x39
+----
+
+.VTP Counter
+[source]
+----
+HQ-F1-S2#show vtp counters 
+VTP statistics:
+Summary advertisements received    : 212
+Subset advertisements received     : 177
+Request advertisements received    : 40
+Summary advertisements transmitted : 48
+Subset advertisements transmitted  : 41
+Request advertisements transmitted : 22
+Number of config revision errors   : 0
+Number of config digest errors     : 0
+Number of V1 summary errors        : 0
+
+
+VTP pruning statistics:
+
+Trunk            Join Transmitted Join Received    Summary advts received from
+                                                   non-pruning-capable device
+---------------- ---------------- ---------------- ---------------------------
+----
+
+====== HQ-F2-S1
+.Vlan
+[source]
+----
+HQ-F2-S1#show vl
+
+VLAN Name                             Status    Ports
+---- -------------------------------- --------- -------------------------------
+1    default                          active    
+110  DEVELOPERS                       active    
+120  HR                               active    Fa0/10
+130  ACCOUNTING                       active    
+140  MARKETING                        active    
+150  SERVER                           active    
+160  FRONTDESK                        active    
+333  MANAGEMENT                       active    
+666  TRASH                            active    Fa0/3, Fa0/4, Fa0/5, Fa0/6
+                                                Fa0/7, Fa0/8, Fa0/9, Fa0/11
+                                                Fa0/12, Fa0/13, Fa0/14, Fa0/15
+                                                Fa0/16, Fa0/17, Fa0/18, Fa0/19
+                                                Fa0/20, Fa0/21, Fa0/22, Fa0/23
+                                                Fa0/24, Gig0/2
+1002 fddi-default                     active    
+1003 token-ring-default               active    
+1004 fddinet-default                  active    
+1005 trnet-default                    active    
+
+VLAN Type  SAID       MTU   Parent RingNo BridgeNo Stp  BrdgMode Trans1 Trans2
+---- ----- ---------- ----- ------ ------ -------- ---- -------- ------ ------
+1    enet  100001     1500  -      -      -        -    -        0      0
+110  enet  100110     1500  -      -      -        -    -        0      0
+120  enet  100120     1500  -      -      -        -    -        0      0
+130  enet  100130     1500  -      -      -        -    -        0      0
+140  enet  100140     1500  -      -      -        -    -        0      0
+150  enet  100150     1500  -      -      -        -    -        0      0
+160  enet  100160     1500  -      -      -        -    -        0      0
+333  enet  100333     1500  -      -      -        -    -        0      0
+666  enet  100666     1500  -      -      -        -    -        0      0
+1002 fddi  101002     1500  -      -      -        -    -        0      0   
+1003 tr    101003     1500  -      -      -        -    -        0      0   
+1004 fdnet 101004     1500  -      -      -        ieee -        0      0   
+1005 trnet 101005     1500  -      -      -        ibm  -        0      0   
+
+VLAN Type  SAID       MTU   Parent RingNo BridgeNo Stp  BrdgMode Trans1 Trans2
+---- ----- ---------- ----- ------ ------ -------- ---- -------- ------ ------
+
+Remote SPAN VLANs
+------------------------------------------------------------------------------
+
+Primary Secondary Type              Ports
+------- --------- ----------------- ------------------------------------------
+----
+
+.Trunk
+[source]
+----
+HQ-F2-S1#show interfaces trunk 
+Port        Mode         Encapsulation  Status        Native vlan
+Fa0/1       on           802.1q         trunking      666
+Fa0/2       on           802.1q         trunking      666
+Gig0/1      on           802.1q         trunking      666
+
+Port        Vlans allowed on trunk
+Fa0/1       110,120,130,140,150,160,333
+Fa0/2       110,120,130,140,150,160,333
+Gig0/1      110,120,130,140,150,160,333
+
+Port        Vlans allowed and active in management domain
+Fa0/1       110,120,130,140,150,160,333
+Fa0/2       110,120,130,140,150,160,333
+Gig0/1      110,120,130,140,150,160,333
+
+Port        Vlans in spanning tree forwarding state and not pruned
+Fa0/1       110,120,130,140,150,160,333
+Fa0/2       none
+Gig0/1      110,120,130,140,150,160,333
+----
+
+.VTP Status
+[source]
+----
+HQ-F2-S1# show vtp status 
+VTP Version capable             : 1 to 2
+VTP version running             : 2
+VTP Domain Name                 : hq.vtp
+VTP Pruning Mode                : Disabled
+VTP Traps Generation            : Disabled
+Device ID                       : 0001.96ED.1C00
+Configuration last modified by 0.0.0.0 at 3-1-93 00:32:14
+
+Feature VLAN : 
+--------------
+VTP Operating Mode                : Client
+Maximum VLANs supported locally   : 255
+Number of existing VLANs          : 13
+Configuration Revision            : 0
+MD5 digest                        : 0x29 0x91 0xD8 0x7D 0x93 0x68 0x68 0x42 
+                                    0x93 0xAE 0xE8 0x72 0x7C 0x7B 0xB1 0x39
+----
+
+.VTP Counter
+[source]
+----
+HQ-F2-S1#show vtp counters 
+VTP statistics:
+Summary advertisements received    : 232
+Subset advertisements received     : 182
+Request advertisements received    : 32
+Summary advertisements transmitted : 38
+Subset advertisements transmitted  : 33
+Request advertisements transmitted : 19
+Number of config revision errors   : 0
+Number of config digest errors     : 0
+Number of V1 summary errors        : 0
+
+
+VTP pruning statistics:
+
+Trunk            Join Transmitted Join Received    Summary advts received from
+                                                   non-pruning-capable device
+---------------- ---------------- ---------------- ---------------------------
+----
+
+====== HQ-F2-S2
+.Vlan
+[source]
+----
+HQ-F2-S2#show vlan 
+
+VLAN Name                             Status    Ports
+---- -------------------------------- --------- -------------------------------
+1    default                          active    
+110  DEVELOPERS                       active    
+120  HR                               active    Fa0/24
+130  ACCOUNTING                       active    
+140  MARKETING                        active    
+150  SERVER                           active    
+160  FRONTDESK                        active    
+333  MANAGEMENT                       active    Fa0/10
+666  TRASH                            active    Fa0/3, Fa0/4, Fa0/5, Fa0/6
+                                                Fa0/7, Fa0/8, Fa0/9, Fa0/11
+                                                Fa0/12, Fa0/13, Fa0/14, Fa0/15
+                                                Fa0/16, Fa0/17, Fa0/18, Fa0/19
+                                                Fa0/20, Fa0/21, Fa0/22, Fa0/23
+                                                Gig0/2
+1002 fddi-default                     active    
+1003 token-ring-default               active    
+1004 fddinet-default                  active    
+1005 trnet-default                    active    
+
+VLAN Type  SAID       MTU   Parent RingNo BridgeNo Stp  BrdgMode Trans1 Trans2
+---- ----- ---------- ----- ------ ------ -------- ---- -------- ------ ------
+1    enet  100001     1500  -      -      -        -    -        0      0
+110  enet  100110     1500  -      -      -        -    -        0      0
+120  enet  100120     1500  -      -      -        -    -        0      0
+130  enet  100130     1500  -      -      -        -    -        0      0
+140  enet  100140     1500  -      -      -        -    -        0      0
+150  enet  100150     1500  -      -      -        -    -        0      0
+160  enet  100160     1500  -      -      -        -    -        0      0
+333  enet  100333     1500  -      -      -        -    -        0      0
+666  enet  100666     1500  -      -      -        -    -        0      0
+1002 fddi  101002     1500  -      -      -        -    -        0      0   
+1003 tr    101003     1500  -      -      -        -    -        0      0   
+1004 fdnet 101004     1500  -      -      -        ieee -        0      0   
+1005 trnet 101005     1500  -      -      -        ibm  -        0      0   
+
+VLAN Type  SAID       MTU   Parent RingNo BridgeNo Stp  BrdgMode Trans1 Trans2
+---- ----- ---------- ----- ------ ------ -------- ---- -------- ------ ------
+
+Remote SPAN VLANs
+------------------------------------------------------------------------------
+
+Primary Secondary Type              Ports
+------- --------- ----------------- ------------------------------------------
+----
+
+.Trunk
+[source]
+----
+HQ-F2-S2#show interfaces trunk 
+Port        Mode         Encapsulation  Status        Native vlan
+Fa0/1       on           802.1q         trunking      666
+Fa0/2       on           802.1q         trunking      666
+Gig0/1      on           802.1q         trunking      666
+
+Port        Vlans allowed on trunk
+Fa0/1       110,120,130,140,150,160,333
+Fa0/2       110,120,130,140,150,160,333
+Gig0/1      110,120,130,140,150,160,333
+
+Port        Vlans allowed and active in management domain
+Fa0/1       110,120,130,140,150,160,333
+Fa0/2       110,120,130,140,150,160,333
+Gig0/1      110,120,130,140,150,160,333
+
+Port        Vlans in spanning tree forwarding state and not pruned
+Fa0/1       110,120,130,140,150,160,333
+Fa0/2       none
+Gig0/1      none
+----
+
+.VTP Status
+[source]
+----
+HQ-F2-S2#  show vtp status 
+VTP Version capable             : 1 to 2
+VTP version running             : 2
+VTP Domain Name                 : hq.vtp
+VTP Pruning Mode                : Disabled
+VTP Traps Generation            : Disabled
+Device ID                       : 00D0.FF0E.5A00
+Configuration last modified by 0.0.0.0 at 3-1-93 00:32:14
+
+Feature VLAN : 
+--------------
+VTP Operating Mode                : Client
+Maximum VLANs supported locally   : 255
+Number of existing VLANs          : 13
+Configuration Revision            : 0
+MD5 digest                        : 0x29 0x91 0xD8 0x7D 0x93 0x68 0x68 0x42 
+                                    0x93 0xAE 0xE8 0x72 0x7C 0x7B 0xB1 0x39
+----
+
+.VTP Counter
+[source]
+----
+HQ-F2-S2#show vtp counters 
+VTP statistics:
+Summary advertisements received    : 217
+Subset advertisements received     : 188
+Request advertisements received    : 35
+Summary advertisements transmitted : 41
+Subset advertisements transmitted  : 36
+Request advertisements transmitted : 17
+Number of config revision errors   : 0
+Number of config digest errors     : 0
+Number of V1 summary errors        : 0
+
+
+VTP pruning statistics:
+
+Trunk            Join Transmitted Join Received    Summary advts received from
+                                                   non-pruning-capable device
+---------------- ---------------- ---------------- ---------------------------
+----
+
+
+===== Etherchannel
+Etherchannel is configured between `HQ-S1` and `HQ-S2` 
+as stated in <<hq-etherchannel, HQ Etherchannel>>.
+
+`HQ-S1` should be the active, whith `HQ-S2` should be the passive
+side, connected through the interfaces `Fa0/23-24` and configured
+with the LACP protocol.
+
+This is proved by the following outputs from the
+command `show etherchannel port-channel`.
+
+====== HQ-S1
+.Etherchannel
+[source]
+----
+HQ-S1#show etherchannel port-channel 
+                Channel-group listing:
+                ----------------------
+
+Group: 1
+----------
+                Port-channels in the group:
+                ---------------------------
+
+Port-channel: Po1    (Primary Aggregator)
+------------
+
+Age of the Port-channel   = 00d:00h:17m:24s
+Logical slot/port   = 2/1       Number of ports = 2
+GC                  = 0x00000000      HotStandBy port = null
+Port state          = Port-channel 
+Protocol            =   LACP
+Port Security       = Disabled
+
+Ports in the Port-channel:
+
+Index   Load   Port     EC state        No of bits
+------+------+------+------------------+-----------
+  0     00     Fa0/23   Active             0
+  0     00     Fa0/24   Active             0
+Time since last port bundled:    00d:00h:17m:23s    Fa0/24
+----
+
+====== HQ-S2
+.Etherchannel
+[source]
+----
+HQ-S2#show etherchannel port-channel 
+                Channel-group listing:
+                ----------------------
+
+Group: 1
+----------
+                Port-channels in the group:
+                ---------------------------
+
+Port-channel: Po1    (Primary Aggregator)
+------------
+
+Age of the Port-channel   = 00d:00h:18m:55s
+Logical slot/port   = 2/1       Number of ports = 2
+GC                  = 0x00000000      HotStandBy port = null
+Port state          = Port-channel 
+Protocol            =   LACP
+Port Security       = Disabled
+
+Ports in the Port-channel:
+
+Index   Load   Port     EC state        No of bits
+------+------+------+------------------+-----------
+  0     00     Fa0/23   Passive            0
+  0     00     Fa0/24   Passive            0
+Time since last port bundled:    00d:00h:18m:54s    Fa0/24
+----
+
+===== R-PVST+
+According to the configuration stated in <<hq-rpvst, HQ Rapid-PVST>> the bridge
+roles should be as follows:
+
+[cols="1,1",options="header"]
+|===
+|Device
+|Role
+
+|HQ-S1
+|Root
+
+|HQ-S2
+|Designated
+
+|HQ-F0-S1
+|Designated
+
+|HQ-F1-S1
+|Designated
+
+|HQ-F1-S2
+|Designated
+
+|HQ-F2-S1
+|Designated
+
+|HQ-F2-S2
+|Designated
+|===
+
+All the bridges should be configured to listen on all vlans.
+
+This is proved by the following outputs from the
+command `show spanning-tree summary`.
+
+====== HQ-S1
+.R-PVST
+[source]
+----
+HQ-S1#show spanning-tree summary 
+Switch is in rapid-pvst mode
+Root bridge for: DEVELOPERS HR ACCOUNTING MARKETING SERVER FRONTDESK MANAGEMENT TRASH
+Extended system ID           is enabled
+Portfast Default             is disabled
+PortFast BPDU Guard Default  is disabled
+Portfast BPDU Filter Default is disabled
+Loopguard Default            is disabled
+EtherChannel misconfig guard is disabled
+UplinkFast                   is disabled
+BackboneFast                 is disabled
+Configured Pathcost method used is short
+
+Name                   Blocking Listening Learning Forwarding STP Active
+---------------------- -------- --------- -------- ---------- ----------
+VLAN0110                     3         0        0          7         10
+VLAN0120                     3         0        0          7         10
+VLAN0130                     3         0        0          7         10
+VLAN0140                     3         0        0          7         10
+VLAN0150                     2         0        0          8         10
+VLAN0160                     3         0        0          7         10
+VLAN0333                     3         0        0          7         10
+VLAN0666                     1         0        0          9         10
+
+---------------------- -------- --------- -------- ---------- ----------
+9 vlans                     21         0        0         59         80
+----
+
+====== HQ-S2
+.R-PVST
+[source]
+----
+HQ-S2#show spanning-tree summary 
+Switch is in rapid-pvst mode
+Root bridge for:
+Extended system ID           is enabled
+Portfast Default             is disabled
+PortFast BPDU Guard Default  is disabled
+Portfast BPDU Filter Default is disabled
+Loopguard Default            is disabled
+EtherChannel misconfig guard is disabled
+UplinkFast                   is disabled
+BackboneFast                 is disabled
+Configured Pathcost method used is short
+
+Name                   Blocking Listening Learning Forwarding STP Active
+---------------------- -------- --------- -------- ---------- ----------
+VLAN0110                     2         0        0          7          9
+VLAN0120                     2         0        0          7          9
+VLAN0130                     2         0        0          7          9
+VLAN0140                     2         0        0          7          9
+VLAN0150                     2         0        0          7          9
+VLAN0160                     2         0        0          7          9
+VLAN0333                     2         0        0          7          9
+VLAN0666                     4         0        0          5          9
+
+---------------------- -------- --------- -------- ---------- ----------
+9 vlans                     18         0        0         54         72
+----
+
+====== HQ-F0-S1
+.R-PVST
+[source]
+----
+HQ-F0-S1#show spanning-tree summary 
+Switch is in rapid-pvst mode
+Root bridge for:
+Extended system ID           is enabled
+Portfast Default             is disabled
+PortFast BPDU Guard Default  is disabled
+Portfast BPDU Filter Default is disabled
+Loopguard Default            is disabled
+EtherChannel misconfig guard is disabled
+UplinkFast                   is disabled
+BackboneFast                 is disabled
+Configured Pathcost method used is short
+
+Name                   Blocking Listening Learning Forwarding STP Active
+---------------------- -------- --------- -------- ---------- ----------
+VLAN0110                     4         0        0          1          5
+VLAN0120                     4         0        0          1          5
+VLAN0130                     4         0        0          1          5
+VLAN0140                     4         0        0          1          5
+VLAN0150                     4         0        0          1          5
+VLAN0160                     1         0        0          4          5
+VLAN0333                     4         0        0          1          5
+VLAN0666                     4         0        0          1          5
+
+---------------------- -------- --------- -------- ---------- ----------
+9 vlans                     29         0        0         11         40
+----
+
+====== HQ-F1-S1
+.R-PVST
+[source]
+----
+HQ-F1-S1#show spanning-tree summary 
+Switch is in rapid-pvst mode
+Root bridge for:
+Extended system ID           is enabled
+Portfast Default             is disabled
+PortFast BPDU Guard Default  is disabled
+Portfast BPDU Filter Default is disabled
+Loopguard Default            is disabled
+EtherChannel misconfig guard is disabled
+UplinkFast                   is disabled
+BackboneFast                 is disabled
+Configured Pathcost method used is short
+
+Name                   Blocking Listening Learning Forwarding STP Active
+---------------------- -------- --------- -------- ---------- ----------
+VLAN0110                     4         0        0          1          5
+VLAN0120                     4         0        0          1          5
+VLAN0130                     3         0        0          2          5
+VLAN0140                     3         0        0          2          5
+VLAN0150                     4         0        0          1          5
+VLAN0160                     4         0        0          1          5
+VLAN0333                     4         0        0          1          5
+VLAN0666                     4         0        0          1          5
+
+---------------------- -------- --------- -------- ---------- ----------
+9 vlans                     30         0        0         10         40
+----
+
+====== HQ-F1-S2
+.R-PVST
+[source]
+----
+HQ-F1-S2#show spanning-tree summary 
+Switch is in rapid-pvst mode
+Root bridge for:
+Extended system ID           is enabled
+Portfast Default             is disabled
+PortFast BPDU Guard Default  is disabled
+Portfast BPDU Filter Default is disabled
+Loopguard Default            is disabled
+EtherChannel misconfig guard is disabled
+UplinkFast                   is disabled
+BackboneFast                 is disabled
+Configured Pathcost method used is short
+
+Name                   Blocking Listening Learning Forwarding STP Active
+---------------------- -------- --------- -------- ---------- ----------
+VLAN0110                     3         0        0          3          6
+VLAN0120                     4         0        0          2          6
+VLAN0130                     3         0        0          3          6
+VLAN0140                     3         0        0          3          6
+VLAN0150                     4         0        0          2          6
+VLAN0160                     4         0        0          2          6
+VLAN0333                     4         0        0          2          6
+VLAN0666                     4         0        0          2          6
+
+---------------------- -------- --------- -------- ---------- ----------
+9 vlans                     29         0        0         19         48
+----
+
+====== HQ-F2-S1
+.R-PVST
+[source]
+----
+HQ-F2-S1#show spanning-tree summary 
+Switch is in rapid-pvst mode
+Root bridge for:
+Extended system ID           is enabled
+Portfast Default             is disabled
+PortFast BPDU Guard Default  is disabled
+Portfast BPDU Filter Default is disabled
+Loopguard Default            is disabled
+EtherChannel misconfig guard is disabled
+UplinkFast                   is disabled
+BackboneFast                 is disabled
+Configured Pathcost method used is short
+
+Name                   Blocking Listening Learning Forwarding STP Active
+---------------------- -------- --------- -------- ---------- ----------
+VLAN0110                     2         0        0          2          4
+VLAN0120                     1         0        0          3          4
+VLAN0130                     2         0        0          2          4
+VLAN0140                     2         0        0          2          4
+VLAN0150                     2         0        0          2          4
+VLAN0160                     2         0        0          2          4
+VLAN0333                     2         0        0          2          4
+VLAN0666                     2         0        0          2          4
+
+---------------------- -------- --------- -------- ---------- ----------
+9 vlans                     15         0        0         17         32
+----
+
+====== HQ-F2-S2
+.R-PVST
+[source]
+----
+HQ-F2-S2#show spanning-tree summary 
+Switch is in rapid-pvst mode
+Root bridge for:
+Extended system ID           is enabled
+Portfast Default             is disabled
+PortFast BPDU Guard Default  is disabled
+Portfast BPDU Filter Default is disabled
+Loopguard Default            is disabled
+EtherChannel misconfig guard is disabled
+UplinkFast                   is disabled
+BackboneFast                 is disabled
+Configured Pathcost method used is short
+
+Name                   Blocking Listening Learning Forwarding STP Active
+---------------------- -------- --------- -------- ---------- ----------
+VLAN0110                     4         0        0          1          5
+VLAN0120                     3         0        0          2          5
+VLAN0130                     4         0        0          1          5
+VLAN0140                     4         0        0          1          5
+VLAN0150                     4         0        0          1          5
+VLAN0160                     4         0        0          1          5
+VLAN0333                     3         0        0          2          5
+VLAN0666                     4         0        0          1          5
+
+---------------------- -------- --------- -------- ---------- ----------
+9 vlans                     30         0        0         10         40
+----
+
+===== IPv4
+===== HSRP
+===== Routing
+===== NAT
+===== WAN
+===== VPN
+===== Firewall
+
 ==== Package Center
+
+===== Vlan
+===== HSRP
+===== IPv4
+===== IPv6
+===== Wifi
+===== Routing
+===== NAT
+===== WAN
+===== VPN
+===== Firewall
+
+==== Remote Package Storage
+
+===== IPv4
+===== Wifi
+===== NAT
+===== WAN
+===== Firewall
 
 === Server
 ==== HQ
 ==== Package Center
 
+=== Network Programming
+
 [appendix]
 == Network Device Configurations
 === HQ
 ==== HQ-ASA
+.Configuration
 [source]
 ----
 : Saved
@@ -2394,6 +3673,7 @@ router ospf 1
 ----
 
 ==== HQ-R1
+.Configuration
 [source]
 ----
 Building configuration...
@@ -2591,6 +3871,7 @@ end
 ----
 
 ==== HQ-R2
+.Configuration
 [source]
 ----
 Building configuration...
@@ -2774,6 +4055,7 @@ end
 ----
 
 ==== HQ-S1
+.Configuration
 [source]
 ----
 Building configuration...
@@ -3056,6 +4338,7 @@ end
 ----
 
 ==== HQ-S2
+.Configuration
 [source]
 ----
 Building configuration...
@@ -3325,6 +4608,7 @@ end
 ----
 
 ==== HQ-F0-S1
+.Configuration
 [source]
 ----
 Building configuration...
@@ -3587,6 +4871,7 @@ end
 ----
 
 ==== HQ-F1-S1
+.Configuration
 [source]
 ----
 Building configuration...
@@ -3846,6 +5131,7 @@ end
 ----
 
 ==== HQ-F1-S2
+.Configuration
 [source]
 ----
 Building configuration...
@@ -4104,6 +5390,7 @@ end
 ----
 
 ==== HQ-F2-S1
+.Configuration
 [source]
 ----
 Building configuration...
@@ -4356,6 +5643,7 @@ end
 ----
 
 ==== HQ-F2-S2
+.Configuration
 [source]
 ----
 Building configuration...
@@ -4611,6 +5899,7 @@ end
 
 === Package Center
 ==== PC-ASA
+.Configuration
 [source]
 ----
 : Saved
@@ -4755,6 +6044,7 @@ router ospf 1
 ----
 
 ==== PC-CORE-MLS1
+.Configuration
 [source]
 ----
 Building configuration...
@@ -5073,6 +6363,7 @@ end
 ----
 
 ==== PC-CORE-MLS2
+.Configuration
 [source]
 ----
 Building configuration...
@@ -5391,6 +6682,7 @@ end
 ----
 
 ==== PC-PS-MLS1
+.Configuration
 [source]
 ----
 Building configuration...
@@ -5725,6 +7017,7 @@ end
 ----
 
 ==== PC-PS-MLS2
+.Configuration
 [source]
 ----
 Building configuration...
@@ -6052,6 +7345,7 @@ end
 ----
 
 ==== PC-O-R1
+.Configuration
 [source]
 ----
 Building configuration...
@@ -6191,6 +7485,7 @@ end
 ----
 
 ==== PC-O-S1
+.Configuration
 [source]
 ----
 Building configuration...
@@ -6434,6 +7729,7 @@ end
 ----
 
 ==== PC-PC-S1
+.Configuration
 [source]
 ----
 Building configuration...
@@ -6683,6 +7979,7 @@ end
 ----
 
 ==== PC-PC-S2
+.Configuration
 [source]
 ----
 Building configuration...
@@ -6933,6 +8230,7 @@ end
 
 Responsable for starting the frontend modules.
 
+.Source Code
 [source, python]
 ----
 """Main file responsable for program init."""
@@ -6954,6 +8252,7 @@ if __name__ == "__main__":
 
 Stores registered devices.
 
+.Registered Devices
 [source]
 ----
 Head Quarters,HQ-R1,10.1.255.1
@@ -6980,6 +8279,7 @@ Package Center,PC-O-R1,10.2.255.194
 
 config for legacy SSH connections.
 
+.Legacy SSH Options
 [source]
 ----
 Host 10.*.*.*
@@ -6997,6 +8297,7 @@ Host 10.*.*.*
 
 Responsable for data storage to avoid unnecessary read operations.
 
+.Source Code
 [source, python]
 ----
 """Responsable for data storage to avoid unnecessary read operations."""
@@ -7057,6 +8358,7 @@ resources = Resources()
 
 Responsable for handling file reading and writing.
 
+.Source Code
 [source, python]
 ----
 """This module is responsable for handling file reading and writing."""
@@ -7100,6 +8402,7 @@ def log(message):
 
 Responsable for network related tasks like pinging and SSH.
 
+.Source Code
 [source, python]
 ----
 """Network device connection and configuration handling."""
@@ -7187,6 +8490,7 @@ async def is_up(count, host):
 
 Responsable for the base screen.
 
+.Source Code
 [source, python]
 ----
 """File responsable for frontend"""
@@ -7265,6 +8569,7 @@ class Base(App):
 
 Responsable for the device testing screen.
 
+.Source Code
 [source, python]
 ----
 """Responsable for the Devices panel"""
@@ -7347,6 +8652,7 @@ class Devices(Container):
 
 Responsable for saving running configurations onto a given tftp server.
 
+.Source Code
 [source, python]
 ----
 """Responsable for the TFTP"""
@@ -7439,6 +8745,7 @@ class TFTP(Container):
 
 Stores style settings for all frontend related files.
 
+.CSS
 [source, scss]
 ----
 $warning: #e5c890;
@@ -7574,6 +8881,3 @@ $lighter-default: #51576d;
     display: none;
 }
 ----
-
-=== Classes and Methods
-

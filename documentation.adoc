@@ -246,13 +246,6 @@ NOTE: For further information, refer to
 <<hq_arp_inspection, HQ ARP Inspection>> and 
 <<pc_arp_inspection, Package Center ARP Inspection>>
 
-=== Duplex Connection Policy
-
-As all of the devices are IEEE 802.3u/ab compliant,
-all interfaces are set to `auto`, as industry standard.
-
-NOTE: IEEE 802.3u defines FastEthernet, while IEEE 802.3ab defines GigabitEthernet
-
 === Miscellaneous Policies
 
 . All network devices/servers must be configured with the correct hostname
@@ -267,6 +260,8 @@ must be configured with `switchport nonegotiation`.
 . All network devices must be configured with `service password-encryption`.
 
 . All network devices must be configured with `no cdp run`.
+
+. All switch interfaces must be configured with `duplex auto`.
 
 <<<
 

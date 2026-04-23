@@ -2255,13 +2255,74 @@ providing IPv4 addresses for the following networks:
 
 [appendix]
 == Testing
+
+This section includes the testing process and results for the network and server features.
+
+
+==== Webpage testing
+
+In this test we will check if the web server is accessible from the outside and if the correct webpage is being displayed.
 === Network
 ==== HQ
 ==== Package Center
 
-=== Server
+=== Server Testing
+
+This section includes all the tests performed on the servers to ensure that they are configured correctly and functioning as expected.
+
 ==== HQ
+
+==== Active Directory Testing
+
+In this test we will join a client pc to the company domain and we will also test out some group policy setting and we will test if the client can reach the folder which is share through the network.
+
+==== DHCP Testing
+
+In this test we will request an IP address with DHCP from the server.
+
+==== File backup testing
+
+In this test we will test if the shared folders will be backed up to the backup drive and if the backup is scheduled to run outside of working hours.
+
+==== Automatic update testing
+
+In this test we will check if the updates are automatically installed and if they are scheduled to be installed outside of working hours.
+
+We tested this feature and it is working as intented the system was updated.  
+
 ==== Package Center
+
+===== Active Directory Testing
+
+In this test we will join a client pc to the company domain and we will also test out some group policy setting and we will test if the client can reach the folder which is share through the network.
+
+===== DHCP Testing
+
+In this test we will request an IP address with DHCP from the server.
+
+//.This image shows that the ip address is set to static.
+image::images/DHCP-teszt1.png[align="center"]
+
+NOTE: This image shows that the ip address is set to static.
+
+image::images/DHCP-teszt2.png[align="center"]
+
+NOTE: This image shows that the ip address is changed to DHCP.
+
+image::images/DHCP-teszt3.png[align="center"]
+
+NOTE: This image shows that the DHCP request was successful from the server.
+
+
+===== File backup testing
+
+In this test we will test if the shared folders will be backed up to the backup drive and if the backup is scheduled to run outside of working hours.
+
+===== Automatic update testing
+
+In this test we will check if the updates are automatically installed and if they are scheduled to be installed outside of working hours.
+
+We tested this feature and it is working as intented the system was updated.  
 
 [appendix]
 == Network Device Configurations

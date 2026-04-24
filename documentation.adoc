@@ -5,7 +5,7 @@ include::utils.adoc[]
 == Introduction
 
 In this project we documented the network infrastructure 
-of a package delivery company. Like https://gls-group.com/HU/hu/home/[GLS]
+of a package delivery company called BitBox. Like https://gls-group.com/HU/hu/home/[GLS]
 and https://www.foxpost.hu/[FOXPOST], this company delivers to 
 package lockers.
 
@@ -13,7 +13,7 @@ There are three sites:
 
 Headquarters:: This location is where the company handles acounting and development.
 Remote Package Storage:: This location is for long term package storage.
-Package Center:: This location houses the packages and the company servers, while also handling customer service
+Package Center:: This location houses the packages and the company webserver, while also handling customer service
 and in person package pick up.
 
 <<<
@@ -34,6 +34,7 @@ The task naming convention is: *<category>: <topic>*
 These categories are:
 
 - *Documentation*
+- *Programming*
 - *Network*
 - *Linux server*
 - *Windows server*
@@ -65,6 +66,7 @@ Every addition to the documentation is a new branch that has the
 following naming convention:
 
 - *Networking:* network/<site>/<topic>
+- *Programming:* prog/<topic>
 - *Server:* server/<OS>/<topic>
 - *Documentation:* docs/<topic>
 
@@ -87,29 +89,181 @@ that places the generated PDF file into the latest release.
 General configurations apply to all devices specified
 in the given section across all sites.
 
+=== User and Password Policies
+
+All network devices must handle login attempts through AAA in
+the following ways (configured as the default list):
+
+==== Login
+
+. AAA should check the given RADIUS server
+. AAA Should check the local user database
+
+==== Dot1x
+
+. AAA should check the given RADIUS server
+
+More specific AAA configurations are specified within the given site.
+
+NOTE: All sites must use RADIUS as their AAA server.
+
+==== Passwords
+
+All network devices must be configured with the following passwords:
+
+.Device Passwords
+[cols="1h,1,1",options="header"]
+|===
+|Place
+|Password
+|Applied As
+
+|Priviliged 
+|enpa55
+|Secret
+
+|Console
+|conpa55
+|Password
+
+|Aux
+|auxpa55
+|Password
+|===
+
+==== Users
+
+All network devices must be configured with the following user:
+
+* *Username*: `admin`
+* *Password*: `adminpa55`
+
+.Users
+[cols="1h,1,1",options="header"]
+|===
+|Place
+|Username
+|Password
+
+|Local
+|admin
+|adminpa55
+
+|AAA
+|AAAadmin
+|AAAadminpa55
+
+|AAA
+|user
+|userpa55
+|===
+
+=== Remote Access Policy
+
+Remote access is achieved through the SSH protocol,
+available on all available VTY lines on the given device, using
+the default AAA configuration.
+
+SSH is configured with the following parameters:
+
+.SSH Parameters
+[cols="1h,1",options="header"]
+|===
+|Setting
+|Parameter
+
+|Version
+|2
+
+|Key Modulus
+|2048
+
+|Auth-retries
+|2
+
+|Timeout
+|30sec
+|===
+
+NOTE: Only the MANAGEMENT Vlan and the like (in the case of the Package Center site)
+can access the vty lines. This is controlled by the `SSH` ACL placed on all
+vty lines inward. For further information, refer to <<hq_ssh, HQ SSH>> and
+<<pc_ssh, Package Cetner SSH>>
+
 === Port-security Policies
 
-.Port-security Policies
+==== General
+
+.Port-security Policy
 [cols="3,^.^1",options="header"]
 |===
 |Policy 
 |Upon Violation
 
-|All connections leading to host devices should
+|All connections leading to host devices must
 allow atmost 2 MAC addresses
 |Restrict
 
 |All connections leading to printers or access points 
-should allow atmost 1 MAC address with the sticky setting
+must allow atmost 1 MAC address with the sticky setting
 .2+.^|Shutdown
 
-|All connections leading to servers should
+|All connections leading to servers must
 allow atmost 1 static MAC address
 
-|All unused ports should be shutdown and
-placedinto the TRASH VLAN
+|All unused interfaces must be shutdown and
+placedinto the TRASH Vlan
 |Null
 |===
+
+All access interfaces must be configured with an
+aging time of 5 minutes.
+
+==== Dot1x
+
+All switch interfaces connecting to a
+PC, laptop or server must use Dot1x port authentication
+through the given AAA RADIUS server.
+
+==== IP Source Guard
+
+* IP source guard must be configured on all switches and 
+multi-layer switches with connections to end devices.
+
+* All printer and servers must be statically configured
+with it's given MAC and IP address.
+
+NOTE: For further information, refer to 
+<<hq_ip_sg, HQ IP Source Guard>> and
+<<pc_ip_sg, Package Center IP Source Guard>>
+
+=== DHCP Snooping Policy
+
+DHCP snooping must me configured on all switches globally with
+a rate limit of `20` on untrusted interfaces.
+
+NOTE: For further information, refer to 
+<<hq_dhcp_snooping, HQ DHCP Snooping>> and 
+<<pc_dhcp_snooping, Package Center DHCP Snooping>>
+
+=== Dynamic ARP Inspection Policy
+
+All interfaces leading to host, printer or server devices, 
+should be treated as, untrusted (this applies to unused interfaces too).
+
+Interfaces leading to other network devies should be treated as trusted.
+
+ARP packets must be validated through the source and destination
+MAC addresses. This is achieved with the following command:
+
+[source]
+----
+ip arp inspection validate src-mac dst-mac
+----
+
+NOTE: For further information, refer to 
+<<hq_arp_inspection, HQ ARP Inspection>> and 
+<<pc_arp_inspection, Package Center ARP Inspection>>
 
 === Duplex Connection Policy
 
@@ -126,6 +280,13 @@ stated in the documentation, found at the given site's topology section.
 . All network devices must be configured with `no ip domain-lookup`
 to avoid accidental DNS lookup while configuring the given device.
 
+. All switch and multi-layer switch interfaces (in switch-port mode)
+must be configured with `switchport nonegotiation`.
+
+. All network devices must be configured with `service password-encryption`.
+
+. All network devices must be configured with `no cdp run`.
+
 <<<
 
 == HQ
@@ -138,44 +299,44 @@ image::images/hq.png[align="center"]
 
 <<<
 
-==== VLANs
+==== Vlans
 
 [cols="1,1,1",options="header"]
-.VLANs
+.Vlans
 |===
-|VLAN ID    
+|Vlan ID    
 |Name          
 |Network 
 
-|VLAN 110   
+|Vlan 110   
 |DEVELOPERS    
 |10.1.10.0/27
 
-|VLAN 120   
+|Vlan 120   
 |HR            
 |10.1.20.0/26
 
-|VLAN 130   
+|Vlan 130   
 |ACCOUNTING    
 |10.1.30.0/27
 
-|VLAN 140   
+|Vlan 140   
 |MARKETING     
 |10.1.40.0/28
 
-|VLAN 150   
+|Vlan 150   
 |SERVER        
 |10.1.50.0/29
 
-|VLAN 160   
+|Vlan 160   
 |FRONTDESK     
 |10.1.60.0/28
 
-|VLAN 333   
+|Vlan 333   
 |MANAGEMENT    
 |10.1.255.0/27
 
-|VLAN 666   
+|Vlan 666   
 |TRASH         
 |Null
 |===
@@ -183,7 +344,7 @@ image::images/hq.png[align="center"]
 ===== VTP
 
 VTP version 2 is configured between all switches, with
-*HQ-S1 being the server* and all other switches 
+`HQ-S1` being the server and all other switches 
 taking up the client role.
 
 .VTP Settings
@@ -204,7 +365,7 @@ taking up the client role.
 
 ==== Etherchannel
 
-Etherchannel is set up between HQ-S1 and HQ-S2, with LACP
+Etherchannel is set up between `HQ-S1` and `HQ-S2`, with LACP
 
 .Etherchannel Connections and Roles
 [cols="1,1,1",options="header"]
@@ -224,8 +385,8 @@ Etherchannel is set up between HQ-S1 and HQ-S2, with LACP
 
 Rapid-PVST is used between all the switches in the network.
 
-switches, with HQ-S1 being the primary and 
-HQ-S2 being the secondary root bridge in all VLANs.
+Switches, with `HQ-S1` being the primary and 
+`HQ-S2` being the secondary root bridge in all Vlans.
 
 [cols="1h,2",options="header"]
 .Rapid-PVST Roles
@@ -240,13 +401,203 @@ HQ-S2 being the secondary root bridge in all VLANs.
 |HQ-S2
 |===
 
+===== BPDU Guard and Portfast
+
+BPDU guard and portfast options are applied to
+all end device facing interfaces.
+
+These are:
+
+.BPDU Guard and Portfast
+[cols="1,1",options="header"]
+|===
+|Device
+|Interface
+
+|HQ-S1
+|Gig0/2
+
+.4+.^|HQ-F0-S1
+|Fa0/10
+|Fa0/11
+|Fa0/20
+|Fa0/24
+
+.2+.^|HQ-F1-S1
+|Fa0/10
+|Fa0/16
+
+.3+.^|HQ-F1-S2
+|Fa0/10
+|Fa0/20
+|Fa0/24
+
+|HQ-F2-S1
+|Fa0/10
+
+.2+.^|HQ-F2-S2
+|Fa0/10
+|Fa0/24
+|===
+
+===== Loop Guard
+
+Loop guard is configured on all switches and multi-layer switches
+globally in the case of a link's partial failure.
+
+The interfaces configured with loop guard is as follows:
+
+.Loop Guard Interfaces
+[cols="1,1",options="header"]
+|===
+|Device
+|Interface
+
+.2+.^|HQ-S1
+|Fa0/23
+|Fa0/24
+
+.2+.^|HQ-S2
+|Fa0/23
+|Fa0/24
+
+.2+.^|HQ-F0-S1
+|Fa0/1
+|Fa0/2
+
+.3+.^|HQ-F1-S1
+|Fa0/1
+|Fa0/2
+|Gig0/1
+
+.3+.^|HQ-F1-S2
+|Fa0/1
+|Fa0/2
+|Gig0/1
+
+.3+.^|HQ-F2-S1
+|Fa0/1
+|Fa0/2
+|Gig0/1
+
+.3+.^|HQ-F2-S2
+|Fa0/1
+|Fa0/2
+|Gig0/1
+|===
+
+===== Root Guard
+
+Only the switches `HQ-S1` and `HQ-S2` should 
+participate in the root election process, and so
+root guard are placed on the following interfaces:
+
+.Root Guarded Interfaces
+[cols="1,1",options="header"]
+|===
+|Device
+|Interface
+
+.5+.^|HQ-S1
+|Fa0/1
+|Fa0/11
+|Fa0/12
+|Fa0/21
+|Fa0/22
+
+.5+.^|HQ-S2
+|Fa0/1
+|Fa0/11
+|Fa0/12
+|Fa0/21
+|Fa0/22
+|===
+
+[[hq_ip_sg]]
+==== IP Source Guard
+
+NOTE: IP source guard is paired with switchport port-security,
+so that MAC addresses will also be checked.
+
+===== Dynamic
+
+Dynamic IP source guard is configured as follows:
+
+.Dynamic IP Source Guard
+[cols="1,1"]
+|===
+|Device
+|Interface
+
+.3+.^|HQ-F0-S1
+|Fa0/10
+|Fa0/11
+|Fa0/24
+
+.2+.^|HQ-F1-S1
+|Fa0/10
+|Fa0/16
+
+|HQ-F1-S2
+|Fa0/10
+
+|HQ-F2-S1
+|Fa0/10
+
+|HQ-F2-S2
+|Fa0/10
+|===
+
+===== Static
+
+Static IP source guard is configured as follows:
+
+.Static IP Source Guard
+[cols="1,1,1,2,2",options="header"]
+|===
+|Device
+|Interface
+|IP
+|MAC
+|Name
+
+|HQ-S1
+|Gig0/2
+|10.1.50.5
+|00D0.9756.36C6
+|Private Windows
+
+|HQ-F0-S1
+|Fa0/24
+|10.1.60.13
+|0003.E4D8.BC6D
+|Frontdesk Printer
+
+.2+.^|HQ-F1-S2
+|Fa0/20
+|10.1.30.29
+|0010.1199.6748
+|Accounting Printer
+
+|Fa0/24
+|10.1.40.13
+|0010.1166.7675
+|Marketing Printer
+
+|HQ-F2-S2
+|Fa0/24
+|10.1.20.61
+|0006.2ACE.3B8A
+|HR Printer
+|===
+
 ==== HSRP
 
-HSRP is set up between HQ-R1 and HQ-R2, with the 
+HSRP is set up between `HQ-R1` and `HQ-R2`, with the 
 HSRP address being the last host IP address in the
 given network.
 
-HQ-R1 is the active, with HQ-R2 being the standby device.
+`HQ-R1` is the active, with `HQ-R2` being the standby device.
 
 This is achieved through the following parameters:
 
@@ -271,7 +622,7 @@ This is achieved through the following parameters:
 [cols="1,1",options="header"]
 .HSRP IPv4 Addresses
 |===
-|VLAN       
+|Vlan       
 |Address
 
 |DEVELOPERS 
@@ -300,13 +651,13 @@ This is achieved through the following parameters:
 
 ==== DHCPv4
 
-The DHCP server is the *Private Windows* host, 
+The DHCP server is the `Private Windows` host, 
 providing IPv4 addresses for the following networks:
 
 [cols="1,1,1,1,1",options="header"]
 .IPv4 DHCP Addressing
 |===
-|VLAN       
+|Vlan       
 |Addressing Range   
 |Number Of Hosts
 |DNS    
@@ -346,7 +697,398 @@ providing IPv4 addresses for the following networks:
 
 <<<
 
-[#hq-ip-addressing]
+[[#hq_dhcp_snooping]]
+==== DHCP Snooping
+
+DHCP snooping is configuration is illustrated with the 
+following diagram:
+
+image::images/hq-dhcp-snooping.png[align="center"]
+
+This state is achieved with the following table of trusted ports:
+
+.DHCP Snooping Trusted Interfaces
+[cols="1,1",options="header"]
+|===
+|Device
+|Interface
+
+.9+.^|HQ-S1
+|Fa0/1
+|Fa0/11
+|Fa0/12
+|Fa0/21
+|Fa0/22
+|Fa0/23
+|Fa0/24
+|Gig0/1
+|Gig0/2
+
+.9+.^|HQ-S2
+|Fa0/1
+|Fa0/11
+|Fa0/12
+|Fa0/21
+|Fa0/22
+|Fa0/23
+|Fa0/24
+|Gig0/1
+|Gig0/2
+
+.2+.^|HQ-F0-S1
+|Fa0/1
+|Fa0/2
+
+.3+.^|HQ-F1-S1
+|Fa0/1
+|Fa0/2
+|Gig0/1
+
+.3+.^|HQ-F1-S2
+|Fa0/1
+|Fa0/2
+|Gig0/1
+
+.3+.^|HQ-F2-S1
+|Fa0/1
+|Fa0/2
+|Gig0/1
+
+.3+.^|HQ-F2-S2
+|Fa0/1
+|Fa0/2
+|Gig0/1
+|===
+
+NOTE: `HQ-R1` and `HQ-R2` are trusted devices because they use
+the `Private Windows` server as the helper-address.
+
+[[hq_arp_inspection]]
+==== Dynamic ARP Inspection
+
+ARP inspection is configured on the following devices:
+
+.ARP Inspected Devices
+[cols="1,1",options="header"]
+|===
+|Device
+|Vlans
+
+|HQ-S1
+|150
+
+|HQ-F0-S1
+|160
+
+|HQ-F1-S1
+.2+.^|110,130,140
+
+|HQ-F1-S2
+
+|HQ-F2-S1
+.2+.^|120,333
+
+|HQ-F2-S2
+|===
+
+The trusted interfaces for these devices are:
+
+.ARP Trusted Interfaces
+[cols="1,1",options="header"]
+|===
+|Device
+|Interface
+
+.8+.^|HQ-S1
+|Fa0/1
+|Fa0/11
+|Fa0/12
+|Fa0/21
+|Fa0/22
+|Fa0/23
+|Fa0/24
+|Gig0/1
+
+.2+.^|HQ-F0-S1
+|Fa0/1
+|Fa0/2
+
+.3+.^|HQ-F1-S1
+|Fa0/1
+|Fa0/2
+|Gig0/1
+
+.3+.^|HQ-F1-S2
+|Fa0/1
+|Fa0/2
+|Gig0/1
+
+.3+.^|HQ-F2-S1
+|Fa0/1
+|Fa0/2
+|Gig0/1
+
+.3+.^|HQ-F2-S2
+|Fa0/1
+|Fa0/2
+|Gig0/1
+|===
+
+==== OSPF
+
+Network advertisement is achieved through single-area OSPF
+illustrated by the following diagram:
+
+image::images/hq-ospf.png[align="center"]
+
+===== Default Route
+
+`PC-ASA` is responsable for advertising the default route, 
+wich is `11.11.11.1`.
+
+===== Router-ID
+
+The router-ids are created according to the following naming convention:
+
+* The first three octets contain the OSPF area number repeated.
+
+* The last octet contains the device's id withing the given OSPF area.
+
+[cols="1,1",options="header"]
+.Router-IDs
+|===
+|Device     
+|Router-ID
+
+|HQ-ASA
+|0.0.0.3
+
+|HQ-R1
+|0.0.0.1
+
+|HQ-R2
+|0.0.0.2
+|===
+
+===== Passive Interfaces
+
+All interfaces on all devices running an OSPF process, has 
+all it's interfaces configured as passive with the following
+command `passive-interface default`.
+
+From that point on only the needed interfaces are selected 
+to be allowed to participate in OSPF advertising.
+
+These interfaces are:
+
+[cols="1,1",options="header"]
+.Active OSPF Interfaces
+|===
+|Device
+|Interface
+
+.2+.^|HQ-ASA
+|Gig1/1
+|Gig1/2
+
+|HQ-R1
+|Gig0/2
+
+|HQ-R2
+|Gig0/2
+|===
+
+==== AAA
+
+The AAA RADIUS server is `Private Windows` (`10.1.50.5`) with the following clients:
+
+* HQ-R1
+* HQ-R2
+* HQ-S1
+* HQ-S2
+* HQ-F0-S1
+* HQ-F1-S1
+* HQ-F1-S2
+* HQ-F2-S1
+* HQ-F2-S2
+
+The passkey for all clients is `aaapa55`.
+
+==== Access List
+
+[[hq_ssh]]
+===== SSH
+
+All network devices serving SSH, must have an ACL
+configured so that only the `MANAGEMENT` Vlan can 
+connect to the VTY line.
+
+This is achieved with the following ACL
+
+[source]
+----
+ip access-list standard SSH
+    permit 10.1.255.0 0.0.0.31
+----
+
+This ACL must be applied onto all the VTY lines for all incoming messages.
+
+===== VPN
+
+The following ACL is configured to identify, which packets
+should be routed within the VPN tunnel.
+
+[source]
+----
+access-list VPN-TRAFFIC extended permit ip object LOCAL object REMOTE
+----
+
+NOTE: For further information regarding these objects,
+refer to <<hq_network_objects>>
+
+==== Firewall
+
+For the firewall we are using the ASA 5506, because of it's 
+Gigabit capabilities.
+
+===== Zones
+
+The firewall is split into for zones, which is as follows:
+
+[cols="1,1,1,1,2",options="header"]
+|===
+|Interface
+|Zone
+|Security-level
+|Address
+|Description
+
+|Gig1/1
+|INSIDE1
+|100
+|10.2.200.1
+|Link to HQ-R1
+
+|Gig1/2
+|INSIDE2
+|100
+|10.2.200.5
+|Link to HQ-R2
+
+|Gig1/8
+|OUTSIDE
+|0
+|11.11.11.2
+|Link to ISP
+|===
+
+[[hq_network_objects]]
+===== Network Objects
+
+There are two network object, for easier ACL
+creation and PAT configuration.
+
+These are:
+
+[cols="1,1,1",options="header"]
+|===
+|Name
+|Network
+|Mask
+
+|LAN1
+|10.1.0.0 
+|255.255.0.0
+
+|LAN2
+|10.1.0.0 
+|255.255.0.0
+
+|LOCAL
+|10.1.0.0
+|255.255.0.0
+
+|REMOTE
+|10.2.0.0
+|255.255.0.0
+|===
+
+NOTE: `LAN1` and `LAN2` are separated because NAT configuration
+occurs inside the given network object which is dependent
+on the zone, so `INSIDE1` and `INSIDE2` both needed a dedicated
+network object.
+
+===== PAT
+
+PAT was set up for the zones, `INSIDE1` and `INSIDE2`.
+The network objects responsible for them are `LAN1` and `LAN2`.
+
+These two PAT configurations are used by the whole network
+across two different uplinks (This is why the same configuration
+is duplicated), and so they use the same address, which is `11.11.11.2`.
+
+==== VPN
+
+Site-to-site VPN is set up between `HQ-ASA` and `PC-ASA` with the 
+following parameters:
+
+[cols="1h,1",options="header"]
+|===
+|Setting
+|Parameter
+
+|Key Exchange
+|IKEv1
+
+|IPsec Protocol
+|ESP
+
+|Confidentiality
+|AES
+
+|Integrity
+|SHA256
+
+|Authentication
+|PSK
+
+|Pre-shared-key
+|vpnpa55
+
+|Diffie-Hellman
+|DH2
+
+|Lifetime
+|1 Hour
+
+|Peer
+|12.12.12.2
+|===
+
+===== Transform-set
+
+The transfrom-set is configured as such:
+
+[source]
+----
+crypto ipsec ikev1 transform-set VPN-SET esp-aes 256 esp-sha-hmac
+----
+
+===== ACL
+
+To detect the interesting traffic for the VPN connection
+the following ACL is configured, named as `VPN-TRAFFIC`:
+
+[source]
+----
+access-list VPN-TRAFFIC extended permit ip object LOCAL object REMOTE
+----
+
+NOTE: For further information about the network objects, `LOCAL` and
+`REMOTE`, refer to <<hq_network_objects>>
+
+<<<
+
 ==== IPv4 Addressing
 
 [cols="1,1,1,1",options="header"]
@@ -433,37 +1175,37 @@ providing IPv4 addresses for the following networks:
 |Null        
 
 |HQ-S1              
-|VLAN 333   
+|Vlan 333   
 |10.1.255.3 
 |10.1.255.30
 
 |HQ-S2              
-|VLAN 333   
+|Vlan 333   
 |10.1.255.4 
 |10.1.255.30
 
 |HQ-F0-S1           
-|VLAN 333   
+|Vlan 333   
 |10.1.255.5 
 |10.1.255.30
 
 |HQ-F1-S1           
-|VLAN 333   
+|Vlan 333   
 |10.1.255.6 
 |10.1.255.30
 
 |HQ-F1-S2           
-|VLAN 333   
+|Vlan 333   
 |10.1.255.7 
 |10.1.255.30
 
 |HQ-F2-S1           
-|VLAN 333   
+|Vlan 333   
 |10.1.255.8 
 |10.1.255.30
 
 |HQ-F2-S2           
-|VLAN 333   
+|Vlan 333   
 |10.1.255.9 
 |10.1.255.30
 
@@ -530,60 +1272,60 @@ image::images/package_center.png[align="center"]
 
 <<<
 
-==== VLANs
+==== Vlans
 
 [cols="1,1,1",options="header"]
-.VLANs
+.Vlans
 |===
-|VLAN ID    
+|Vlan ID    
 |Name              
 |Network 
 
-|VLAN 210   
+|Vlan 210   
 |WORKERS           
 |10.2.10.0/24
 
-|VLAN 220   
+|Vlan 220   
 |SERVER           
 |10.2.20.0/28
 
-|VLAN 230   
+|Vlan 230   
 |FRONTDESK        
 |10.2.30.0/27
 
-|VLAN 331   
+|Vlan 331   
 |CORE-MANAGEMENT   
 |10.2.255.0/25
 
-|VLAN 332   
+|Vlan 332   
 |PS-MANAGEMENT     
 |10.2.255.128/26
 
-|VLAN 333   
+|Vlan 333   
 |O-MANAGEMENT      
 |10.2.255.192/26
 
-|VLAN 291
+|Vlan 291
 |INTER-LAYER-1
 |10.2.200.0/29
 
-|VLAN 292
+|Vlan 292
 |INTER-LAYER-2
 |10.2.200.8/29
 
-|VLAN 666   
+|Vlan 666   
 |TRASH             
 |Null 
 |===
 
-NOTE: The VLANs _INTER-LAYER-1_ and _INTER-LAYER-2_ are needed to
+NOTE: The Vlans `INTER-LAYER-1` and `INTER-LAYER-2` are needed to
 connect the distribution and core layer devices as they don't have 
 a shared network.
 
 ==== Etherchannel
 
-Etherchannel is set up between *PC-CORE-MLS1*, 
-*PC-CORE-MLS2*, *PC-PS-MLS1* and *PC-PS-MLS2* with *LACP*
+Etherchannel is set up between `PC-CORE-MLS1`, 
+`PC-CORE-MLS2`, `PC-PS-MLS1` and `PC-PS-MLS2` with *LACP*
 in the following ways:
 
 .Etherchannel Connections and Roles
@@ -645,16 +1387,115 @@ storage workers, with the following configurations:
 |8
 |===
 
-<<<
+NOTE: All access points are configured with a frequency
+of 2.4GHz.
+
+[[pc_ip_sg]]
+==== IP Source Guard
+
+NOTE: IP source guard is paired with switchport port-security,
+so that MAC addresses will also be checked.
+
+===== Dynamic
+
+Dynamic IP source guard is configured as follows:
+
+.Dynamic IP Source Guard
+[cols="1,1",options="header"]
+|===
+|Device
+|Interface
+
+|PC-PS-S1
+|Fa0/1
+
+|PC-O-S1
+|Fa0/1
+|===
+
+===== Static
+
+Static IP source guard is configured as follows:
+
+.Static IP Source Guard
+[cols="1,1,1,2,2",options="header"]
+|===
+|Device
+|Interface
+|IP
+|MAC
+|Name
+
+|PC-PS-S1
+|Fa0/24
+|10.2.20.10
+|0060.7035.2DB1
+|Private Linux
+
+|PC-O-S1
+|Fa0/24
+|10.2.30.2
+|00D0.BA5B.5C07
+|Frontdesk Printer
+|===
+
+==== HSRP
+
+HSRP is set up between `PC-PS-MLS1` and `PC-PS-MLS2` with the 
+HSRP address being the last host IP address in the
+given network.
+
+`PC-PS-MLS1` is the active, with `PC-PS-MLS2` being the standby device.
+
+This is achieved through the following parameters:
+
+.HSRP Parameters
+[cols="1,1,1,1",options="header"]
+|===
+|Device         
+|Priority   
+|Version    
+|Preempt
+
+|PC-PS-MLS1     
+|200        
+.2+.^|2          
+|True
+
+|PC-PS-MLS2     
+|100        
+|False
+|===
+
+[cols="1,1,1",options="header"]
+.HSRP IPv4 Addresses In Package Storage
+|===
+|Vlan           
+|Address
+|Group Number
+
+|WORKERS        
+|10.2.10.254 
+|0
+
+|SERVER         
+|10.2.20.14 
+|1
+
+|PS-MANAGEMENT  
+|10.2.255.190 
+|2
+|===
+
 
 ==== DHCPv4
-The DHCP server is the *Private Linux* host, 
+The DHCP server is the `Private Linux` host, 
 providing IPv4 addresses for the following networks:
 
 [cols="1,1,1,1,1",options="header"]
 .IPv4 DHCP Addressing
 |===
-|VLAN       
+|Vlan       
 |Addressing Range   
 |Number Of Hosts
 |DNS    
@@ -677,79 +1518,444 @@ providing IPv4 addresses for the following networks:
 |10.2.255.190
 |===
 
-==== HSRP
+<<<
 
-HSRP is set up between PC-CORE-MLS1 and PC-CORE-MLS2, 
-and PC-PS-MLS1 and PC-PS-MLS2 with the 
-HSRP address being the last host IP address in the
-given network.
+[[pc_dhcp_snooping]]
+==== DHCP Snooping
 
-PC-CORE-MLS1 and PC-PS-MLS1 is the active, 
-with PC-CORE-MLS2 and PC-PS-MLS2 being the standby device.
+DHCP snooping is configuration is illustrated with the 
+following diagram:
 
-This is achieved through the following parameters:
+image::images/pc-dhcp-snooping.png[align="center"]
 
-.HSRP Parameters
-[cols="1,1,1,1",options="header"]
+This state is achieved with the following table of trusted ports:
+
+.DHCP Snooping Trusted Interfaces
+[cols="1,1",options="header"]
 |===
-|Device         
-|Priority   
-|Version    
-|Preempt
+|Device
+|Interface
 
-|PC-CORE-MLS1   
-|200        
-.4+.^|2          
-|True
+.4+.^|PC-CORE-MLS1
+|Gig1/0/11
+|Gig1/0/12
+|Gig1/0/13
+|Gig1/0/14
 
-|PC-CORE-MLS2   
-|100        
-|False
+.4+.^|PC-CORE-MLS2
+|Gig1/0/11
+|Gig1/0/12
+|Gig1/0/13
+|Gig1/0/14
 
-|PC-PS-MLS1     
-|200        
-|True
+|PC-O-S1
+|Gig0/1
 
-|PC-PS-MLS2     
-|100        
-|False
+.6+.^|PC-PS-MLS1
+|Gig1/0/1
+|Gig1/0/2
+|Gig1/0/11
+|Gig1/0/12
+|Gig1/0/21
+|Gig1/0/22
+
+.6+.^|PC-PS-MLS2
+|Gig1/0/1
+|Gig1/0/2
+|Gig1/0/13
+|Gig1/0/14
+|Gig1/0/23
+|Gig1/0/24
+
+.3+.^|PC-PS-S1
+|Fa0/24
+|Gig0/1
+|Gig0/2
+
+.2+.^|PC-PS-S2
+|Gig0/1
+|Gig0/2
 |===
+
+[[pc_arp_inspection]]
+==== Dynamic ARP Inspection
+
+ARP inspection is configured on the following devices:
+
+.ARP Inspected Devices
+[cols="1,1",options="header"]
+|===
+|Device
+|Vlans
+
+|PC-PS-S1
+|220,332
+
+|PC-O-S1
+|230
+|===
+
+The trusted interfaces for these devices are:
+
+.ARP Trusted Interfaces
+[cols="1,1",options="header"]
+|===
+|Device
+|Interface
+
+.2+.^|PC-PS-S1
+|Gig0/1
+|Gig0/2
+
+|PC-O-S1
+|Gig0/1
+|===
+
+<<<
+
+==== OSPF
+
+Network advertisement is achieved through multi-area OSPF
+illustrated by the following diagram:
+
+image::images/pc-ospf.png[align="center"]
+
+NOTE: Etherchannels are simplified into one logical connection.
+
+===== Default Route
+
+`PC-ASA` is responsable for advertising the default route, 
+wich is `12.12.12.1`.
+
+<<<
+
+===== Router-ID
+
+The router-ids are created according to the following naming convention:
+
+* The first three octets contain the OSPF area number repeated.
+
+* The last octet contains the device's id withing the given OSPF area.
 
 [cols="1,1,1",options="header"]
-.HSRP IPv4 Addresses In CORE
+.Router-IDs
 |===
-|VLAN       
-|Address
-|Group Number
+|Device     
+|Area   
+|Router-ID
 
-|INTER-LAYER-1
-|10.2.200.6
-|3
+|PC-ASA
+.3+.^|0
+|0.0.0.3
 
-|INTER-LAYER-2
-|10.2.200.14
-|4
-|===
+|PC-CORE-MLS1
+|0.0.0.1
 
-[cols="1,1,1",options="header"]
-.HSRP IPv4 Addresses In Package Storage
-|===
-|VLAN           
-|Address
-|Group Number
+|PC-CORE-MLS2
+|0.0.0.2
 
-|WORKERS        
-|10.2.10.254 
-|0
+|PC-PS-MLS1
+.2+.^|1
+|1.1.1.1
 
-|SERVER         
-|10.2.20.14 
-|1
+|PC-PS-MLS2
+|1.1.1.2
 
-|PS-MANAGEMENT  
-|10.2.255.190 
+|PC-O-R1
 |2
+|2.2.2.1
 |===
+
+===== Passive Interfaces
+
+All interfaces on all devices running an OSPF process, has 
+all it's interfaces configured as passive with the following
+command `passive-interface default`.
+
+From that point on only the needed interfaces are selected 
+to be allowed to participate in OSPF advertising.
+
+These interfaces are:
+
+[cols="1,1",options="header"]
+.Active OSPF Interfaces
+|===
+|Device
+|Interface
+
+.5+.^|PC-CORE-MLS1
+|Gig1/0/1
+|Gig1/0/5
+|Vlan 291
+|Vlan 292
+|Vlan 331
+
+.5+.^|PC-CORE-MLS2
+|Gig1/0/1
+|Gig1/0/5
+|Vlan 291
+|Vlan 292
+|Vlan 331
+
+|PC-PS-MLS1
+|Vlan 291
+
+|PC-PS-MLS2
+|Vlan 292
+
+.2+.^|PC-O-R1
+|Gig0/1
+|Gig0/2
+
+|===
+
+==== Access List
+
+[[pc_ssh]]
+===== SSH
+
+All network devices serving SSH, must have an ACL
+configured so that only the `MANAGEMENT` Vlan can 
+connect to the VTY line.
+
+The Package Center site is split into three
+`MANAGEMENT` Vlans due to seperate broadcast domains,
+so the ACL will accept the traffic if it is from
+any of the three `MANAGEMENT` Vlans.
+
+[source]
+----
+ip access-list standard SSH
+    permit 10.2.255.0 0.0.0.255
+----
+
+NOTE: This ACL must be applied onto all the VTY 
+lines for all incoming messages.
+
+===== DMZ
+
+The following ACL is configured to allow outside requests
+to enter the DMZ, and thus the the `Public Linux` server.
+
+[[source]]
+----
+access-list OUTSIDE-IN extended permit object-group DMZ-SERVICES any object DMZ-PUBLIC-IP
+access-list OUTSIDE-IN extended permit object-group DMZ-SERVICES any object DMZ-NETWORK-IPV6
+----
+
+NOTE: For further information regarding these objects,
+refer to <<pc_service_objects>> and <<pc_network_objects>>.
+
+===== VPN
+
+The following ACL is configured to identify, which packets
+should be routed within the VPN tunnel.
+
+[source]
+----
+access-list VPN-TRAFFIC extended permit ip object LOCAL object REMOTE
+----
+
+NOTE: For further information regarding these objects,
+refer to <<pc_network_objects>>.
+
+==== Firewall
+
+For the firewall we are using the ASA 5506, because of it's 
+Gigabit capabilities.
+
+===== Zones
+
+The firewall is split into for zones, which is as follows:
+
+[cols="1,1,1,1,2",options="header"]
+|===
+|Interface
+|Zone
+|Security-level
+|Address
+|Description
+
+|Gig1/1
+|INSIDE1
+|100
+|10.2.200.25
+|Link to PC-CORE-MLS1
+
+|Gig1/2
+|INSIDE2
+|100
+|10.2.200.29
+|Link to PC-CORE-MLS2
+
+|Gig1/5
+|DMZ
+|50
+|10.2.250.1
+|Link to Public Linux
+
+|Gig1/8
+|OUTSIDE
+|0
+|12.12.12.2
+|Link to ISP
+|===
+
+[[pc_service_objects]]
+===== Service Objects
+
+There is one service object needed
+allowed to enter the DMZ, containing the webserver, named
+`DMZ-SERVICES`.
+
+The allowed services are as follows:
+
+* Destination port 80 for HTTP
+* Destination port 443 for HTTPS
+
+[[pc_network_objects]]
+===== Network Objects
+
+There are four network object, for easier ACL
+creation and PAT configuration.
+
+These are:
+
+[cols="1,1,1",options="header"]
+|===
+|Name
+|Network
+|Mask
+
+|DMZ-NETWORK
+|10.2.250.2
+|Host
+
+|DMZ-NETWORK-IPV6
+|2001:DB8:ACAD:CC01::100
+|Host
+
+|DMZ-PUBLIC-IP
+|12.12.12.3
+|Host
+
+|LAN1
+|10.2.0.0 
+|255.255.0.0
+
+|LAN2
+|10.2.0.0 
+|255.255.0.0
+
+|LOCAL
+|10.2.0.0
+|255.255.0.0
+
+|REMOTE
+|10.1.0.0
+|255.255.0.0
+|===
+
+NOTE: `LAN1` and `LAN2` are separated because NAT configuration
+occurs inside the given network object which is dependent
+on the zone, so `INSIDE1` and `INSIDE2` both needed a dedicated
+network object.
+
+===== Policy Map
+
+The default policy map is additionally configured to inspect
+HTTP traffic as well.
+
+Thus the default policy map will be the following:
+
+[source]
+----
+policy-map global_policy
+ class inspection_default
+  inspect dns preset_dns_map
+  inspect ftp 
+  inspect http 
+  inspect tftp
+----
+
+===== NAT
+
+====== PAT
+
+PAT was set up for the zones, `INSIDE1` and `INSIDE2`.
+The network objects responsible for them are `LAN1` and `LAN2`.
+
+These two PAT configurations are used by the whole network
+across two different uplinks (This is why the same configuration
+is duplicated), and so they use the same address, which is `12.12.12.2`.
+
+====== SNAT
+
+SNAT is set up specifically for the `DMZ`, with the 
+responsible network object being named `DMZ-NETWORK`.
+
+The server's address (`10.2.250.2`) is being staticly 
+translated to `12.12.12.3`
+
+==== VPN
+
+Site-to-site VPN is set up between `HQ-ASA` and `PC-ASA` with the 
+following parameters:
+
+[cols="1h,1",options="header"]
+|===
+|Setting
+|Parameter
+
+|Key Exchange
+|IKEv1
+
+|IPsec Protocol
+|ESP
+
+|Confidentiality
+|AES
+
+|Integrity
+|SHA256
+
+|Authentication
+|PSK
+
+|Pre-shared-key
+|vpnpa55
+
+|Diffie-Hellman
+|DH2
+
+|Lifetime
+|1 Hour
+
+|Peer
+|11.11.11.2
+|===
+
+===== Transform-set
+
+The transfrom-set is configured as such:
+
+[source]
+----
+crypto ipsec ikev1 transform-set VPN-SET esp-aes 256 esp-sha-hmac
+----
+
+===== ACL
+
+To detect the interesting traffic for the VPN connection
+the following ACL is configured, named as `VPN-TRAFFIC`:
+
+[source]
+----
+access-list VPN-TRAFFIC extended permit ip object LOCAL object REMOTE
+----
+
+NOTE: For further information about the network objects, `LOCAL` and
+`REMOTE`, refer to <<pc_network_objects>>
 
 <<<
 
@@ -774,53 +1980,61 @@ This is achieved through the following parameters:
 |Null
 
 |Gig1/8
-|10.2.250.1
+|12.12.12.2
 |Null
 
-.4+.^|PC-CORE-MLS1
+.5+.^|PC-CORE-MLS1
+|Gig1/0/1
+|10.2.200.26
+|Null
+
 |Gig1/0/5
 |10.2.200.17
 |Null
 
-|VLAN291
+|Vlan291
 |10.2.200.1
 |Null
 
-|VLAN292
+|Vlan292
 |10.2.200.9
 |Null
 
-|VLAN331
+|Vlan331
 |10.2.255.1
 |Null
 
-.4+.^|PC-CORE-MLS2
+.5+.^|PC-CORE-MLS2
+|Gig1/0/1
+|10.2.200.30
+|Null
+
 |Gig1/0/5
 |10.2.200.21
 |Null
 
-|VLAN291
+|Vlan291
 |10.2.200.2
 |Null
 
-|VLAN292
+|Vlan292
 |10.2.200.10
 |Null
 
-|VLAN331
+|Vlan331
 |10.2.255.2
 |Null
 
 .4+.^|PC-PS-MLS1
-|VLAN210
+|Vlan210
 |10.2.10.1
 |Null
 
-|VLAN220
+|Vlan220
 |10.2.20.1
 |Null
 
-|VLAN291
+|Vlan291
 |10.2.200.3
 |Null
 
@@ -829,19 +2043,19 @@ This is achieved through the following parameters:
 |Null
 
 .4+.^|PC-PS-MLS2
-|VLAN210
+|Vlan210
 |10.2.10.2
 |Null
 
-|VLAN220
+|Vlan220
 |10.2.20.2
 |Null
 
-|VLAN292
+|Vlan292
 |10.2.200.11
 |Null
 
-|VLAN332
+|Vlan332
 |10.2.255.130
 |Null
 
@@ -863,17 +2077,17 @@ This is achieved through the following parameters:
 |Null
 
 |PC-PS-S1
-|VLAN332
+|Vlan332
 |10.2.255.131
 |10.2.255.190
 
 |PC-PS-S2
-|VLAN332
+|Vlan332
 |10.2.255.132
 |10.2.255.190
 
 |PC-O-S1
-|VLAN333
+|Vlan333
 |10.2.255.194
 |10.2.255.193
 
@@ -912,36 +2126,886 @@ This is achieved through the following parameters:
 
 <<<
 
+==== IPv6 Addressing
+
+IPv6 addressing is implemented only for the `Public Linux`
+webserver and `PC-ASA` firewall for the sake of alternative addressing. 
+
+Through the use of IPv6 GUA addresses, there is no need
+to configure NAT66.
+
+[cols="1,1,2,1,1",options="header"]
+.IPv6 Addressing
+|===
+|Device             
+|Interface  
+|Address    
+|Type
+|Default Gateway
+
+.2+.^|PC-ASA
+|Gig1/8
+|2001:DB8:ACAD:CC00::2/56
+|GUA
+|Null
+
+|Gig1/5
+|FE80::1
+|Link-Local
+|Null
+
+|Public Linux
+|Gig0
+|2001:DB8:ACAD:CC01::100/64
+|GUA
+|FE80::1
+|===
+
+== Private Windows Server in Package Center
+This windows server provides the package center office with an active directory, DNS, DHCP, printer sharing and AAA capebilities.
+
+=== Active Directory
+
+==== Domain Name
+The domain name for the active directory is 
+`bitbox.com`.
+
+==== Organizational Units
+The organizational units are as follows:
+
+.Organizational Units
+[cols="1,1,1",options="header"]
+|===
+|Name
+|Description
+|Groups
+
+|FRONTDESK
+|Contains all the frontdesk users and devices
+|Frontdesk Users
+
+|PS-MANAGEMENT
+|Contains all the PS-MANAGEMENT users and devices
+|PS-MANAGEMENT Users
+
+|WORKERS
+|Contains all the WORKERS users and devices
+|WORKERS Users
+|===
+
+==== Frontdesk Group policy
+This policy is applied to all users and devices in the `FRONTDESK` organizational unit.
+
+User Configuration:
+
+Automatic software installation:
+
+* Install the company system software on all frontdesk PCs and keep it updated
+
+Printers: 
+
+* Allow access to the frontdesk printer only
+* Disable adding new printers
+* Disable removing printers
+
+Start Menu & Taskbar:
+
+* Remove access to:
+    ** Control Panel
+    ** Settings
+    ** Run
+* Lock Start Menu Layout(predefined by the administrator)
+* Disable taskbar context menu
+
+Browser Restrictions:
+
+* Set homepage to the company system
+* Disable access to the following websites:
+    ** Social media
+    ** Entertainment
+* Disable extensions and plugins
+* Disable downloading files
+
+Control panel & CMD:
+
+* Disable access to command prompt
+* Disable access to powershell
+* Disable access to registry editor
+* Disable access to task manager
+
+Windows Settings:
+
+* Disable changing desktop background
+* Disable access to settings
+
+Computer Configuration:
+
+Removeable Media:
+
+* Disable usb storage device reading and writing
+
+Application Control:
+
+* Package management software
+* Browser
+
+* Disable local admin access for users
+* Minimum password requirements:
+    ** Minimum length of 12 characters
+    ** Must contain uppercase letters, lowercase letters, numbers and special characters
+    ** Password expiration every 90 days
+    ** Account lockout after 5 failed login attempts
+    ** Any failed attempts are all audited
+
+
+
+Updates:
+
+* Disable user access to updates
+* All updates are automatically installed outside of working hours
+
+Auditing & Monitoring:
+
+* Audit account lockout
+* Audit failed login attempts
+* Audit successful logins
+* Audit file share access
+* Audit file system access
+* At logon wait for the network before allowing the user to log in, to ensure that the latest policies are applied and that the user is not logging in with cached credentials, which may be a security risk if the user is using a different device or if their account has been compromised.
+
+==== Workers Group policy
+
+This policy is applied to all users and devices in the `WORKERS` organizational unit.
+
+User Configuration:
+
+* Allow access to removable media but it is monitored and audited
+* Remove Run menu from start menu
+* Disable access to control panel and settings
+* Enable only certain control panel items such as devices nad Printers, network
+* Disable access to command prompt, powershell, registry editor and task manager.
+Browser Restrictions:
+
+* Set homepage to the company system
+* Disable access to the following websites:
+    ** Social media
+    ** Entertainment
+* Allow only whitelisted extensions and plugins
+* Download directory is set to a monitored and audited folder
+* Print access is only allowed to the shared printer in the storage area
+* Only users in the `WORKERS` organizational unit have access to the shared printer in the storage area
+*At startup run the package management software and scanner software
+
+Computer Configuration:
+
+* Application control:
+    *** Allowed:
+        ** Package management software
+        ** Scanner software
+        ** Label printing software
+        ** Browser
+    *** Denied:
+        ** Deny unknown applications not explicitly allowed
+* Windows Updates:
+    *** Disable user access to updates
+    *** All updates are automatically installed outside of working hours
+ * At logon wait for the network before allowing the user to log in, to ensure that the latest policies are applied and that the user is not logging in with cached credentials, which may be a security risk if the user is using a different device or if their account has been compromised.
+ * Auditing & Monitoring:
+    *** Audit account lockout
+    *** Audit failed login attempts
+    *** Audit successful logins
+    *** Audit file share access
+    *** Audit file system access
+    *** Audit removable media access
+    *** Audit browser download folder activity
+    *** Audit printer access
+
+==== PS-MANAGEMENT Group policy
+
+User Configuration:
+
+* Browser Control:
+    ** Set homepage to the company system
+    ** Allow access to all websites but monitor and audit access
+    ** Allow extensions and plugins but monitor and audit access
+    ** Allow downloading files but set the download directory to a monitored and audited folder
+
+* Printer Access:
+    ** Allow access to all printers but monitor and audit access
+    ** Allow adding and removing printers but monitor and audit access
+
+Computer Configuration:
+
+* Application control:
+    *** Allowed:
+        ** Allow only the necessary management software for the PS-MANAGEMENT team, such as remote desktop software, monitoring software and management consoles.
+    *** Denied:
+        ** Deny unknown applications not explicitly allowed
+* Remote Desktop Access:
+    *** Only allow remote desktop access to devices in the `PS-MANAGEMENT` organizational unit
+    *** Only allow users in the `PS-MANAGEMENT` organizational unit to initiate remote desktop sessions
+* Removable Media:
+    *** Allow access to removable media but it is monitored and audited
+* Windows Updates:
+    *** Allow user to schedule updates but all updates must be installed outside of working hours
+    *** However updates are configured automatically
+* Security Hardening:
+    *** Enable User Account Control:
+        ** Run all administrators in Admin Approval Mode
+        ** Prompt for creditials when ther is an elevation request
+        ** Prompt for credentials on the secure desktop
+* Credintial Guard:
+    *** Enable Credential Guard to protect against credential theft attacks, such as Pass-the-Hash and Pass-the-Ticket, by isolating and protecting user credentials in a secure environment.
+    *** Disallow storage of passwords local device to prevent credential theft in case of device compromise.
+* Auditing & Monitoring:
+    *** Audit account lockout
+    *** Audit failed login attempts
+    *** Audit successful logins
+    *** Audit file share access
+    *** Audit file system access
+    *** Audit removable media access
+    *** Audit browser download folder activity
+    *** Audit printer access
+    *** Audit privileged User activity, such as access to sensitive files and folders, use of administrative tools and changes to user accounts and group memberships.
+
+=== DHCP
+
+The DHCP serves the `WORKERS`, `FRONTDESK` and `PS-MANAGEMENT` Vlans,.
+
+==== DHCP Configurations
+
+Configurations for the DHCP scopes for each Vlan are as follows:
+
+.DHCP Configurations
+[cols="1,1,1,1,1",options="header"]
+|===
+|Name
+|Addressing Range
+|DNS server
+|Domain Name
+|Default Gateway
+
+|Frontdesk
+|10.1.30.2 - 10.1.30.30
+|10.2.20.10
+|bitbox.com
+|10.2.30.1
+
+|WORKERS
+|10.2.10.3 - 10.2.10.253
+|10.2.20.10
+|bitbox.com
+|10.2.10.254
+
+|PS-MANAGEMENT
+|10.2.255.133 - 10.2.255.189
+|10.2.20.10
+|bitbox.com
+|10.2.255.190
+|===
+
+=== File Backup
+
+There is a seperate drive for file backup in the server, which is shared across the network and only accessible to users in the Administrators group, to ensure that only authorized personnel have access to sensitive data.
+
+Every shared folder in the server is backed up to this drive, and the backup is scheduled to run every day outside of working hours, to minimize disruption to users.
+
+=== File Sharing
+
+File sharing is achieved through shared folders on the server, with access permissions set according to the organizational units and groups in Active Directory.
+
+Users in the `FRONTDESK` organizational unit have a maxiumum 2GB of storage space, users in the `WORKERS` organizational unit have a maximum of 5GB of storage space and users in the `PS-MANAGEMENT` organizational unit have a maximum of 10GB of storage space, to ensure that storage resources are allocated efficiently and to prevent any one user from consuming excessive amounts of storage.
+
+=== AAA
+
+AAA is configured on the server to provide centralized authentication, authorization and accounting for users accessing network resources.
+
+The RADIUS server has the following RADIUS clients:
+
+* PC-CORE-MLS1
+* PC-CORE-MLS2
+* PC-O-R1
+* PC-O-S1
+* PC-PS-MLS1
+* PC-PS-MLS2
+* PC-PS-S1
+* PC-PS-S2
+
+The passkey for all clients is `Passw0rd`.
+
+
+== Private Windows Server in HQ office
+
+This windows server provides the HQ office with an active directory, DNS, DHCP, printer/file sharing and AAA capebilities.
+
+=== Active Directory
+
+==== Domain Name
+The domain name for the active directory is `bitbox.com`.
+
+==== Organizational Units
+The organizational units are as follows:
+
+.Organizational Units
+[cols="1,1,1",options="header"]
+|===
+|Name
+|Description
+|Groups
+
+|Accounting
+|Contains all the accounting users and devices
+|Accounting Users
+
+|Developers
+|Contains all the developers users and devices
+|Developer Users
+
+|Frontdesk
+|Contains all the frontdesk users and devices
+|Frontdesk Users
+
+|HR
+|Contains all the HR users and devices
+|HR Users
+
+|Management
+|Contains all the management users and devices
+|Management Users
+
+|Marketing
+|Contains all the marketing users and devices
+|Marketing Users
+|===
+
+==== Accounting Group policy
+This policy is applied to all users and devices in the `Accounting` organizational unit.
+
+User Configuration:
+
+* Start Menu & Taskbar:
+    ** Remove access to Run menu From start menu
+    ** Disable changes to the taskbar and start menu
+
+* Disable access to control panel and settings
+
+* Enable only certain control panel items such as devices and Printers and Programs and Features
+
+* Disable access to command prompt, powershell, registry editor and task manager.
+
+* Browser Restrictions:
+    ** Set homepage to the company system
+    ** Allow access to all websites but monitor and audit access
+    ** Allow only whitelisted extensions and plugins
+    ** Disable downloading files
+    ** Disable access to developer tools in the browser
+
+* Printer Access:
+    ** Allow access to the shared printer in the accounting area only
+    ** Disable adding and removing printers
+
+Computer Configuration:
+
+* Application control:
+    *** Allowed:
+        ** Accounting software
+        ** Browser
+    *** Denied:
+        ** Deny unknown applications not explicitly allowed
+
+* Removable media:
+    ** Disallow all removable storage class access to prevent data exfiltration and malware introduction through USB devices.
+
+* Windows Updates:
+    ** Disable user access to updates
+    ** All updates are automatically installed outside of working hours
+
+* Security Hardening:
+    ** Enable User Account Control:
+        *** Run all administrators in Admin Approval Mode
+        *** Prompt for credentials when there is an elevation request
+
+* Credential Guard:
+    ** Enable Credential Guard to protect against credential theft attacks, such as Pass-the-Hash and Pass-the-Ticket, by isolating and protecting user credentials in a secure environment.
+    ** Disallow storage of passwords local device to prevent credential theft in case of device compromise.
+
+* Auditing & Monitoring:
+    ** Audit account lockout
+    ** Audit failed login attempts
+    ** Audit successful logins
+    ** Audit file share access
+    ** Audit file system access
+    ** Audit Privileged User activity, such as access to sensitive files and folders, use of administrative tools.
+
+=== Frontdesk Group policy
+
+This policy is applied to all users and devices in the `FRONTDESK` organizational unit.
+
+User Configuration:
+
+Automatic software installation:
+
+* Install the company system software on all frontdesk PCs and keep it updated
+
+Printers: 
+
+* Allow access to the frontdesk printer only
+* Disable adding new printers
+* Disable removing printers
+
+Start Menu & Taskbar:
+
+* Remove access to:
+    ** Control Panel
+    ** Settings
+    ** Run
+* Lock Start Menu Layout(predefined by the administrator)
+* Disable taskbar context menu
+
+Browser Restrictions:
+
+* Set homepage to the company system
+* Disable access to the following websites:
+    ** Social media
+    ** Entertainment
+* Disable extensions and plugins
+* Disable downloading files
+
+Control panel & CMD:
+
+* Disable access to command prompt
+* Disable access to powershell
+* Disable access to registry editor
+* Disable access to task manager
+
+Windows Settings:
+
+* Disable changing desktop background
+* Disable access to settings
+
+Computer Configuration:
+
+Removeable Media:
+
+* Disable usb storage device reading and writing
+
+Application Control:
+
+* Package management software
+* Browser
+
+* Disable local admin access for users
+* Minimum password requirements:
+    ** Minimum length of 12 characters
+    ** Must contain uppercase letters, lowercase letters, numbers and special characters
+    ** Password expiration every 90 days
+    ** Account lockout after 5 failed login attempts
+    ** Any failed attempts are all audited
+
+
+
+Updates:
+
+* Disable user access to updates
+* All updates are automatically installed outside of working hours
+
+Auditing & Monitoring:
+
+* Audit account lockout
+* Audit failed login attempts
+* Audit successful logins
+* Audit file share access
+* Audit file system access
+* At logon wait for the network before allowing the user to log in, to ensure that the latest policies are applied and that the user is not logging in with cached credentials, which may be a security risk if the user is using a different device or if their account has been compromised.
+
+
+=== Management Group policy
+
+This policy is applied to all users and devices in the `Management` organizational unit.
+
+User Configuration:
+
+* Browser Control:
+    ** Set homepage to the company system
+    ** Allow access to all websites but monitor and audit access
+    ** Allow extensions and plugins but monitor and audit access
+    ** Allow downloading files but set the download directory to a monitored and audited folder
+
+* Printer Access:
+    ** Allow access to all printers but monitor and audit access
+    ** Allow adding and removing printers but monitor and audit access
+
+Computer Configuration:
+
+* Application control:
+    *** Allowed:
+        ** Allow only the necessary management software for the MANAGEMENT team, such as remote desktop software, monitoring software and management consoles.
+    *** Denied:
+        ** Deny unknown applications not explicitly allowed
+* Remote Desktop Access:
+    *** Only allow remote desktop access to devices in the `MANAGEMENT` organizational unit
+    *** Only allow users in the `MANAGEMENT` organizational unit to initiate remote desktop sessions
+* Removable Media:
+    *** Allow access to removable media but it is monitored and audited
+* Windows Updates:
+    *** Allow user to schedule updates but all updates must be installed outside of working hours
+    *** However updates are configured automatically
+* Security Hardening:
+    *** Enable User Account Control:
+        ** Run all administrators in Admin Approval Mode
+        ** Prompt for creditials when ther is an elevation request
+        ** Prompt for credentials on the secure desktop
+* Credintial Guard:
+    *** Enable Credential Guard to protect against credential theft attacks, such as Pass-the-Hash and Pass-the-Ticket, by isolating and protecting user credentials in a secure environment.
+    *** Disallow storage of passwords local device to prevent credential theft in case of device compromise.
+* Auditing & Monitoring:
+    *** Audit account lockout
+    *** Audit failed login attempts
+    *** Audit successful logins
+    *** Audit file share access
+    *** Audit file system access
+    *** Audit removable media access
+    *** Audit browser download folder activity
+    *** Audit printer access
+    *** Audit privileged User activity, such as access to sensitive files and folders, use of administrative tools and changes to user accounts and group memberships.
+
+=== Developers Group policy
+
+This policy is applied to all users and devices in the `Developers` organizational unit.
+
+User Configuration:
+
+* Allow access to Control Panel and Settings to allow developers to change necessary settings for development purposes, but monitor and audit access to sensitive settings such as user accounts and group memberships.
+
+* Allow access to command prompt, powershell and registry editor for development purposes, but monitor and audit access to sensitive commands and registry keys.
+
+* Task manager is enabled for developers to allow them to monitor their applications and processes, but access is monitored and audited.
+
+* Browser Control:
+    ** Set homepage to the company system
+    ** Allow access to all websites but monitor and audit access
+    ** Allow extensions and plugins but monitor and audit access
+    ** Allow downloading files but set the download directory to a monitored and audited folder
+
+Computer Configuration:
+
+* Application control:
+    *** Allowed:
+        ** Allow necessary development software, such as IDEs, code editors, version control software and testing tools.
+    *** Denied:
+        ** Deny unknown applications not explicitly allowed
+
+* Removable Media:
+    ** Allow access to removable media but it is monitored and audited to prevent data exfiltration and malware introduction through USB devices.
+
+* Powershell Control:
+    Powershell Script Block logging is enabled to monitor and audit powershell activity, which can be used by attackers for malicious purposes.
+
+* Windows Updates:
+    ** Updates are automatically configured.
+    ** Users are notified before install.
+    ** Updates are scheduled to be installed outside of working hours to minimize disruption.
+
+* Security Hardening:
+    ** Enable User Account Control:
+        *** Run all administrators in Admin Approval Mode
+        *** Prompt for credentials when there is an elevation request
+
+* Credential Guard:
+    ** Enable Credential Guard to protect against credential theft attacks, such as Pass-the-Hash and Pass-the-Ticket, by isolating and protecting user credentials in a secure environment.
+    ** Disallow storage of passwords local device to prevent credential theft in case of device compromise.
+
+* Auditing & Monitoring:
+    ** Audit account lockout
+    ** Audit failed login attempts
+    ** Audit successful logins
+    ** Audit file share access
+    ** Audit file system access
+    ** Audit process creation and termination
+    ** Audit powershell activity through script block logging
+    *Audit control panel and settings access, with special attention to sensitive settings such as user accounts and group memberships.
+
+=== Marketing Group policy
+
+This policy is applied to all users and devices in the `Marketing` organizational unit.
+
+User Configuration:
+
+* Allow access to Control Panel and Settings to allow marketing team to change necessary settings for their work, but monitor and audit access to sensitive settings such as user accounts and group memberships.
+
+* Allow access to command prompt and powershell for marketing purposes, but monitor and audit access to sensitive commands.
+
+* Disable access to registry editor and task manager to prevent unauthorized changes and monitoring of processes.
+
+* Browser Control:
+    ** Set homepage to the company system
+    ** Allow access to all websites but monitor and audit access
+    ** Allow extensions and plugins but monitor and audit access
+    ** Allow downloading files but set the download directory to a monitored and audited folder
+    ** Allow access to developer tools in the browser to allow marketing team to analyze web pages and troubleshoot issues, but monitor and audit access.
+
+* Printer Access:
+    ** Allow access to all printers in the `MARKETING` organizational unit.
+    ** Allow adding and removing printers but monitor and audit access
+
+Computer Configuration:
+
+* Application control:
+    *** Allowed:
+        ** Allow necessary marketing software, such as graphic design software, video editing software and social media management tools.
+    *** Denied:
+        ** Deny unknown applications not explicitly allowed
+
+* Removable Media:
+    ** Allow access to removable media but it is monitored and audited to prevent data exfiltration and malware introduction through USB devices.
+
+* Windows Updates:
+    ** Updates are configured automatically and they are installed outside of work hours to not disrupt the marketing team during their work.
+
+* Security Hardening:
+    ** Enable User Account Control:
+        *** Run all administrators in Admin Approval Mode
+        *** Prompt for credentials when there is an elevation request
+
+* Credential Guard:
+    ** Enable Credential Guard to protect against credential theft attacks, such as Pass-the-Hash and Pass-the-Ticket, by isolating and protecting user credentials in a secure environment.
+    ** Disallow storage of passwords local device to prevent credential theft in case of device compromise.
+
+* Auditing & Monitoring:
+    ** Audit account lockout
+    ** Audit failed login attempts
+    ** Audit successful logins
+    ** Audit file share access
+    ** Audit file system access
+    ** Audit process creation and termination
+    ** Audit powershell activity through script block logging
+    *Audit control panel and settings access, with special attention to sensitive settings such as user accounts and group memberships.
+
+=== HR Group policy
+
+This policy is applied to all users and devices in the `HR` organizational unit.
+
+User Configuration:
+
+* Start Menu & Taskbar:
+    ** Remove access to Run menu From start menu
+    ** Disable changes to the taskbar and start menu
+
+* Control panel:
+    ** Disable access to control panel and settings
+    ** Enable only certain control panel items such as devices and Printers and Programs and Features
+
+* Disable access to command prompt, powershell, registry editor and task manager.
+
+* Browser Restrictions:
+    ** Set homepage to the company system
+    ** Allow access to all websites but monitor and audit access
+    ** Allow only whitelisted extensions and plugins
+    ** Disable downloading files
+    ** Disable access to developer tools in the browser
+
+* Printer Access:
+    ** Allow access to the shared printer in the HR area only
+    ** Disable adding and removing printers
+
+Computer Configuration:
+
+* Application control:
+    *** Allowed:
+        ** HR software
+        ** Browser
+    *** Denied:
+        ** Deny unknown applications not explicitly allowed
+
+* Removable media:
+    ** Disallow all removable storage class access to prevent data exfiltration and malware introduction through USB devices.
+
+* Windows Updates:
+    ** Disable user access to updates
+    ** All updates are automatically installed outside of working hours
+
+* Security Hardening:
+    ** Enable User Account Control:
+        *** Run all administrators in Admin Approval Mode
+        *** Prompt for credentials when there is an elevation request
+
+* Credential Guard:
+    ** Enable Credential Guard to protect against credential theft attacks, such as Pass-the-Hash and Pass-the-Ticket, by isolating and protecting user credentials in a secure environment.
+    ** Disallow storage of passwords local device to prevent credential theft in case of device compromise.
+
+* Auditing & Monitoring:
+    ** Audit account lockout
+    ** Audit failed login attempts
+    ** Audit successful logins
+    ** Audit file share access
+    ** Audit file system access
+    * At logon wait for the network before allowing the user to log in, to ensure that the latest policies are applied and that the user is not logging in with cached credentials, which may be a security risk if the user is using a different device or if their account has been compromised.
+
+=== DHCP
+
+The DHCP serves the `Accounting`, `Frontdesk`, `HR`, `Management`, `Marketing` and `Developers` Vlans,.
+
+==== DHCP Configurations
+
+Configurations for the DHCP scopes for each Vlan are as follows:
+
+.DHCP Configurations
+[cols="1,1,1,1,1",options="header"]
+|===
+|Name
+|Addressing Range
+|DNS server
+|Domain Name
+|Default Gateway
+
+|HQ-DEVELOPERS
+|10.1.10.3 - 10.1.10.29
+|10.2.20.10
+|bitbox.com
+|10.1.10.30
+
+|HQ-HR
+|10.1.20.3 - 10.1.20.60
+|10.2.20.10
+|bitbox.com
+|10.1.20.62
+
+|HQ-ACCOUNTING
+|10.1.30.3 - 10.1.30.28
+|10.2.20.10
+|bitbox.com
+|10.1.30.30
+
+|HQ-MARKETING
+|10.1.40.3 - 10.1.40.12
+|10.2.20.10
+|bitbox.com
+|10.1.40.14
+
+|HQ-FRONTDESK
+|10.1.60.3 - 10.1.60.12
+|10.2.20.10
+|bitbox.com
+|10.1.60.14
+
+|HQ-MANAGEMENT
+|10.1.255.17 - 10.1.255.29
+|10.2.20.10
+|bitbox.com
+|10.1.255.30
+|===
+
+=== File Backup
+
+There is a seperate drive for file backup in the server, which is shared across the network and only accessible to users in the Administrators group, to ensure that only authorized personnel have access to sensitive data.
+
+Every shared folder in the server is backed up to this drive, and the backup is scheduled to run every day outside of working hours, to minimize disruption to users.
+
+=== File Sharing
+
+File sharing is achieved through shared folders on the server, with access permissions set according to the organizational units and groups in Active Directory.
+
+Users in the `Accounting` organizational unit have a maxiumum 5GB of storage space, users in the `HR` organizational unit have a maximum of 5GB of storage space, users in the `MARKETING` organizational unit have a maximum of 10GB of storage space, users in the `DEVELOPERS` organizational unit have a maximum of 20GB of storage space, users in the `MANAGEMENT` organizational unit have a maximum of 20GB of storage space and users in the `FRONTDESK` organizational unit have a maximum of 2GB of storage space, to ensure that storage resources are allocated efficiently and to prevent any one user from consuming excessive amounts of storage.
+
+=== AAA
+
+AAA is set up on the server to provide centralized authentication, authorization and accounting for users accessing network resources.
+
+The RADIUS server has the following RADIUS clients:
+
+* HQ-CORE-MLS1
+* HQ-CORE-MLS2
+* HQ-O-R1
+* HQ-O-S1
+* HQ-PS-MLS1
+* HQ-PS-MLS2
+* HQ-PS-S1
+* HQ-PS-S2
+
+The passkey for all clients is `Passw0rd`.
+
+== Public Linux Server in HQ office
+
+This server's purpose is to host a the company webpage using nginx web server. It is accessible from the internet and it is protected by the `HQ-ASA` firewall. Only the the management and developers can modify the webpage. 
+The website uses the company domain bitbox.com. 
+
+<<<
+
 == Remote Package Storage
 
 === Network
 
+The remote package storage site consists on a 
+`SOHO Router` serving WIFI to storage workers and
+directly connecting to the ISP.
+
 ==== Topology
 
-// image::images/remote_package_storage.jpg[align="center"]
+image::images/rps-topology.png[align="center"]
 
-<<<
+==== LAN
 
-==== VLANs
+This site only serves one lan, which is `10.3.0.0/24`.
 
-[cols="1,1,1",options="header"]
-.VLANs
+==== Wifi
+
+.Wifi
+[cols="1,1,1,1",options="header"]
 |===
-|VLAN ID    
-|Name          
-|Network 
+|SSID               
+|Password 
+|Auth   
+|Encryption
 
-|VLAN 310   
-|WORKERS       
-|10.3.10.0/23
+|Warehouse
+|warehousepa55
+|WPA2 Personal
+|AES
+|===
 
-|VLAN 333   
-|MANAGEMENT    
-|10.3.255.0/24
+==== DHCPv4
 
-|VLAN 666   
-|TRASH         
+The DHCP server is the `SOHO Router`, 
+providing IPv4 addresses for the following networks:
+
+[cols="1,1,1,1",options="header"]
+.IPv4 DHCP Addressing
+|===
+|Vlan       
+|Addressing Range   
+|Number Of Hosts
+|DNS    
+|Default-gateway
+
+|10.3.0.2-254       
+|253             
+|8.8.8.8
+|10.3.0.1
+|===
+
+==== IPv4 Addressing
+
+[cols="1,1,1,1",options="header"]
+.IPv4 Addressing
+|===
+|Device             
+|Interface  
+|Address    
+|Default Gateway
+
+.2+.^|SOHO Router
+|Internet
+|13.13.13.2
 |Null
+
+|LAN
+|10.3.0.1
+|Null
+
+|Worker Phones
+|Wifi
+|DHCP
+|10.3.0.1
 |===
 
 <<<

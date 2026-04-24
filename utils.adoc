@@ -1,4 +1,5 @@
 :source-highlighter: rouge
+:appendix-caption: Appendix
 :title-page:
 :toc:
 :toclevels: 3

@@ -1,0 +1,21 @@
+Head Quarters,HQ-R1,10.1.255.1
+Head Quarters,HQ-R2,10.1.255.2
+Head Quarters,HQ-S1,10.1.255.3
+Head Quarters,HQ-S2,10.1.255.4
+Head Quarters,HQ-F0-S1,10.1.255.5
+Head Quarters,HQ-F1-S1,10.1.255.6
+Head Quarters,HQ-F1-S2,10.1.255.7
+Head Quarters,HQ-F2-S1,10.1.255.8
+Head Quarters,HQ-F2-S2,10.1.255.9
+Package Center,PC-CORE-MLS1,10.2.255.1
+Package Center,PC-CORE-MLS2,10.2.255.2
+Package Center,PC-PS-MLS1,10.2.255.129
+Package Center,PC-PS-MLS2,10.2.255.130
+Package Center,PC-PS-S1,10.2.255.131
+Package Center,PC-PS-S2,10.2.255.132
+Package Center,PC-O-R1,10.2.255.193
+Package Center,PC-O-R1,10.2.255.194
+OMIKK,Tibi Telefon,10.108.172.82
+Pataky,R1,192.168.100.1
+Pataky,S1,192.168.100.11
+Local,Local,127.0.0.1

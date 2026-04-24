@@ -1725,21 +1725,6 @@ These interfaces are:
 
 |===
 
-==== AAA
-
-The AAA RADIUS server is `Private Linux` (`10.2.20.10`) with the following clients:
-
-* PC-CORE-MLS1
-* PC-CORE-MLS2
-* PC-O-R1
-* PC-O-S1
-* PC-PS-MLS1
-* PC-PS-MLS2
-* PC-PS-S1
-* PC-PS-S2
-
-The passkey for all clients is `aaapa55`.
-
 ==== Access List
 
 [[pc_ssh]]
@@ -2196,6 +2181,774 @@ to configure NAT66.
 |GUA
 |FE80::1
 |===
+
+== Private Windows Server in Package Center
+This windows server provides the package center office with an active directory, DNS, DHCP, printer sharing and AAA capebilities.
+
+=== Active Directory
+
+==== Domain Name
+The domain name for the active directory is 
+`bitbox.com`.
+
+==== Organizational Units
+The organizational units are as follows:
+
+.Organizational Units
+[cols="1,1,1",options="header"]
+|===
+|Name
+|Description
+|Groups
+
+|FRONTDESK
+|Contains all the frontdesk users and devices
+|Frontdesk Users
+
+|PS-MANAGEMENT
+|Contains all the PS-MANAGEMENT users and devices
+|PS-MANAGEMENT Users
+
+|WORKERS
+|Contains all the WORKERS users and devices
+|WORKERS Users
+|===
+
+==== Frontdesk Group policy
+This policy is applied to all users and devices in the `FRONTDESK` organizational unit.
+
+User Configuration:
+
+Automatic software installation:
+
+* Install the company system software on all frontdesk PCs and keep it updated
+
+Printers: 
+
+* Allow access to the frontdesk printer only
+* Disable adding new printers
+* Disable removing printers
+
+Start Menu & Taskbar:
+
+* Remove access to:
+    ** Control Panel
+    ** Settings
+    ** Run
+* Lock Start Menu Layout(predefined by the administrator)
+* Disable taskbar context menu
+
+Browser Restrictions:
+
+* Set homepage to the company system
+* Disable access to the following websites:
+    ** Social media
+    ** Entertainment
+* Disable extensions and plugins
+* Disable downloading files
+
+Control panel & CMD:
+
+* Disable access to command prompt
+* Disable access to powershell
+* Disable access to registry editor
+* Disable access to task manager
+
+Windows Settings:
+
+* Disable changing desktop background
+* Disable access to settings
+
+Computer Configuration:
+
+Removeable Media:
+
+* Disable usb storage device reading and writing
+
+Application Control:
+
+* Package management software
+* Browser
+
+* Disable local admin access for users
+* Minimum password requirements:
+    ** Minimum length of 12 characters
+    ** Must contain uppercase letters, lowercase letters, numbers and special characters
+    ** Password expiration every 90 days
+    ** Account lockout after 5 failed login attempts
+    ** Any failed attempts are all audited
+
+
+
+Updates:
+
+* Disable user access to updates
+* All updates are automatically installed outside of working hours
+
+Auditing & Monitoring:
+
+* Audit account lockout
+* Audit failed login attempts
+* Audit successful logins
+* Audit file share access
+* Audit file system access
+* At logon wait for the network before allowing the user to log in, to ensure that the latest policies are applied and that the user is not logging in with cached credentials, which may be a security risk if the user is using a different device or if their account has been compromised.
+
+==== Workers Group policy
+
+This policy is applied to all users and devices in the `WORKERS` organizational unit.
+
+User Configuration:
+
+* Allow access to removable media but it is monitored and audited
+* Remove Run menu from start menu
+* Disable access to control panel and settings
+* Enable only certain control panel items such as devices nad Printers, network
+* Disable access to command prompt, powershell, registry editor and task manager.
+Browser Restrictions:
+
+* Set homepage to the company system
+* Disable access to the following websites:
+    ** Social media
+    ** Entertainment
+* Allow only whitelisted extensions and plugins
+* Download directory is set to a monitored and audited folder
+* Print access is only allowed to the shared printer in the storage area
+* Only users in the `WORKERS` organizational unit have access to the shared printer in the storage area
+*At startup run the package management software and scanner software
+
+Computer Configuration:
+
+* Application control:
+    *** Allowed:
+        ** Package management software
+        ** Scanner software
+        ** Label printing software
+        ** Browser
+    *** Denied:
+        ** Deny unknown applications not explicitly allowed
+* Windows Updates:
+    *** Disable user access to updates
+    *** All updates are automatically installed outside of working hours
+ * At logon wait for the network before allowing the user to log in, to ensure that the latest policies are applied and that the user is not logging in with cached credentials, which may be a security risk if the user is using a different device or if their account has been compromised.
+ * Auditing & Monitoring:
+    *** Audit account lockout
+    *** Audit failed login attempts
+    *** Audit successful logins
+    *** Audit file share access
+    *** Audit file system access
+    *** Audit removable media access
+    *** Audit browser download folder activity
+    *** Audit printer access
+
+==== PS-MANAGEMENT Group policy
+
+User Configuration:
+
+* Browser Control:
+    ** Set homepage to the company system
+    ** Allow access to all websites but monitor and audit access
+    ** Allow extensions and plugins but monitor and audit access
+    ** Allow downloading files but set the download directory to a monitored and audited folder
+
+* Printer Access:
+    ** Allow access to all printers but monitor and audit access
+    ** Allow adding and removing printers but monitor and audit access
+
+Computer Configuration:
+
+* Application control:
+    *** Allowed:
+        ** Allow only the necessary management software for the PS-MANAGEMENT team, such as remote desktop software, monitoring software and management consoles.
+    *** Denied:
+        ** Deny unknown applications not explicitly allowed
+* Remote Desktop Access:
+    *** Only allow remote desktop access to devices in the `PS-MANAGEMENT` organizational unit
+    *** Only allow users in the `PS-MANAGEMENT` organizational unit to initiate remote desktop sessions
+* Removable Media:
+    *** Allow access to removable media but it is monitored and audited
+* Windows Updates:
+    *** Allow user to schedule updates but all updates must be installed outside of working hours
+    *** However updates are configured automatically
+* Security Hardening:
+    *** Enable User Account Control:
+        ** Run all administrators in Admin Approval Mode
+        ** Prompt for creditials when ther is an elevation request
+        ** Prompt for credentials on the secure desktop
+* Credintial Guard:
+    *** Enable Credential Guard to protect against credential theft attacks, such as Pass-the-Hash and Pass-the-Ticket, by isolating and protecting user credentials in a secure environment.
+    *** Disallow storage of passwords local device to prevent credential theft in case of device compromise.
+* Auditing & Monitoring:
+    *** Audit account lockout
+    *** Audit failed login attempts
+    *** Audit successful logins
+    *** Audit file share access
+    *** Audit file system access
+    *** Audit removable media access
+    *** Audit browser download folder activity
+    *** Audit printer access
+    *** Audit privileged User activity, such as access to sensitive files and folders, use of administrative tools and changes to user accounts and group memberships.
+
+=== DHCP
+
+The DHCP serves the `WORKERS`, `FRONTDESK` and `PS-MANAGEMENT` Vlans,.
+
+==== DHCP Configurations
+
+Configurations for the DHCP scopes for each Vlan are as follows:
+
+.DHCP Configurations
+[cols="1,1,1,1,1",options="header"]
+|===
+|Name
+|Addressing Range
+|DNS server
+|Domain Name
+|Default Gateway
+
+|Frontdesk
+|10.1.30.2 - 10.1.30.30
+|10.2.20.10
+|bitbox.com
+|10.2.30.1
+
+|WORKERS
+|10.2.10.3 - 10.2.10.253
+|10.2.20.10
+|bitbox.com
+|10.2.10.254
+
+|PS-MANAGEMENT
+|10.2.255.133 - 10.2.255.189
+|10.2.20.10
+|bitbox.com
+|10.2.255.190
+|===
+
+=== File Backup
+
+There is a seperate drive for file backup in the server, which is shared across the network and only accessible to users in the Administrators group, to ensure that only authorized personnel have access to sensitive data.
+
+Every shared folder in the server is backed up to this drive, and the backup is scheduled to run every day outside of working hours, to minimize disruption to users.
+
+=== File Sharing
+
+File sharing is achieved through shared folders on the server, with access permissions set according to the organizational units and groups in Active Directory.
+
+Users in the `FRONTDESK` organizational unit have a maxiumum 2GB of storage space, users in the `WORKERS` organizational unit have a maximum of 5GB of storage space and users in the `PS-MANAGEMENT` organizational unit have a maximum of 10GB of storage space, to ensure that storage resources are allocated efficiently and to prevent any one user from consuming excessive amounts of storage.
+
+=== AAA
+
+AAA is configured on the server to provide centralized authentication, authorization and accounting for users accessing network resources.
+
+The RADIUS server has the following RADIUS clients:
+
+* PC-CORE-MLS1
+* PC-CORE-MLS2
+* PC-O-R1
+* PC-O-S1
+* PC-PS-MLS1
+* PC-PS-MLS2
+* PC-PS-S1
+* PC-PS-S2
+
+The passkey for all clients is `Passw0rd`.
+
+
+== Private Windows Server in HQ office
+
+This windows server provides the HQ office with an active directory, DNS, DHCP, printer/file sharing and AAA capebilities.
+
+=== Active Directory
+
+==== Domain Name
+The domain name for the active directory is `bitbox.com`.
+
+==== Organizational Units
+The organizational units are as follows:
+
+.Organizational Units
+[cols="1,1,1",options="header"]
+|===
+|Name
+|Description
+|Groups
+
+|Accounting
+|Contains all the accounting users and devices
+|Accounting Users
+
+|Developers
+|Contains all the developers users and devices
+|Developer Users
+
+|Frontdesk
+|Contains all the frontdesk users and devices
+|Frontdesk Users
+
+|HR
+|Contains all the HR users and devices
+|HR Users
+
+|Management
+|Contains all the management users and devices
+|Management Users
+
+|Marketing
+|Contains all the marketing users and devices
+|Marketing Users
+|===
+
+==== Accounting Group policy
+This policy is applied to all users and devices in the `Accounting` organizational unit.
+
+User Configuration:
+
+* Start Menu & Taskbar:
+    ** Remove access to Run menu From start menu
+    ** Disable changes to the taskbar and start menu
+
+* Disable access to control panel and settings
+
+* Enable only certain control panel items such as devices and Printers and Programs and Features
+
+* Disable access to command prompt, powershell, registry editor and task manager.
+
+* Browser Restrictions:
+    ** Set homepage to the company system
+    ** Allow access to all websites but monitor and audit access
+    ** Allow only whitelisted extensions and plugins
+    ** Disable downloading files
+    ** Disable access to developer tools in the browser
+
+* Printer Access:
+    ** Allow access to the shared printer in the accounting area only
+    ** Disable adding and removing printers
+
+Computer Configuration:
+
+* Application control:
+    *** Allowed:
+        ** Accounting software
+        ** Browser
+    *** Denied:
+        ** Deny unknown applications not explicitly allowed
+
+* Removable media:
+    ** Disallow all removable storage class access to prevent data exfiltration and malware introduction through USB devices.
+
+* Windows Updates:
+    ** Disable user access to updates
+    ** All updates are automatically installed outside of working hours
+
+* Security Hardening:
+    ** Enable User Account Control:
+        *** Run all administrators in Admin Approval Mode
+        *** Prompt for credentials when there is an elevation request
+
+* Credential Guard:
+    ** Enable Credential Guard to protect against credential theft attacks, such as Pass-the-Hash and Pass-the-Ticket, by isolating and protecting user credentials in a secure environment.
+    ** Disallow storage of passwords local device to prevent credential theft in case of device compromise.
+
+* Auditing & Monitoring:
+    ** Audit account lockout
+    ** Audit failed login attempts
+    ** Audit successful logins
+    ** Audit file share access
+    ** Audit file system access
+    ** Audit Privileged User activity, such as access to sensitive files and folders, use of administrative tools.
+
+=== Frontdesk Group policy
+
+This policy is applied to all users and devices in the `FRONTDESK` organizational unit.
+
+User Configuration:
+
+Automatic software installation:
+
+* Install the company system software on all frontdesk PCs and keep it updated
+
+Printers: 
+
+* Allow access to the frontdesk printer only
+* Disable adding new printers
+* Disable removing printers
+
+Start Menu & Taskbar:
+
+* Remove access to:
+    ** Control Panel
+    ** Settings
+    ** Run
+* Lock Start Menu Layout(predefined by the administrator)
+* Disable taskbar context menu
+
+Browser Restrictions:
+
+* Set homepage to the company system
+* Disable access to the following websites:
+    ** Social media
+    ** Entertainment
+* Disable extensions and plugins
+* Disable downloading files
+
+Control panel & CMD:
+
+* Disable access to command prompt
+* Disable access to powershell
+* Disable access to registry editor
+* Disable access to task manager
+
+Windows Settings:
+
+* Disable changing desktop background
+* Disable access to settings
+
+Computer Configuration:
+
+Removeable Media:
+
+* Disable usb storage device reading and writing
+
+Application Control:
+
+* Package management software
+* Browser
+
+* Disable local admin access for users
+* Minimum password requirements:
+    ** Minimum length of 12 characters
+    ** Must contain uppercase letters, lowercase letters, numbers and special characters
+    ** Password expiration every 90 days
+    ** Account lockout after 5 failed login attempts
+    ** Any failed attempts are all audited
+
+
+
+Updates:
+
+* Disable user access to updates
+* All updates are automatically installed outside of working hours
+
+Auditing & Monitoring:
+
+* Audit account lockout
+* Audit failed login attempts
+* Audit successful logins
+* Audit file share access
+* Audit file system access
+* At logon wait for the network before allowing the user to log in, to ensure that the latest policies are applied and that the user is not logging in with cached credentials, which may be a security risk if the user is using a different device or if their account has been compromised.
+
+
+=== Management Group policy
+
+This policy is applied to all users and devices in the `Management` organizational unit.
+
+User Configuration:
+
+* Browser Control:
+    ** Set homepage to the company system
+    ** Allow access to all websites but monitor and audit access
+    ** Allow extensions and plugins but monitor and audit access
+    ** Allow downloading files but set the download directory to a monitored and audited folder
+
+* Printer Access:
+    ** Allow access to all printers but monitor and audit access
+    ** Allow adding and removing printers but monitor and audit access
+
+Computer Configuration:
+
+* Application control:
+    *** Allowed:
+        ** Allow only the necessary management software for the MANAGEMENT team, such as remote desktop software, monitoring software and management consoles.
+    *** Denied:
+        ** Deny unknown applications not explicitly allowed
+* Remote Desktop Access:
+    *** Only allow remote desktop access to devices in the `MANAGEMENT` organizational unit
+    *** Only allow users in the `MANAGEMENT` organizational unit to initiate remote desktop sessions
+* Removable Media:
+    *** Allow access to removable media but it is monitored and audited
+* Windows Updates:
+    *** Allow user to schedule updates but all updates must be installed outside of working hours
+    *** However updates are configured automatically
+* Security Hardening:
+    *** Enable User Account Control:
+        ** Run all administrators in Admin Approval Mode
+        ** Prompt for creditials when ther is an elevation request
+        ** Prompt for credentials on the secure desktop
+* Credintial Guard:
+    *** Enable Credential Guard to protect against credential theft attacks, such as Pass-the-Hash and Pass-the-Ticket, by isolating and protecting user credentials in a secure environment.
+    *** Disallow storage of passwords local device to prevent credential theft in case of device compromise.
+* Auditing & Monitoring:
+    *** Audit account lockout
+    *** Audit failed login attempts
+    *** Audit successful logins
+    *** Audit file share access
+    *** Audit file system access
+    *** Audit removable media access
+    *** Audit browser download folder activity
+    *** Audit printer access
+    *** Audit privileged User activity, such as access to sensitive files and folders, use of administrative tools and changes to user accounts and group memberships.
+
+=== Developers Group policy
+
+This policy is applied to all users and devices in the `Developers` organizational unit.
+
+User Configuration:
+
+* Allow access to Control Panel and Settings to allow developers to change necessary settings for development purposes, but monitor and audit access to sensitive settings such as user accounts and group memberships.
+
+* Allow access to command prompt, powershell and registry editor for development purposes, but monitor and audit access to sensitive commands and registry keys.
+
+* Task manager is enabled for developers to allow them to monitor their applications and processes, but access is monitored and audited.
+
+* Browser Control:
+    ** Set homepage to the company system
+    ** Allow access to all websites but monitor and audit access
+    ** Allow extensions and plugins but monitor and audit access
+    ** Allow downloading files but set the download directory to a monitored and audited folder
+
+Computer Configuration:
+
+* Application control:
+    *** Allowed:
+        ** Allow necessary development software, such as IDEs, code editors, version control software and testing tools.
+    *** Denied:
+        ** Deny unknown applications not explicitly allowed
+
+* Removable Media:
+    ** Allow access to removable media but it is monitored and audited to prevent data exfiltration and malware introduction through USB devices.
+
+* Powershell Control:
+    Powershell Script Block logging is enabled to monitor and audit powershell activity, which can be used by attackers for malicious purposes.
+
+* Windows Updates:
+    ** Updates are automatically configured.
+    ** Users are notified before install.
+    ** Updates are scheduled to be installed outside of working hours to minimize disruption.
+
+* Security Hardening:
+    ** Enable User Account Control:
+        *** Run all administrators in Admin Approval Mode
+        *** Prompt for credentials when there is an elevation request
+
+* Credential Guard:
+    ** Enable Credential Guard to protect against credential theft attacks, such as Pass-the-Hash and Pass-the-Ticket, by isolating and protecting user credentials in a secure environment.
+    ** Disallow storage of passwords local device to prevent credential theft in case of device compromise.
+
+* Auditing & Monitoring:
+    ** Audit account lockout
+    ** Audit failed login attempts
+    ** Audit successful logins
+    ** Audit file share access
+    ** Audit file system access
+    ** Audit process creation and termination
+    ** Audit powershell activity through script block logging
+    *Audit control panel and settings access, with special attention to sensitive settings such as user accounts and group memberships.
+
+=== Marketing Group policy
+
+This policy is applied to all users and devices in the `Marketing` organizational unit.
+
+User Configuration:
+
+* Allow access to Control Panel and Settings to allow marketing team to change necessary settings for their work, but monitor and audit access to sensitive settings such as user accounts and group memberships.
+
+* Allow access to command prompt and powershell for marketing purposes, but monitor and audit access to sensitive commands.
+
+* Disable access to registry editor and task manager to prevent unauthorized changes and monitoring of processes.
+
+* Browser Control:
+    ** Set homepage to the company system
+    ** Allow access to all websites but monitor and audit access
+    ** Allow extensions and plugins but monitor and audit access
+    ** Allow downloading files but set the download directory to a monitored and audited folder
+    ** Allow access to developer tools in the browser to allow marketing team to analyze web pages and troubleshoot issues, but monitor and audit access.
+
+* Printer Access:
+    ** Allow access to all printers in the `MARKETING` organizational unit.
+    ** Allow adding and removing printers but monitor and audit access
+
+Computer Configuration:
+
+* Application control:
+    *** Allowed:
+        ** Allow necessary marketing software, such as graphic design software, video editing software and social media management tools.
+    *** Denied:
+        ** Deny unknown applications not explicitly allowed
+
+* Removable Media:
+    ** Allow access to removable media but it is monitored and audited to prevent data exfiltration and malware introduction through USB devices.
+
+* Windows Updates:
+    ** Updates are configured automatically and they are installed outside of work hours to not disrupt the marketing team during their work.
+
+* Security Hardening:
+    ** Enable User Account Control:
+        *** Run all administrators in Admin Approval Mode
+        *** Prompt for credentials when there is an elevation request
+
+* Credential Guard:
+    ** Enable Credential Guard to protect against credential theft attacks, such as Pass-the-Hash and Pass-the-Ticket, by isolating and protecting user credentials in a secure environment.
+    ** Disallow storage of passwords local device to prevent credential theft in case of device compromise.
+
+* Auditing & Monitoring:
+    ** Audit account lockout
+    ** Audit failed login attempts
+    ** Audit successful logins
+    ** Audit file share access
+    ** Audit file system access
+    ** Audit process creation and termination
+    ** Audit powershell activity through script block logging
+    *Audit control panel and settings access, with special attention to sensitive settings such as user accounts and group memberships.
+
+=== HR Group policy
+
+This policy is applied to all users and devices in the `HR` organizational unit.
+
+User Configuration:
+
+* Start Menu & Taskbar:
+    ** Remove access to Run menu From start menu
+    ** Disable changes to the taskbar and start menu
+
+* Control panel:
+    ** Disable access to control panel and settings
+    ** Enable only certain control panel items such as devices and Printers and Programs and Features
+
+* Disable access to command prompt, powershell, registry editor and task manager.
+
+* Browser Restrictions:
+    ** Set homepage to the company system
+    ** Allow access to all websites but monitor and audit access
+    ** Allow only whitelisted extensions and plugins
+    ** Disable downloading files
+    ** Disable access to developer tools in the browser
+
+* Printer Access:
+    ** Allow access to the shared printer in the HR area only
+    ** Disable adding and removing printers
+
+Computer Configuration:
+
+* Application control:
+    *** Allowed:
+        ** HR software
+        ** Browser
+    *** Denied:
+        ** Deny unknown applications not explicitly allowed
+
+* Removable media:
+    ** Disallow all removable storage class access to prevent data exfiltration and malware introduction through USB devices.
+
+* Windows Updates:
+    ** Disable user access to updates
+    ** All updates are automatically installed outside of working hours
+
+* Security Hardening:
+    ** Enable User Account Control:
+        *** Run all administrators in Admin Approval Mode
+        *** Prompt for credentials when there is an elevation request
+
+* Credential Guard:
+    ** Enable Credential Guard to protect against credential theft attacks, such as Pass-the-Hash and Pass-the-Ticket, by isolating and protecting user credentials in a secure environment.
+    ** Disallow storage of passwords local device to prevent credential theft in case of device compromise.
+
+* Auditing & Monitoring:
+    ** Audit account lockout
+    ** Audit failed login attempts
+    ** Audit successful logins
+    ** Audit file share access
+    ** Audit file system access
+    * At logon wait for the network before allowing the user to log in, to ensure that the latest policies are applied and that the user is not logging in with cached credentials, which may be a security risk if the user is using a different device or if their account has been compromised.
+
+=== DHCP
+
+The DHCP serves the `Accounting`, `Frontdesk`, `HR`, `Management`, `Marketing` and `Developers` Vlans,.
+
+==== DHCP Configurations
+
+Configurations for the DHCP scopes for each Vlan are as follows:
+
+.DHCP Configurations
+[cols="1,1,1,1,1",options="header"]
+|===
+|Name
+|Addressing Range
+|DNS server
+|Domain Name
+|Default Gateway
+
+|HQ-DEVELOPERS
+|10.1.10.3 - 10.1.10.29
+|10.2.20.10
+|bitbox.com
+|10.1.10.30
+
+|HQ-HR
+|10.1.20.3 - 10.1.20.60
+|10.2.20.10
+|bitbox.com
+|10.1.20.62
+
+|HQ-ACCOUNTING
+|10.1.30.3 - 10.1.30.28
+|10.2.20.10
+|bitbox.com
+|10.1.30.30
+
+|HQ-MARKETING
+|10.1.40.3 - 10.1.40.12
+|10.2.20.10
+|bitbox.com
+|10.1.40.14
+
+|HQ-FRONTDESK
+|10.1.60.3 - 10.1.60.12
+|10.2.20.10
+|bitbox.com
+|10.1.60.14
+
+|HQ-MANAGEMENT
+|10.1.255.17 - 10.1.255.29
+|10.2.20.10
+|bitbox.com
+|10.1.255.30
+|===
+
+=== File Backup
+
+There is a seperate drive for file backup in the server, which is shared across the network and only accessible to users in the Administrators group, to ensure that only authorized personnel have access to sensitive data.
+
+Every shared folder in the server is backed up to this drive, and the backup is scheduled to run every day outside of working hours, to minimize disruption to users.
+
+=== File Sharing
+
+File sharing is achieved through shared folders on the server, with access permissions set according to the organizational units and groups in Active Directory.
+
+Users in the `Accounting` organizational unit have a maxiumum 5GB of storage space, users in the `HR` organizational unit have a maximum of 5GB of storage space, users in the `MARKETING` organizational unit have a maximum of 10GB of storage space, users in the `DEVELOPERS` organizational unit have a maximum of 20GB of storage space, users in the `MANAGEMENT` organizational unit have a maximum of 20GB of storage space and users in the `FRONTDESK` organizational unit have a maximum of 2GB of storage space, to ensure that storage resources are allocated efficiently and to prevent any one user from consuming excessive amounts of storage.
+
+=== AAA
+
+AAA is set up on the server to provide centralized authentication, authorization and accounting for users accessing network resources.
+
+The RADIUS server has the following RADIUS clients:
+
+* HQ-CORE-MLS1
+* HQ-CORE-MLS2
+* HQ-O-R1
+* HQ-O-S1
+* HQ-PS-MLS1
+* HQ-PS-MLS2
+* HQ-PS-S1
+* HQ-PS-S2
+
+The passkey for all clients is `Passw0rd`.
+
+== Public Linux Server in HQ office
+
+This server's purpose is to host a the company webpage using nginx web server. It is accessible from the internet and it is protected by the `HQ-ASA` firewall. Only the the management and developers can modify the webpage. 
+The website uses the company domain bitbox.com. 
 
 <<<
 

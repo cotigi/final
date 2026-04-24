@@ -38,7 +38,7 @@ class TFTP(Container):
                     yield Label(device["name"], classes="device-info", id=f"tftp-{id}-hostname")
                     yield Label(device["ip"], classes="device-info", id=f"tftp-{id}-ip")
                     with Static(classes="device-indicator-container"):
-                        yield Label(classes=f"display-off", id=f"tftp-{id}-bytes")
+                        yield Label(classes=f"display-off byte-info", id=f"tftp-{id}-bytes")
                         yield LoadingIndicator(classes="device-test-indicator display-off", id=f"tftp-{id}-indicator")
                     yield Button(
                         "Save",
@@ -67,15 +67,15 @@ class TFTP(Container):
 
         container.set_classes("device-container warning-border")
         indicator.set_classes("device-test-indicator display-on")
-        bytes_label.set_classes("display-off")
+        bytes_label.set_classes("display-off byte-info")
 
         status, bytes_str = await save_to_tftp(hostname, ip)
 
         indicator.set_classes("device-test-indicator display-off")
 
         if status:
-            bytes_label.update(bytes_str+"B")
-            bytes_label.set_classes("display-on")
+            bytes_label.update(bytes_str+" Bytes")
+            bytes_label.set_classes("display-on byte-info")
 
             container.add_class("success-border")
         else:

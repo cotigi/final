@@ -1,5 +1,0 @@
-Host 192.168.100.*
-    KexAlgorithms +diffie-hellman-group1-sha1
-    HostKeyAlgorithms +ssh-rsa
-    PubkeyAcceptedAlgorithms +ssh-rsa
-    Ciphers +aes128-cbc,aes192-cbc,aes256-cbc,3des-cbc

@@ -69,6 +69,10 @@ $lighter-default: #51576d;
     margin: 1 0;
 }
 
+.byte-info {
+    margin: 1 0;
+}
+
 .device-test {
     height: 3;
     min-width: 1;

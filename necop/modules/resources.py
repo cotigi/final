@@ -6,8 +6,8 @@ class Resources:
     def __init__(
             self, 
             user = {
-                "username": "root",
-                "password": "rootpa55",
+                "username": "AAAadmin",
+                "password": "AAAadminpa55",
             },
             enable_password = "enpa55"
         ):
@@ -15,7 +15,7 @@ class Resources:
         self.update_devices()
         self.user = user
         self.enable_password = enable_password
-        self.tftp_server = "192.168.100.11" # Placeholder
+        self.tftp_server = "10.1.50.5"
 
     def update_devices(self):
         """Calls the file reader from the files module."""

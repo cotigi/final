@@ -533,6 +533,9 @@ Dynamic IP source guard is configured as follows:
 |Device
 |Interface
 
+|HQ-S1
+|Gig0/2
+
 .3+.^|HQ-F0-S1
 |Fa0/10
 |Fa0/11
@@ -542,14 +545,17 @@ Dynamic IP source guard is configured as follows:
 |Fa0/10
 |Fa0/16
 
-|HQ-F1-S2
+.3+.^|HQ-F1-S2
 |Fa0/10
+|Fa0/20
+|Fa0/24
 
 |HQ-F2-S1
 |Fa0/10
 
-|HQ-F2-S2
+.2+.^|HQ-F2-S2
 |Fa0/10
+|Fa0/24
 |===
 
 ===== Static
@@ -1414,11 +1420,13 @@ Dynamic IP source guard is configured as follows:
 |Device
 |Interface
 
-|PC-PS-S1
+.2+.^|PC-PS-S1
 |Fa0/1
+|Fa0/24
 
-|PC-O-S1
+.2+.^|PC-O-S1
 |Fa0/1
+|Fa0/24
 |===
 
 ===== Static
@@ -2282,8 +2290,8 @@ The tested PCs are the following:
 |Vlan
 |Expected Network
 
-|Frontend PC
-|FRONTEND (V160)
+|Frontdesk PC
+|FRONTDESK (V160)
 |10.1.60.0/28
 
 |Management PC
@@ -2291,7 +2299,7 @@ The tested PCs are the following:
 |10.1.255.0/27
 |===
 
-.Frontend PC
+.Frontdesk PC
 image::images/1-fepc.png[align="center"]
 
 .Management PC
@@ -2956,12 +2964,15 @@ username admin secret 5 $1$mERr$YDWMoxSY4R79.r8uptM1C0
 ip arp inspection vlan 150
 ip arp inspection validate src-mac dst-mac ip
 !
+ip source binding 00D0.9756.36C6 vlan 150 10.1.50.5 interface gigabitethernet0/2
+!
 ip dhcp snooping
 !
 dot1x system-auth-control
 spanning-tree mode rapid-pvst
 spanning-tree extend system-id
 spanning-tree vlan 110,120,130,140,150,160,333,666 priority 24576
+spanning-tree loopguard default
 !
 interface Port-channel1
  switchport trunk native vlan 666
@@ -3163,6 +3174,7 @@ interface GigabitEthernet0/2
  switchport port-security aging time 5
  spanning-tree portfast
  spanning-tree bpduguard enable
+ ip verify source port-security
 !
 interface Vlan1
  no ip address
@@ -3182,7 +3194,7 @@ radius-server host 10.1.50.5 auth-port 1645 key aaapa55
 ip access-list standard SSH
  permit 10.1.255.0 0.0.0.31
 line con 0
- login
+ login authentication default
 !
 line vty 0 4
  access-class SSH in
@@ -3240,6 +3252,7 @@ ip dhcp snooping
 spanning-tree mode rapid-pvst
 spanning-tree extend system-id
 spanning-tree vlan 110,120,130,140,150,160,333,666 priority 28672
+spanning-tree loopguard default
 !
 interface Port-channel1
  switchport trunk native vlan 666
@@ -3452,7 +3465,7 @@ radius-server host 10.1.50.5 auth-port 1645 key aaapa55
 ip access-list standard SSH
  permit 10.1.255.0 0.0.0.31
 line con 0
- login
+ login authentication default
 !
 line vty 0 4
  access-class SSH in
@@ -3509,11 +3522,14 @@ username admin secret 5 $1$mERr$YDWMoxSY4R79.r8uptM1C0
 ip arp inspection vlan 160
 ip arp inspection validate src-mac dst-mac ip
 !
+ip source binding 0003.E4D8.BC6D vlan 160 10.1.60.13 interface fastethernet0/24
+!
 ip dhcp snooping
 !
 dot1x system-auth-control
 spanning-tree mode rapid-pvst
 spanning-tree extend system-id
+spanning-tree loopguard default
 !
 interface FastEthernet0/1
  switchport trunk native vlan 666
@@ -3587,6 +3603,7 @@ interface FastEthernet0/10
  dot1x pae authenticator
  spanning-tree portfast
  spanning-tree bpduguard enable
+ ip verify source port-security
 !
 interface FastEthernet0/11
  switchport access vlan 160
@@ -3600,6 +3617,7 @@ interface FastEthernet0/11
  dot1x pae authenticator
  spanning-tree portfast
  spanning-tree bpduguard enable
+ ip verify source port-security
 !
 interface FastEthernet0/12
  switchport access vlan 666
@@ -3682,6 +3700,7 @@ interface FastEthernet0/24
  switchport port-security aging time 5
  spanning-tree portfast
  spanning-tree bpduguard enable
+ ip verify source port-security
 !
 interface GigabitEthernet0/1
  switchport access vlan 666
@@ -3715,7 +3734,7 @@ radius-server host 10.1.50.5 auth-port 1645 key aaapa55
 ip access-list standard SSH
  permit 10.1.255.0 0.0.0.31
 line con 0
- login
+ login authentication default
 !
 line vty 0 4
  access-class SSH in
@@ -3777,6 +3796,7 @@ ip dhcp snooping
 dot1x system-auth-control
 spanning-tree mode rapid-pvst
 spanning-tree extend system-id
+spanning-tree loopguard default
 !
 interface FastEthernet0/1
  switchport trunk native vlan 666
@@ -3850,6 +3870,7 @@ interface FastEthernet0/10
  dot1x pae authenticator
  spanning-tree portfast
  spanning-tree bpduguard enable
+ ip verify source port-security
 !
 interface FastEthernet0/11
  switchport access vlan 666
@@ -3893,6 +3914,7 @@ interface FastEthernet0/16
  dot1x pae authenticator
  spanning-tree portfast
  spanning-tree bpduguard enable
+ ip verify source port-security
 !
 interface FastEthernet0/17
  switchport access vlan 666
@@ -3975,7 +3997,7 @@ radius-server host 10.1.50.5 auth-port 1645 key aaapa55
 ip access-list standard SSH
  permit 10.1.255.0 0.0.0.31
 line con 0
- login
+ login authentication default
 !
 line vty 0 4
  access-class SSH in
@@ -4032,11 +4054,15 @@ username admin secret 5 $1$mERr$YDWMoxSY4R79.r8uptM1C0
 ip arp inspection vlan 110,130,140
 ip arp inspection validate src-mac dst-mac ip
 !
+ip source binding 0010.1199.6748 vlan 130 10.1.30.29 interface fastethernet0/20
+ip source binding 0010.1166.7675 vlan 140 10.1.40.13 interface fastethernet0/24
+!
 ip dhcp snooping
 !
 dot1x system-auth-control
 spanning-tree mode rapid-pvst
 spanning-tree extend system-id
+spanning-tree loopguard default
 !
 interface FastEthernet0/1
  switchport trunk native vlan 666
@@ -4109,6 +4135,7 @@ interface FastEthernet0/10
  dot1x pae authenticator
  spanning-tree portfast
  spanning-tree bpduguard enable
+ ip verify source port-security
 !
 interface FastEthernet0/11
  switchport access vlan 666
@@ -4172,6 +4199,7 @@ interface FastEthernet0/20
  switchport port-security aging time 5
  spanning-tree portfast
  spanning-tree bpduguard enable
+ ip verify source port-security
 !
 interface FastEthernet0/21
  switchport access vlan 666
@@ -4199,6 +4227,7 @@ interface FastEthernet0/24
  switchport port-security aging time 5
  spanning-tree portfast
  spanning-tree bpduguard enable
+ ip verify source port-security
 !
 interface GigabitEthernet0/1
  switchport trunk native vlan 666
@@ -4233,7 +4262,7 @@ radius-server host 10.1.50.5 auth-port 1645 key aaapa55
 ip access-list standard SSH
  permit 10.1.255.0 0.0.0.31
 line con 0
- login
+ login authentication default
 !
 line vty 0 4
  access-class SSH in
@@ -4296,6 +4325,7 @@ ip dhcp snooping
 dot1x system-auth-control
 spanning-tree mode rapid-pvst
 spanning-tree extend system-id
+spanning-tree loopguard default
 !
 interface FastEthernet0/1
  switchport trunk native vlan 666
@@ -4368,6 +4398,7 @@ interface FastEthernet0/10
  dot1x pae authenticator
  spanning-tree portfast
  spanning-tree bpduguard enable
+ ip verify source port-security
 !
 interface FastEthernet0/11
  switchport access vlan 666
@@ -4486,7 +4517,7 @@ radius-server host 10.1.50.5 auth-port 1645 key aaapa55
 ip access-list standard SSH
  permit 10.1.255.0 0.0.0.31
 line con 0
- login
+ login authentication default
 !
 line vty 0 4
  access-class SSH in
@@ -4544,11 +4575,14 @@ username admin secret 5 $1$mERr$YDWMoxSY4R79.r8uptM1C0
 ip arp inspection vlan 120,333
 ip arp inspection validate src-mac dst-mac ip
 !
+ip source binding 0006.2ACE.3B8A vlan 120 10.1.20.61 interface fastethernet0/24
+!
 ip dhcp snooping
 !
 dot1x system-auth-control
 spanning-tree mode rapid-pvst
 spanning-tree extend system-id
+spanning-tree loopguard default
 !
 interface FastEthernet0/1
  switchport trunk native vlan 666
@@ -4621,6 +4655,7 @@ interface FastEthernet0/10
  dot1x pae authenticator
  spanning-tree portfast
  spanning-tree bpduguard enable
+ ip verify source port-security
 !
 interface FastEthernet0/11
  switchport access vlan 666
@@ -4708,6 +4743,7 @@ interface FastEthernet0/24
  switchport port-security aging time 5
  spanning-tree portfast
  spanning-tree bpduguard enable
+ ip verify source port-security
 !
 interface GigabitEthernet0/1
  switchport trunk native vlan 666
@@ -4742,7 +4778,7 @@ radius-server host 10.1.50.5 auth-port 1645 key aaapa55
 ip access-list standard SSH
  permit 10.1.255.0 0.0.0.31
 line con 0
- login
+ login authentication default
 !
 line vty 0 4
  access-class SSH in
@@ -4853,6 +4889,7 @@ object network REMOTE
 route OUTSIDE 0.0.0.0 0.0.0.0 12.12.12.1 1
 !
 access-list OUTSIDE-IN extended permit object-group DMZ-SERVICES any object DMZ-PUBLIC-IP
+access-list OUTSIDE-IN extended permit object-group DMZ-SERVICES any object DMZ-NETWORK-IPV6
 access-list OUTSIDE-IN extended permit ip object REMOTE object LOCAL
 access-list VPN-TRAFFIC extended permit ip object LOCAL object REMOTE
 !
@@ -6386,6 +6423,8 @@ username admin secret 5 $1$mERr$YDWMoxSY4R79.r8uptM1C0
 ip arp inspection vlan 230
 ip arp inspection validate src-mac dst-mac ip
 !
+ip source binding 00D0.BA5B.5C07 vlan 230 10.2.30.2 interface fastethernet0/24
+!
 ip dhcp snooping
 !
 dot1x system-auth-control
@@ -6401,6 +6440,7 @@ interface FastEthernet0/1
  switchport port-security aging time 5
  authentication port-control auto
  dot1x pae authenticator
+ ip verify source port-security
 !
 interface FastEthernet0/2
  switchport access vlan 666
@@ -6540,6 +6580,7 @@ interface FastEthernet0/24
  switchport nonegotiate
  switchport port-security mac-address sticky 
  switchport port-security aging time 5
+ ip verify source port-security
 !
 interface GigabitEthernet0/1
  switchport trunk native vlan 666
@@ -6590,7 +6631,7 @@ line vty 5 15
 end
 ----
 
-==== PC-PC-S1
+==== PC-PS-S1
 .Configuration
 [source]
 ----
@@ -6630,6 +6671,8 @@ username admin secret 5 $1$mERr$YDWMoxSY4R79.r8uptM1C0
 ip arp inspection vlan 220,332
 ip arp inspection validate src-mac dst-mac ip
 !
+ip source binding 0060.7035.2DB1 vlan 220 10.2.20.10 interface fastethernet0/24
+!
 ip dhcp snooping
 !
 dot1x system-auth-control
@@ -6645,6 +6688,7 @@ interface FastEthernet0/1
  switchport port-security aging time 5
  authentication port-control auto
  dot1x pae authenticator
+ ip verify source port-security
 !
 interface FastEthernet0/2
  switchport access vlan 666
@@ -6786,6 +6830,7 @@ interface FastEthernet0/24
  switchport nonegotiate
  switchport port-security mac-address 0060.7035.2DB1
  switchport port-security aging time 5
+ ip verify source port-security
 !
 interface GigabitEthernet0/1
  switchport trunk native vlan 666
@@ -6840,7 +6885,7 @@ line vty 5 15
 end
 ----
 
-==== PC-PC-S2
+==== PC-PS-S2
 .Configuration
 [source]
 ----
@@ -7136,21 +7181,6 @@ Package Center,PC-O-R1,10.2.255.193
 Package Center,PC-O-R1,10.2.255.194
 ----
 
-===== ssh
-*Location*: `necop/resources/ssh`
-
-config for legacy SSH connections.
-
-.Legacy SSH Options
-[source]
-----
-Host 10.*.*.*
-    KexAlgorithms +diffie-hellman-group1-sha1
-    HostKeyAlgorithms +ssh-rsa
-    PubkeyAcceptedAlgorithms +ssh-rsa
-    Ciphers +aes128-cbc,aes192-cbc,aes256-cbc,3des-cbc
-----
-
 ==== Modules
 
 ===== resources.py
@@ -7170,8 +7200,8 @@ class Resources:
     def __init__(
             self, 
             user = {
-                "username": "root",
-                "password": "rootpa55",
+                "username": "AAAadmin",
+                "password": "AAAadminpa55",
             },
             enable_password = "enpa55"
         ):
@@ -7179,7 +7209,7 @@ class Resources:
         self.update_devices()
         self.user = user
         self.enable_password = enable_password
-        self.tftp_server = "192.168.100.11" # Placeholder
+        self.tftp_server = "10.1.50.5"
 
     def update_devices(self):
         """Calls the file reader from the files module."""
@@ -7249,13 +7279,6 @@ def read_devices():
     file.close()
 
     return devices
-
-def log(message):
-    file = open("log.txt", "a")
-
-    file.write(message)
-
-    file.close()
 ----
 
 ===== network.py
@@ -7271,7 +7294,6 @@ Responsable for network related tasks like pinging and SSH.
 
 from netmiko.exceptions import NetmikoTimeoutException
 from ..resources import resources
-from ..files import log
 
 import os
 from netmiko import ConnectHandler
@@ -7282,12 +7304,7 @@ async def save_to_tftp(hostname, ip):
             "host": ip,
             "username": resources.user["username"],
             "password": resources.user["password"],
-            "secret": resources.enable_password,
-            "disabled_algorithms": {
-                "kex": [],
-                "keys": [],
-            },
-            "ssh_config_file": "~/Projects/final/necop/resources/ssh"
+            "secret": resources.enable_password
     }
 
     try:
@@ -7303,16 +7320,12 @@ async def save_to_tftp(hostname, ip):
         strip_prompt=False
     )
 
-    log(str(response))
-
     if "Address or name of remote host" in response:
         response = conn.send_command_timing(
             command_string=resources.tftp_server,
             strip_command=False,
             strip_prompt=False
         )
-
-    log(str(response))
 
     if "Destination filename" in response:
         response = conn.send_command_timing(
@@ -7322,21 +7335,15 @@ async def save_to_tftp(hostname, ip):
             last_read=5.0,
             read_timeout=120.0
         )
-    log(str(response))
 
     conn.disconnect()
 
-    if "OK" in response:
+    if "!" in response:
         bytes_uploaded = str(response)\
-                            .splitlines()[1]\
-                            .lstrip("[")\
-                            .rstrip("]")\
-                            .split("-")[1]\
-                            .rstrip("bytes")\
-                            .strip()
+                            .splitlines()[2]\
+                            .split()[0]
 
         return (True, bytes_uploaded)
-    log(str(response))
 
     return (False, "Null")
 
@@ -7437,7 +7444,7 @@ Responsable for the device testing screen.
 """Responsable for the Devices panel"""
 
 from ..resources import resources
-from ..network.network import is_up
+from ..network import is_up
 
 from textual.app import ComposeResult
 from textual.containers import (
@@ -7520,7 +7527,7 @@ Responsable for saving running configurations onto a given tftp server.
 """Responsable for the TFTP"""
 
 from ..resources import resources
-from ..network.network import save_to_tftp
+from ..network import save_to_tftp
 
 from textual.app import ComposeResult
 from textual.containers import (
@@ -7557,7 +7564,7 @@ class TFTP(Container):
                     yield Label(device["name"], classes="device-info", id=f"tftp-{id}-hostname")
                     yield Label(device["ip"], classes="device-info", id=f"tftp-{id}-ip")
                     with Static(classes="device-indicator-container"):
-                        yield Label(classes=f"display-off", id=f"tftp-{id}-bytes")
+                        yield Label(classes=f"display-off byte-info", id=f"tftp-{id}-bytes")
                         yield LoadingIndicator(classes="device-test-indicator display-off", id=f"tftp-{id}-indicator")
                     yield Button(
                         "Save",
@@ -7586,15 +7593,15 @@ class TFTP(Container):
 
         container.set_classes("device-container warning-border")
         indicator.set_classes("device-test-indicator display-on")
-        bytes_label.set_classes("display-off")
+        bytes_label.set_classes("display-off byte-info")
 
         status, bytes_str = await save_to_tftp(hostname, ip)
 
         indicator.set_classes("device-test-indicator display-off")
 
         if status:
-            bytes_label.update(bytes_str+"B")
-            bytes_label.set_classes("display-on")
+            bytes_label.update(bytes_str+" Bytes")
+            bytes_label.set_classes("display-on byte-info")
 
             container.add_class("success-border")
         else:
@@ -7678,6 +7685,10 @@ $lighter-default: #51576d;
     height: 1;
     width: 1fr;
 
+    margin: 1 0;
+}
+
+.byte-info {
     margin: 1 0;
 }
 

@@ -1,7 +1,7 @@
 """Responsable for the Devices panel"""
 
 from ..resources import resources
-from ..network.network import is_up
+from ..network import is_up
 
 from textual.app import ComposeResult
 from textual.containers import (

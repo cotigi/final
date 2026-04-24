@@ -1,7 +1,7 @@
 """Responsable for the TFTP"""
 
 from ..resources import resources
-from ..network.network import save_to_tftp
+from ..network import save_to_tftp
 
 from textual.app import ComposeResult
 from textual.containers import (

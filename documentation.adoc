@@ -1,37 +1,37 @@
-= Final Project
+= Vizsgaremek
 Pászti Tibor Miklós & Póra Dávid
 include::utils.adoc[]
 
-== Introduction
+== Bevezetés
 
-In this project we documented the network infrastructure 
-of a package delivery company called BitBox. Like https://gls-group.com/HU/hu/home/[GLS]
-and https://www.foxpost.hu/[FOXPOST], this company delivers to 
-package lockers.
+Ez a Dokumentáció a BitBox csomagszállító cég hálózati 
+és szerver infrastruktújáról szól.
+Ez a cég, mint a https://gls-group.com/HU/hu/home/[GLS]
+és https://www.foxpost.hu/[FOXPOST], egy csomagszállító cég.
 
-There are three sites:
+Az alábbi telephelyek lettek kiépítve:
 
-Headquarters:: This location is where the company handles acounting and development.
-Remote Package Storage:: This location is for long term package storage.
-Package Center:: This location houses the packages and the company webserver, while also handling customer service
-and in person package pick up.
+Headquarters:: Cég vezetési, bérszámlálási és fejlesztési telephely
+Remote Package Storage:: Hosszú távú csomag tárolás és feldolgozás
+Package Center:: Rövid távú csomag tárolás és átadás, illetve web szerver
+futtatása és tárolása
 
 <<<
 
-== Project Management
+== Projektmenedzsment
 
-=== Task Tracking
-The task are tracked using https://trello.com/[Trello] with 
-each task being assigned to one of three lists.
+=== Feladat Követés
+A feladatokat a https://trello.com/[Trello] oldalon követjük.
+Minden feladat az alábbi négy listán kell hogy átmenjen:
 
 - *Todo*
 - *In Progress*
 - *Under Review*
 - *Done*
 
-The task naming convention is: *<category>: <topic>*
+Feladatok elnevezési szabálya: *<category>: <topic>*
 
-These categories are:
+Kategóriák:
 
 - *Documentation*
 - *Programming*
@@ -41,98 +41,96 @@ These categories are:
 
 image::images/trello.png[align="center"]
 
-==== Automations
+==== Autómatizációk 
 
-===== Labeling
+===== Bélyegezés
 
-- When a new task is created in the Todo list, this automation
-labels the task depending on the category mentioned at the start
-of the task name.
+- Amikor egy új feladat a `TODO` listába kerül, ez az autómatizáió
+meg bélyegezi az elöbb említett kategóriák alapján.
 
-- When a task is dragged into the Done list the Done label
-is automatically assigned.
+- Amikoe egy feladat átkerül a `DONE` listába, 
+rákerül a Done bélyeg.
 
-===== miscellaneous
+===== Egyéb
 
-- When dragging a task from Todo to In Progress,
-it automatically assigns the said person to the task.
+- Amikoe egy feladat átkerül az `In Progress` listába,
+az adott személy automatikusan említve lesz a feladatban.
 
 <<<
 
-=== Documentation
-The documentation is written in https://asciidoctor.org/[Asciidoctor]
-and converted into PDF. This document is stored on https://github.com/[Github]
-for easier teamwork and version control.
+=== Dokumentáció
+A dokumentáció https://asciidoctor.org/[Asciidoctor] leíró nyelvben
+van írva, ami késöbb PDF formátumba lesz konvertálva. 
+Ez a dokumentáció a https://github.com/[Github] felületen van 
+tárolva, könnyebb csapatmunka és verzió követés érdekében.
 
-Every addition to the documentation is a new branch that has the 
-following naming convention:
+Amikor egy új ág készül, az alábbi elnevezési szabályokat kell követni:
 
-- *Networking:* network/<site>/<topic>
-- *Programming:* prog/<topic>
-- *Server:* server/<OS>/<topic>
-- *Documentation:* docs/<topic>
+- *Hálózat:* network/<telephely>/<téma>
+- *Programozás:* prog/<téma>
+- *Szerver:* server/<OS>/<téma>
+- *Dokumentáció:* docs/<téma>
 
-When an addition is completed the person assigned to the task has to issue
-a pull-request and the other party has to authorize it.
-The main branch is protected and thus people can't push directly.
+Amikor egy feladat kész van, az adott személy létrehoz egy 
+pull-requestet és a másik személynek ezt jóvá kell hagynia.
+
+A main ág védett állapotvan van, így nem lehet direkt módosítani.
 
 image::images/git-tree.png[align="center"]
 
 ==== Github Actions
 
-There is one workflow that is responsible for converting the 
-Asciidoctor file to a PDF file for every branch on push and or pull requests.
-This PDF file is uploaded as an artifact and can be downloaded in a zip file.
-In the case of the main branch there is an additional feature 
-that places the generated PDF file into the latest release.
+Egy workflow létezik a repository-ban. Ez a workflow az asciidoctor
+fájl-t, PDF-re konvertálja és a main ág esetében ez a PDF fájl kikerül
+a latest release fül alá.
 
 image::images/git-actions.png[align="center"]
 
 <<<
 
-== General
+== Általános
 
-General configurations apply to all devices specified
-in the given section across all sites.
+Általános konfigurációk minden telephelyre vonatkoznak.
 
-=== User and Password Policies
+=== Felhasználó és Jelszó Szabályok
 
-All network devices must handle login attempts through AAA in
-the following ways (configured as the default list):
+Minden hálózati eszköznek a AAA protokolon keresztül kell
+hitelesítenie, az alábbi módon.
 
-==== Login
+==== Bejelentkezés
 
-. AAA should check the given RADIUS server
-. AAA Should check the local user database
+. AAA megnézi az adott RADIUS szervert
+. AAA megnézi a lokális felhasználókat
 
 ==== Dot1x
 
-. AAA should check the given RADIUS server
+. AAA megnézi a RADIUS szervert
 
-More specific AAA configurations are specified within the given site.
+Pontosabb AAA konfigurációk az adott telephelyen belül találhatók
 
-NOTE: All sites must use RADIUS as their AAA server.
+NOTE: Minden telephelynek a RADIUS protokolt kell használnia
+AAA hitelesítésre
 
-==== Passwords
+==== Jelszavak
 
-All network devices must be configured with the 
-following enable secret: `enpa55`
+Minden hálózati eszközt el kell látni a `enpa55` enable secret
+jelszóval
 
-==== Users
+==== Felhasználók
 
-All network devices must be configured with the following user:
+Minden hálózati eszközt el kell látni az alábbi felhasználóval:
 
-* *Username*: `admin`
-* *Password*: `adminpa55`
+* *Név*: `admin`
+* *Jelszó*: `adminpa55`
 
-.Users
+.Felhasználók
 [cols="1h,1,1",options="header"]
 |===
-|Place
-|Username
-|Password
+|Hely
+|Név
+|Jelszó
 
-|Local
+|Lokális
 |admin
 |adminpa55
 
@@ -145,103 +143,101 @@ All network devices must be configured with the following user:
 |userpa55
 |===
 
-=== Remote Access Policy
+=== Távoli Elérés Szabályzat
 
-Remote access is achieved through the SSH protocol,
-available on all available VTY lines on the given device, using
-the default AAA configuration.
+SSH protokolon keresztül érünk el távoli elérést, ami minden
+VTY vonalon be kell hogy legyen kapcsolva és az alapértelmezett
+AAA beállítással ellátva.
 
-SSH is configured with the following parameters:
+SSH az alábbi paraméterekkel van ellátva:
 
-.SSH Parameters
+.SSH Paraméterek 
 [cols="1h,1",options="header"]
 |===
-|Setting
-|Parameter
+|Beállítás
+|Paraméter
 
-|Version
+|Verzió
 |2
 
-|Key Modulus
+|Kulcs Hossz
 |2048
 
-|Auth-retries
+|Hitelesítés Próbák
 |2
 
-|Timeout
-|30sec
+|Tiltás
+|30 Másodperc
 |===
 
-NOTE: Only the MANAGEMENT Vlan and the like (in the case of the Package Center site)
-can access the vty lines. This is controlled by the `SSH` ACL placed on all
-vty lines inward. For further information, refer to <<hq_ssh, HQ SSH>> and
+NOTE: Csak a `MANAGEMENT` és hasonló (a `Package Center` esetében) 
+vlanok érhetik el a VTY vonalakat. További információért, lásd <<hq_ssh, HQ SSH>> és
 <<pc_ssh, Package Cetner SSH>>
 
-=== Port-security Policies
+=== Port-security Szabályzat
 
-==== General
+==== Általános
 
-.Port-security Policy
+.Port-security Szabályzat
 [cols="3,^.^1",options="header"]
 |===
-|Policy 
-|Upon Violation
+|Szabály
+|Megsértés esetén
 
-|All connections leading to host devices must
-allow atmost 2 MAC addresses
-|Restrict
+|Minden kapcsolat ami felhasználói eszközökhöz tart, 
+maximum 2 MAC címet engedhet meg
+|Korlátozás
 
-|All connections leading to printers or access points 
-must allow atmost 1 MAC address with the sticky setting
-.2+.^|Shutdown
+|Minden kapcsolat ami nyomtatókhoz vagy access pointokhoz tart,
+maximum 1 MAC címet engedélyezhet, a sticky beállítással
+.2+.^|Lekapcsolás
 
-|All connections leading to servers must
-allow atmost 1 static MAC address
+|Minden kapcsolat ami szerverhez tart,
+maximum 1 statikus MAC címet engedhet meg
 
-|All unused interfaces must be shutdown and
-placedinto the TRASH Vlan
+|Minden nem használt portot le kell kapcsolni és
+a TRASH vlan ba kell helyezni
 |Null
 |===
 
-All access interfaces must be configured with an
-aging time of 5 minutes.
+Minden access porton az aging time beállítást 5 percre kell állítani
 
 ==== Dot1x
 
-All switch interfaces connecting to a
-PC, laptop must use Dot1x port authentication
-through the given AAA RADIUS server.
+Minden switch portot ami felhasználói eszközhöz vezet, el kell 
+látni a Dot1x port hitelesítés beállítással, a AAA RADIUS szerveren keresztül
 
 ==== IP Source Guard
+* IP Source Guard protokolt minden switchen és multi-layer switchen
+be kell állítani, ahol van végeszköz kapcsolat.
 
-* IP source guard must be configured on all switches and 
-multi-layer switches with connections to end devices.
 
-* All printer and servers must be statically configured
-with it's given MAC and IP address.
+* Minden nyomtató és szerver esetében a MAC és IP cím párt
+statikusan be kell állítani
 
-NOTE: For further information, refer to 
-<<hq_ip_sg, HQ IP Source Guard>> and
+NOTE: További információért, lásd
+<<hq_ip_sg, HQ IP Source Guard>> és
 <<pc_ip_sg, Package Center IP Source Guard>>
 
-=== DHCP Snooping Policy
+=== DHCP Snooping Szabályzat
 
-DHCP snooping must me configured on all switches globally with
-a rate limit of `20` on upstream links towards the given DHCP server.
+DHCP Snooping minden switchen globálisan be kell állítani és
+ellátni egy 20 csomag/másodperc beállítással, a DHCP szerver
+irányába.
 
-NOTE: For further information, refer to 
-<<hq_dhcp_snooping, HQ DHCP Snooping>> and 
+NOTE: További információért, lásd
+<<hq_dhcp_snooping, HQ DHCP Snooping>> és 
 <<pc_dhcp_snooping, Package Center DHCP Snooping>>
 
-=== Dynamic ARP Inspection Policy
+=== Dynamic ARP Inspection Szabályzat
 
-All interfaces leading to host, access point, printer or server devices, 
-should be treated as untrusted (this applies to unused interfaces too).
+. Minden vég eszközhöz csatlakozó port nem megbízottként kell
+hogy legyen tekintve (ez a nem használt portokra is igaz).
 
-Interfaces leading to other network devies should be treated as trusted.
+. Minden hálózati eszközhöz csatlakozó port megbízott
 
-ARP packets must be validated through the source and destination
-MAC addresses. This is achieved with the following command:
+. ARP csomagokat validálni kell a forrás és cél MAC cím, illetve 
+az IP cím alapján
 
 .ARP Inspection
 [source]
@@ -249,47 +245,48 @@ MAC addresses. This is achieved with the following command:
 ip arp inspection validate src-mac dst-mac ip
 ----
 
-NOTE: For further information, refer to 
-<<hq_arp_inspection, HQ ARP Inspection>> and 
+NOTE: További információért, lásd
+<<hq_arp_inspection, HQ ARP Inspection>> és
 <<pc_arp_inspection, Package Center ARP Inspection>>
 
-=== Miscellaneous Policies
+=== Egyébb Szabályzatok 
 
-. All network devices/servers must be configured with the correct hostname
-stated in the documentation, found at the given site's topology section.
+. Minden hálózati eszközt és szervert el kell látni az 
+topológiában említett névvel.
 
-. All network devices must be configured with `no ip domain-lookup`
-to avoid accidental DNS lookup while configuring the given device.
+. Minden hálózati eszközt el kell látni a `no ip domain-lookup`
+parancsal.
 
-. All switch and multi-layer switch interfaces (in switch-port mode)
-must be configured with `switchport nonegotiation`.
+. Minden switch és multi-layer switch portot el kell látni a `switchport nonegotiation`
+parancsal.
 
-. All network devices must be configured with `service password-encryption`.
+. Minden hálózati eszközt el kell látni a `service password-encryption`
+parancsal.
 
-. All network devices must be configured with `no cdp run`.
+. Minden hálózati eszközt el kell látni a `no cdp run` parancsal.
 
-. All switch interfaces must be configured with `duplex auto`.
+. Minden switch portot el kell látni a `duplex auto` parancsal.
 
-. All ASA devices can only be configured via console connection.
+. Minden ASA eszközt csak konzolos módon szabad konfigurálni.
 
 <<<
 
 == HQ
 
-=== Network
+=== Hálózat
 
-==== Topology
+==== Topológia
 
 image::images/hq.png[align="center"]
 
 <<<
 
-==== Device Specification
+==== Eszköz Specifikáció
 
 [cols="1h,1",options="header"]
 |===
-|Hostname
-|Model
+|Név
+|Modell
 
 |HQ-ASA
 |Cisco ASA 5506-X
@@ -323,14 +320,14 @@ image::images/hq.png[align="center"]
 |===
 
 [#hq-vlans]
-==== Vlans
+==== Vlanok
 
 [cols="1,1,1",options="header"]
 .Vlans
 |===
 |Vlan ID    
-|Name          
-|Network 
+|Név
+|Hálózat
 
 |Vlan 110   
 |DEVELOPERS    
@@ -367,37 +364,37 @@ image::images/hq.png[align="center"]
 
 ===== VTP
 
-VTP version 2 is configured between all switches, with
-`HQ-S1` being the server and all other switches 
-taking up the client role.
+A VTPv2 protokol minden switchen be van állítva és a `HQ-S1`
+a szerver, míg minden más switch kliens módban van.
 
-.VTP Settings
+.VTP Beállítások
 [cols="1h,1",options="header"]
 |===
-|Setting    
-|Parameter
+|Beállítás 
+|Pareméter
 
 |Domain     
 |hq.vtp
 
-|Password   
+|Jelszó   
 |vtppa55
 
-|Version    
+|Verzió
 |2
 |===
 
 [#hq-etherchannel]
 ==== Etherchannel
 
-Etherchannel is set up between `HQ-S1` and `HQ-S2`, with LACP
+Etherchannel protokol be van állítva a `HQ-S1` és `HQ-S2` eszközök
+között, az LACP protokol segítségével.
 
-.Etherchannel Connections and Roles
+.Etherchannel Kapcsolatok és Szerepek
 [cols="1,1,1",options="header"]
 |===
-|From (Active)  
-|To (Passive)   
-|Interfaces
+|Honnan (Aktív)  
+|Hova (Passzív)   
+|Portok
 
 |HQ-S1          
 |HQ-S2          
@@ -409,36 +406,33 @@ Etherchannel is set up between `HQ-S1` and `HQ-S2`, with LACP
 [#hq-rpvst]
 ==== Rapid-PVST
 
-Rapid-PVST is used between all the switches in the network.
+Rapid-PVST+ protokol van beállítva minden switch között.
 
-Switches, with `HQ-S1` being the primary and 
-`HQ-S2` being the secondary root bridge in all Vlans.
+`HQ-S1` a fő, míg `HQ-S2` a mellék gyökér bridge, miden vlanban. 
 
 [cols="1h,2",options="header"]
-.Rapid-PVST Roles
+.Rapid-PVST Szerepek
 |===
-|Role       
-|Device
+|Szerep
+|Eszköz
 
-|Primary    
+|Fő
 |HQ-S1
 
-|Secondary  
+|Mellék
 |HQ-S2
 |===
 
-===== BPDU Guard and Portfast
+===== BPDU Guard és Portfast
 
-BPDU guard and portfast options are applied to
-all end device facing interfaces.
+BPDU Guard és portfast beállítások minden vég eszköz 
+irányába be van állítva.
 
-These are:
-
-.BPDU Guard and Portfast
+.BPDU Guard és Portfast
 [cols="1,1",options="header"]
 |===
-|Device
-|Interface
+|Eszköz
+|Port
 
 |HQ-S1
 |Gig0/2
@@ -467,20 +461,19 @@ These are:
 
 ===== Loop Guard
 
-Loop guard is configured on all switches and multi-layer switches
-globally in the case of a link's partial failure.
+Loop Guard minden switchen globálisan be van konfigurálva.
 
 ===== Root Guard
 
-Only the switches `HQ-S1` and `HQ-S2` should 
-participate in the root election process, and so
-root guard are placed on the following interfaces:
+Csak az eszközök, `HQ-S1` és `HQ-S2`, vehetnek részt
+a gyökér bridge választásban, így az alábbi portokon
+lett Root Guard konfigurálva.
 
-.Root Guarded Interfaces
+.Root Guard Portok
 [cols="1,1",options="header"]
 |===
-|Device
-|Interface
+|Eszköz
+|Port
 
 .5+.^|HQ-S1
 |Fa0/1
@@ -500,18 +493,18 @@ root guard are placed on the following interfaces:
 [[hq_ip_sg]]
 ==== IP Source Guard
 
-NOTE: IP source guard is paired with switchport port-security,
-so that MAC addresses will also be checked.
+NOTE: IP Source Guard, a port-security protokollal van párosítva,
+így a MAC cím szerint is szűrve lesz.
 
-===== Dynamic
+===== Dinamikus
 
-Dynamic IP source guard is configured as follows:
+Dinamikus IP Source Guard az alábbi módon van konfigurálva:
 
-.Dynamic IP Source Guard
+.Dinamikus IP Source Guard
 [cols="1,1"]
 |===
-|Device
-|Interface
+|Eszköz
+|Port
 
 |HQ-S1
 |Gig0/2
@@ -538,18 +531,18 @@ Dynamic IP source guard is configured as follows:
 |Fa0/24
 |===
 
-===== Static
+===== Statikus
 
-Static IP source guard is configured as follows:
+Statikus IP Source Guard az alábbi módon van konfigurálva:
 
-.Static IP Source Guard
+.Statikus IP Source Guard
 [cols="1,1,1,2,2",options="header"]
 |===
-|Device
-|Interface
+|Eszköz
+|Port
 |IP
 |MAC
-|Name
+|Név
 
 |HQ-S1
 |Gig0/2
@@ -583,37 +576,37 @@ Static IP source guard is configured as follows:
 
 ==== HSRP
 
-HSRP is set up between `HQ-R1` and `HQ-R2`, with the 
-HSRP address being the last host IP address in the
-given network.
+HSRP protokol van beállítva a `HQ-R1` és `HQ-R2` eszközök
+között. Minden hálózatvan az utolsó IP cím a virtuális router
+címe.
 
-`HQ-R1` is the active, with `HQ-R2` being the standby device.
+`HQ-R1` az aktív, míg `HQ-R2` a passzív.
 
-This is achieved through the following parameters:
+Ez az alábbi konfigurációkkal lett elérve:
 
-.HSRP Parameters
+.HSRP Paraméterek
 [cols="1,1,1,1",options="header"]
 |===
-|Device 
-|Priority   
-|Version    
-|Preempt
+|Eszköz
+|Prioritás
+|Verzió
+|Kezdeményezés
 
 |HQ-R1  
 |200        
 .2+.^|2          
-|True
+|Igen
 
 |HQ-R2  
 |100        
-|False
+|Nem
 |===
 
 [cols="1,1",options="header"]
-.HSRP IPv4 Addresses
+.HSRP IPv4 Címek
 |===
 |Vlan       
-|Address
+|Cím
 
 |DEVELOPERS 
 |10.1.10.30 
@@ -641,15 +634,15 @@ This is achieved through the following parameters:
 
 ==== DHCPv4
 
-The DHCP server is the `Private Windows` host, 
-providing IPv4 addresses for the following networks:
+Minden hálózatnak a `Private Windows` eszköz
+a DHCP szervere.
 
 [cols="1,1,1,1,1",options="header"]
-.IPv4 DHCP Addressing
+.IPv4 DHCP Címzés
 |===
 |Vlan       
-|Addressing Range   
-|Number Of Hosts
+|Cím Tartomány
+|Címek száma
 |DNS    
 |Default-gateway
 
@@ -687,21 +680,20 @@ providing IPv4 addresses for the following networks:
 
 <<<
 
-[[#hq_dhcp_snooping]]
+[[hq_dhcp_snooping]]
 ==== DHCP Snooping
 
-DHCP snooping is configuration is illustrated with the 
-following diagram:
+DHCP Snooping a kép által illusztrált módon lett konfigurálva:
 
 image::images/hq-dhcp-snooping.png[align="center"]
 
-This state is achieved with the following table of trusted ports:
+Ez az állapot az alábbi megbízott portokkal lett elérve:
 
-.DHCP Snooping Trusted Interfaces
+.DHCP Snooping Megbízott Portok
 [cols="1,1",options="header"]
 |===
-|Device
-|Interface
+|Eszköz
+|Port
 
 .9+.^|HQ-S1
 |Fa0/1
@@ -750,19 +742,16 @@ This state is achieved with the following table of trusted ports:
 |Gig0/1
 |===
 
-NOTE: `HQ-R1` and `HQ-R2` are trusted devices because they use
-the `Private Windows` server as the helper-address.
-
 [[hq_arp_inspection]]
 ==== Dynamic ARP Inspection
 
-ARP inspection is configured on the following devices:
+DAI az alábbi eszközökön van engedélyezve:
 
-.ARP Inspected Devices
+.DAI Eszközök 
 [cols="1,1",options="header"]
 |===
-|Device
-|Vlans
+|Eszköz
+|Vlanok
 
 |HQ-S1
 |150
@@ -781,13 +770,13 @@ ARP inspection is configured on the following devices:
 |HQ-F2-S2
 |===
 
-The trusted interfaces for these devices are:
+Megbízott portok az alábbi módon vannak konfigurálva:
 
-.ARP Trusted Interfaces
+.DAI Megbízott Portok
 [cols="1,1",options="header"]
 |===
-|Device
-|Interface
+|Eszköz
+|Port
 
 .8+.^|HQ-S1
 |Fa0/1
@@ -826,28 +815,28 @@ The trusted interfaces for these devices are:
 
 ==== OSPF
 
-Network advertisement is achieved through single-area OSPF
-illustrated by the following diagram:
+Hálózat hírdetés a single-area OSPF protokollal van elérve,
+illusztrálva az alábbi diagram alapján:
 
 image::images/hq-ospf.png[align="center"]
 
-===== Default Route
+===== Alapértelmezett útvonal
 
-`PC-ASA` is responsable for advertising the default route, 
-wich is `11.11.11.1`.
+`PC-ASA` eszköz felelős az alapértelmezett útvonal hírdetéséért.
+Az alapértelmezett útvonal: `11.11.11.1`
 
 ===== Router-ID
 
-The router-ids are created according to the following naming convention:
+A router azonosítók az alábbi szabályok alapján készülnek:
 
-* The first three octets contain the OSPF area number repeated.
+* Az első három oktet, az OSPF zóna azonosító, ismételve
 
-* The last octet contains the device's id withing the given OSPF area.
+* Az utolsó oktet, az eszközt azonosító szám, a zónán belül
 
 [cols="1,1",options="header"]
-.Router-IDs
+.Router-IDk
 |===
-|Device     
+|Eszköz
 |Router-ID
 
 |HQ-ASA
@@ -860,22 +849,18 @@ The router-ids are created according to the following naming convention:
 |0.0.0.2
 |===
 
-===== Passive Interfaces
+===== Passzív Portok
 
-All interfaces on all devices running an OSPF process, has 
-all it's interfaces configured as passive with the following
-command `passive-interface default`.
+Alapértelmezetten minden port passzív és kézzel aktívra kell
+állítani a kellő portokat.
 
-From that point on only the needed interfaces are selected 
-to be allowed to participate in OSPF advertising.
-
-These interfaces are:
+Aktív portok az alábbiak:
 
 [cols="1,1",options="header"]
-.Active OSPF Interfaces
+.Aktív OSPF portok
 |===
-|Device
-|Interface
+|Eszköz
+|Port
 
 .2+.^|HQ-ASA
 |Gig1/1
@@ -890,7 +875,9 @@ These interfaces are:
 
 ==== AAA
 
-The AAA RADIUS server is `Private Windows` (`10.1.50.5`) with the following clients:
+A AAA RADIUS szerver, a  `Private Windows` (`10.1.50.5`) eszköz.
+
+Kliensek:
 
 * HQ-R1
 * HQ-R2
@@ -902,107 +889,97 @@ The AAA RADIUS server is `Private Windows` (`10.1.50.5`) with the following clie
 * HQ-F2-S1
 * HQ-F2-S2
 
-The passkey for all clients is `aaapa55`.
+A jelszó: `aaapa55`
 
 ==== Access List
 
 [[hq_ssh]]
 ===== SSH
 
-All network devices serving SSH, must have an ACL
-configured so that only the `MANAGEMENT` Vlan can 
-connect to the VTY line.
+Minden hálózati eszköznek, ami SSH-t biztosít, tartalmaznia kell
+egy ACL-t ami csak az adott `MANAGEMENT` vlan-t engedi be a VTY 
+vonalokra.
 
-This is achieved with the following ACL
+Ez az alábbi konfigurációval van elérve:
 
-.SSH Access
+.SSH Hozzáférés
 [source]
 ----
 ip access-list standard SSH
     permit 10.1.255.0 0.0.0.31
 ----
 
-This ACL must be applied onto all the VTY lines for all incoming messages.
+NOTE: A fent említett ACL-t minden VTY vonalon a befelé tekintő
+irányba, be kell konfigurálni.
 
 ===== VPN
 
-The following ACL is configured to identify, which packets
-should be routed within the VPN tunnel.
+A következő ACL a VPN csomagok felismerésére van konfigurálva
 
-.VPN Traffic
+.VPN Csomag Felismerés
 [source]
 ----
 access-list VPN-TRAFFIC extended permit ip object LOCAL object REMOTE
 ----
 
-NOTE: For further information regarding these objects,
-refer to <<hq_network_objects>>
+NOTE: További információért a hálózati objektumokkal kapcsolatban,
+lásd <<hq_network_objects>>
 
-===== Inward Flowing Traffic
+===== Befelé Irányuló Csomagok
 
-The following ACL allows VPN packets to enter the network
+Az alábbi ACL beengedi a VPN csomagokat és minden mást tilt.
 
 [source]
 ----
 access-list OUTSIDE-IN extended permit ip object REMOTE object LOCAL
 ----
 
-This ACL must be configured on the `OUTSIDE` interface, inwards.
+Ez az ACL az `OUTSIDE` zónán kell hogy belegyen állítva.
 
 [source]
 ----
 access-group OUTSIDE-IN in interface OUTSIDE
 ----
 
-==== Firewall
-
-For the firewall we are using the ASA 5506, because of it's 
-Gigabit capabilities.
+==== Tűzfal
 
 ===== Zones
 
-The firewall is split into for zones, which is as follows:
-
 [cols="1,1,1,1,2",options="header"]
 |===
-|Interface
-|Zone
-|Security-level
-|Address
-|Description
+|Port
+|Zóna
+|Biztonsági Szint
+|Cím
+|Leírás
 
 |Gig1/1
 |INSIDE1
 |100
 |10.2.200.1
-|Link to HQ-R1
+|Kapcsolat HQ-R1
 
 |Gig1/2
 |INSIDE2
 |100
 |10.2.200.5
-|Link to HQ-R2
+|Kapcsolat HQ-R2
 
 |Gig1/8
 |OUTSIDE
 |0
 |11.11.11.2
-|Link to ISP
+|kapcsolat ISP
 |===
 
 [[hq_network_objects]]
-===== Network Objects
-
-There are two network object, for easier ACL
-creation and PAT configuration.
-
-These are:
+===== Hálózati Objektumok
 
 [cols="1,1,1",options="header"]
 |===
-|Name
-|Network
-|Mask
+|Név
+|Hálózat
+|Maszk
 
 |LAN1
 |10.1.0.0 
@@ -1021,61 +998,56 @@ These are:
 |255.255.0.0
 |===
 
-NOTE: `LAN1` and `LAN2` are separated because NAT configuration
-occurs inside the given network object which is dependent
-on the zone, so `INSIDE1` and `INSIDE2` both needed a dedicated
-network object.
+NOTE: `LAN1` és `LAN2` a `INSIDE1` és `INSIDE2` zónák NATolás érdekében
+lettek szétszedve illetve duplikálva.
 
 ===== PAT
 
-PAT was set up for the zones, `INSIDE1` and `INSIDE2`.
-The network objects responsible for them are `LAN1` and `LAN2`.
+PAT van konfigurálva a `INSIDE1` és `INSIDE2` zónáknak.
 
-These two PAT configurations are used by the whole network
-across two different uplinks (This is why the same configuration
-is duplicated), and so they use the same address, which is `11.11.11.2`.
+Külső címük: `11.11.11.2`
 
 ==== VPN
 
-Site-to-site VPN is set up between `HQ-ASA` and `PC-ASA` with the 
-following parameters:
+Site-to-site VPN van felállítva `HQ-ASA` és `PC-ASA` az 
+alábbi paraméterekkel:
 
 [cols="1h,1",options="header"]
 |===
-|Setting
-|Parameter
+|Beállítás
+|Paraméter
 
-|Key Exchange
+|Kulcs Csere
 |IKEv1
 
-|IPsec Protocol
+|IPsec Protokol
 |ESP
 
-|Confidentiality
+|Titkosítás
 |AES
 
-|Integrity
+|Integritás
 |SHA256
 
-|Authentication
+|Hitelesítés
 |PSK
 
-|Pre-shared-key
+|Megosztott Kulcs
 |vpnpa55
 
 |Diffie-Hellman
 |DH2
 
-|Lifetime
+|Élettartam
 |1 Hour
 
-|Peer
+|Pár
 |12.12.12.2
 |===
 
 ===== Transform-set
 
-The transfrom-set is configured as such:
+A transform-set az alábbi módon lett konfigurálva:
 
 .VPN Transform Set
 [source]
@@ -1085,28 +1057,27 @@ crypto ipsec ikev1 transform-set VPN-SET esp-aes 256 esp-sha-hmac
 
 ===== ACL
 
-To detect the interesting traffic for the VPN connection
-the following ACL is configured, named as `VPN-TRAFFIC`:
+A VPN csomagok észleléséhez az alábbi ACL-t használjuk:
 
-.VPN Traffic
+.VPN Csomagok Észlelése
 [source]
 ----
 access-list VPN-TRAFFIC extended permit ip object LOCAL object REMOTE
 ----
 
-NOTE: For further information about the network objects, `LOCAL` and
-`REMOTE`, refer to <<hq_network_objects>>
+NOTE: További információért a hálózati objetumokkal kapcsolatban,
+lásd <<hq_network_objects>>
 
 <<<
 
-==== IPv4 Addressing
+==== IPv4 Címzés
 
 [cols="1,1,1,1",options="header"]
-.IPv4 Addressing
+.IPv4 Címzés
 |===
-|Device             
-|Interface  
-|Address    
+|Eszköz
+|Port
+|Cím
 |Default Gateway
 
 .2+.^|HQ-ASA             
@@ -1274,20 +1245,20 @@ NOTE: For further information about the network objects, `LOCAL` and
 
 == Package Center
 
-=== Network
+=== Hálózat
 
-==== Topology
+==== Topológia
 
 image::images/package-center.png[align="center"]
 
 <<<
 
-==== Device Specification
+==== Eszköz Specifikáció
 
 [cols="1h,1",options="header"]
 |===
-|Hostname
-|Model
+|Eszköz
+|Modell
 
 |PC-ASA
 |Cisco ASA 5506-X
@@ -1317,14 +1288,14 @@ image::images/package-center.png[align="center"]
 |Cisco 2960
 |===
 
-==== Vlans
+==== Vlanok
 
 [cols="1,1,1",options="header"]
-.Vlans
+.Vlanok
 |===
 |Vlan ID    
-|Name              
-|Network 
+|Név            
+|Hálózat
 
 |Vlan 210   
 |WORKERS           
@@ -1363,23 +1334,22 @@ image::images/package-center.png[align="center"]
 |Null 
 |===
 
-NOTE: The Vlans `INTER-LAYER-1` and `INTER-LAYER-2` are needed to
-connect the distribution and core layer devices as they don't have 
-a shared network.
+NOTE: A vlanok, `INTER-LAYER-1` és `INTER-LAYER-2`, a rétegek 
+közti kapcsolat érdekében lettek konfigurálva.
 
 ==== Etherchannel
 
-Etherchannel is set up between `PC-CORE-MLS1`, 
-`PC-CORE-MLS2`, `PC-PS-MLS1` and `PC-PS-MLS2` with *LACP*
-in the following ways:
+Etherchannel protokol be van állítva a `PC-CORE-MLS1`, 
+`PC-CORE-MLS2`, `PC-PS-MLS1` és `PC-PS-MLS2` eszközök között, 
+az LACP protokol segítségével.
 
-.Etherchannel Connections and Roles
+.Etherchannel Kapcsolatok és Szerepek
 [cols="1,1,1,1",options="header"]
 |===
-|From (Active)  
-|To (Passive)   
-|Interfaces     
-|Group
+|Honnan (Aktív)  
+|Hova (Passzív)   
+|Portok
+|Csoport
 
 .2+.^|PC-CORE-MLS1   
 |PC-PS-MLS1     
@@ -1400,21 +1370,20 @@ in the following ways:
 |4
 |===
 
-==== Access Points
+==== Access Pointok
 
-One access point is placed in the Office for the frontdesk
-workers and two are placed in the Package Storage for the
-storage workers, with the following configurations:
+Egy access point az Office és 2 access point a Package Storage
+helyiségekben van elhelyezve, az alábbi konfigurációkkal:
 
-.Access Points
+.Access Pointok
 [cols="1,2,1,1,1,1",options="header"]
 |===
-|Device         
+|Eszköz
 |SSID               
-|Password 
-|Auth   
-|Encryption
-|Channel
+|Jelszó
+|Hitelesítés
+|Titkosítás
+|Csatorna
 
 |PC-O-AC1
 |PC-Office
@@ -1432,24 +1401,23 @@ storage workers, with the following configurations:
 |8
 |===
 
-NOTE: All access points are configured with a frequency
-of 2.4GHz.
+NOTE: Minden access point a 2.4GHz frekvencián sugároz.
 
 [[pc_ip_sg]]
 ==== IP Source Guard
 
-NOTE: IP source guard is paired with switchport port-security,
-so that MAC addresses will also be checked.
+NOTE: Ip Source Guard, a port-security protokollal van párosítva,
+így a MAC cím szerint is szűrve lesz.
 
-===== Dynamic
+===== Dinamikus
 
-Dynamic IP source guard is configured as follows:
+Dinamikus IP Source Guard az alábbi módon van konfigurálva:
 
-.Dynamic IP Source Guard
+.Dinamikus IP Source Guard
 [cols="1,1",options="header"]
 |===
-|Device
-|Interface
+|Eszköz
+|Port
 
 .2+.^|PC-PS-S1
 |Fa0/1
@@ -1460,18 +1428,18 @@ Dynamic IP source guard is configured as follows:
 |Fa0/24
 |===
 
-===== Static
+===== Statikus
 
-Static IP source guard is configured as follows:
+Statikus IP Source Guard az alábbi módon van konfigurálva:
 
-.Static IP Source Guard
+.Statikus IP Source Guard
 [cols="1,1,1,2,2",options="header"]
 |===
-|Device
-|Interface
+|Eszköz
+|Port
 |IP
 |MAC
-|Name
+|Név
 
 |PC-PS-S1
 |Fa0/24
@@ -1488,63 +1456,58 @@ Static IP source guard is configured as follows:
 
 ==== HSRP
 
-HSRP is set up between `PC-PS-MLS1` and `PC-PS-MLS2` with the 
-HSRP address being the last host IP address in the
-given network.
+HSRP protokol van beállítva a `PC-PS-MLS1` and `PC-PS-MLS2` eszközök
+között. Minden hálózatban az utolsó IP cím a virtuális router címe.
 
-`PC-PS-MLS1` is the active, with `PC-PS-MLS2` being the standby device.
 
-This is achieved through the following parameters:
+`PC-PS-MLS1` az aktív, míg `PC-PS-MLS2` a passzív.
 
-.HSRP Parameters
+Ez az alábbi konfigurációkkal lett elérve: 
+
+.HSRP Paraméterek
 [cols="1,1,1,1",options="header"]
 |===
-|Device         
-|Priority   
-|Version    
-|Preempt
+|Eszköz
+|Prioritás
+|Verzió
+|Kezdeményezés
 
 |PC-PS-MLS1     
 |200        
 .2+.^|2          
-|True
+|Igen
 
 |PC-PS-MLS2     
 |100        
-|False
+|Nem
 |===
 
-[cols="1,1,1",options="header"]
-.HSRP IPv4 Addresses In Package Storage
+[cols="1,1",options="header"]
+.HSRP IPv4 Címek
 |===
-|Vlan           
-|Address
-|Group Number
+|Vlanok
+|Cím
 
 |WORKERS        
 |10.2.10.254 
-|0
 
 |SERVER         
 |10.2.20.14 
-|1
 
 |PS-MANAGEMENT  
 |10.2.255.190 
-|2
 |===
-
 
 ==== DHCPv4
-The DHCP server is the `PC Private Windows` host, 
-providing IPv4 addresses for the following networks:
+Minden hálózatnak a `PC Private Windows` eszköz a 
+DHCP szervere.
 
 [cols="1,1,1,1,1",options="header"]
-.IPv4 DHCP Addressing
+.IPv4 DHCP Címzés
 |===
-|Vlan       
-|Addressing Range   
-|Number Of Hosts
+|Vlanok       
+|Cím Tartomány
+|Címek Száma
 |DNS    
 |Default-gateway
 
@@ -1570,18 +1533,17 @@ providing IPv4 addresses for the following networks:
 [[pc_dhcp_snooping]]
 ==== DHCP Snooping
 
-DHCP snooping is configuration is illustrated with the 
-following diagram:
+DHCP Snooping a kép által illusztrált módon lett konfigurálva:
 
 image::images/pc-dhcp-snooping.png[align="center"]
 
-This state is achieved with the following table of trusted ports:
+Ez az állapot az alábbi megbízott portokkal lett elérve:
 
-.DHCP Snooping Trusted Interfaces
+.DHCP Snooping Megbízott Portok
 [cols="1,1",options="header"]
 |===
-|Device
-|Interface
+|Eszköz
+|Port
 
 .4+.^|PC-CORE-MLS1
 |Gig1/0/11
@@ -1627,13 +1589,13 @@ This state is achieved with the following table of trusted ports:
 [[pc_arp_inspection]]
 ==== Dynamic ARP Inspection
 
-ARP inspection is configured on the following devices:
+DAI az alábbi eszközökön van engedélyezve:
 
-.ARP Inspected Devices
+.DAI Eszközök
 [cols="1,1",options="header"]
 |===
-|Device
-|Vlans
+|Eszköz
+|Vlanok
 
 |PC-PS-S1
 |220,332
@@ -1645,13 +1607,13 @@ ARP inspection is configured on the following devices:
 |230
 |===
 
-The trusted interfaces for these devices are:
+Megbízott portok az alábbi módon vannak konfigurálva:
 
-.ARP Trusted Interfaces
+.DAI Megbízott Portok 
 [cols="1,1",options="header"]
 |===
-|Device
-|Interface
+|Eszköz
+|Port
 
 .2+.^|PC-PS-S1
 |Gig0/1
@@ -1669,33 +1631,33 @@ The trusted interfaces for these devices are:
 
 ==== OSPF
 
-Network advertisement is achieved through multi-area OSPF
-illustrated by the following diagram:
+Hálózat Hírdetés a single-area OSPF protokollal van elérve,
+illusztrálva az alábbi diagram alapján:
 
 image::images/pc-ospf.png[align="center"]
 
-NOTE: Etherchannels are simplified into one logical connection.
+NOTE: Etherchannels kapcsolatok egyszerüsítve vannak.
 
-===== Default Route
+===== Alapértelmezett útvonal
 
-`PC-ASA` is responsable for advertising the default route, 
-wich is `12.12.12.1`.
+`PC-ASA` eszköz felelős az alapértelmezett útvonal hírdetéséért.
+Az alapértelmezett útvonal: `12.12.12.1`.
 
 <<<
 
 ===== Router-ID
 
-The router-ids are created according to the following naming convention:
+A router azonosítók az alábbi szabályok alapján készülnek:
 
-* The first three octets contain the OSPF area number repeated.
+* Az első három oktet, az OSPF zóna azonosító, ismételve
 
-* The last octet contains the device's id withing the given OSPF area.
+* Az utolsó oktet, az eszközt azonosító szám, a zónán belül
 
 [cols="1,1,1",options="header"]
-.Router-IDs
+.Router-IDk
 |===
-|Device     
-|Area   
+|Eszköz
+|Zóna
 |Router-ID
 
 |PC-ASA
@@ -1720,22 +1682,18 @@ The router-ids are created according to the following naming convention:
 |2.2.2.1
 |===
 
-===== Passive Interfaces
+===== Passzív Portok
 
-All interfaces on all devices running an OSPF process, has 
-all it's interfaces configured as passive with the following
-command `passive-interface default`.
+Alapértelmezetten minden port passzív és kézzel aktívra 
+kell állítani a kellő portokat.
 
-From that point on only the needed interfaces are selected 
-to be allowed to participate in OSPF advertising.
-
-These interfaces are:
+Aktív portok az alábbiak:
 
 [cols="1,1",options="header"]
-.Active OSPF Interfaces
+.Aktív OSPF Portok
 |===
-|Device
-|Interface
+|Eszköz
+|Port
 
 .5+.^|PC-CORE-MLS1
 |Gig1/0/1
@@ -1765,7 +1723,9 @@ These interfaces are:
 
 ==== AAA
 
-The AAA RADIUS server is `PC Private Windows` (`10.2.20.10`) with the following clients:
+A AAA RADIUS szerver, a `PC Private Windows` (`10.2.20.10`) eszköz.
+
+Kliensek:
 
 * PC-CORE-MLS1
 * PC-CORE-MLS2
@@ -1776,39 +1736,35 @@ The AAA RADIUS server is `PC Private Windows` (`10.2.20.10`) with the following 
 * PC-PS-S1
 * PC-PS-S2
 
-The passkey for all clients is `aaapa55`.
+A jelszó: `aaapa55`
 
 ==== Access List
 
 [[pc_ssh]]
 ===== SSH
 
-All network devices serving SSH, must have an ACL
-configured so that only the `MANAGEMENT` Vlan can 
-connect to the VTY line.
+Minden hálózati eszköznek, ami SSH-t biztosít, tartalmaznia kell
+egy ACL-t ami csak az adott `MANAGEMENT` vlan-t engedi be a VTY
+vonalokra.
 
-The Package Center site is split into three
-`MANAGEMENT` Vlans due to seperate broadcast domains,
-so the ACL will accept the traffic if it is from
-any of the three `MANAGEMENT` Vlans.
+A Package Center telephely három `MANAGEMENT` vlan-ra van bontva
+mert a rétegek között különböző broadcast domain van.
 
-.SSH Access
+.SSH Hozzáférés
 [source]
 ----
 ip access-list standard SSH
     permit 10.2.255.0 0.0.0.255
 ----
 
-NOTE: This ACL must be applied onto all the VTY 
-lines for all incoming messages.
+NOTE: A fent említett ACL-t minden VTY vonalon a befelé tekintő
+irányba, be kell konfigurálni.
 
-===== Inward Flowing Traffic
+===== Befelé Irányuló Csomagok
 
-The following ACL is configured to allow outside requests
-to enter the DMZ, and thus the the `Public Linux` server, and to allow 
-VPN traffic to enter the network.
+Az alábbi ACL beengedi a VPN csomagokat, illetve a `Public Linux`-nak
+címzett IPv4 és IPv6, HTTP és HTTPS csomagokat.
 
-.Inward Access
 [[source]]
 ----
 access-list OUTSIDE-IN extended permit object-group DMZ-SERVICES any object DMZ-PUBLIC-IP
@@ -1816,97 +1772,70 @@ access-list OUTSIDE-IN extended permit object-group DMZ-SERVICES any object DMZ-
 access-list OUTSIDE-IN extended permit ip object REMOTE object LOCAL
 ----
 
-NOTE: For further information regarding these objects,
-refer to <<pc_service_objects>> and <<pc_network_objects>>.
+NOTE: További információért az objektumokkal kapcsolatban,
+lásd <<pc_service_objects>> és <<pc_network_objects>>.
 
-This ACL must be configured on the `OUTSIDE` interface, inwards.
+Ez az ACL az `OUTSIDE` zónán kell hogy belegyen állítva.
 
 [source]
 ----
 access-group OUTSIDE-IN in interface OUTSIDE
 ----
 
-===== VPN
+==== Tűzfal
 
-The following ACL is configured to identify, which packets
-should be routed within the VPN tunnel.
-
-.VPN Traffic
-[source]
-----
-access-list VPN-TRAFFIC extended permit ip object LOCAL object REMOTE
-----
-
-NOTE: For further information regarding these objects,
-refer to <<pc_network_objects>>.
-
-==== Firewall
-
-For the firewall we are using the ASA 5506, because of it's 
-Gigabit capabilities.
-
-===== Zones
-
-The firewall is split into for zones, which is as follows:
+===== Zónák
 
 [cols="1,1,1,1,2",options="header"]
 |===
-|Interface
-|Zone
-|Security-level
-|Address
-|Description
+|Port
+|Zóna
+|Biztonsági Szint
+|Cím
+|Leírás
 
 |Gig1/1
 |INSIDE1
 |100
 |10.2.200.25
-|Link to PC-CORE-MLS1
+|Kapcsolat PC-CORE-MLS1
 
 |Gig1/2
 |INSIDE2
 |100
 |10.2.200.29
-|Link to PC-CORE-MLS2
+|Kapcsolat PC-CORE-MLS2
 
 |Gig1/5
 |DMZ
 |50
 |10.2.250.1
-|Link to Public Linux
+|Kapcsolat Public Linux
 
 |Gig1/8
 |OUTSIDE
 |0
 |12.12.12.2
-|Link to ISP
+|Kapcsolat ISP
 |===
 
 [[pc_service_objects]]
-===== Service Objects
+===== Service Objektumok
 
-There is one service object needed
-allowed to enter the DMZ, containing the webserver, named
-`DMZ-SERVICES`.
+A `DMZ-SERVICES` objektum az alábbi paraméterekkel van 
+konfigurálva:
 
-The allowed services are as follows:
-
-* Destination port 80 for HTTP
-* Destination port 443 for HTTPS
+* Cél port 80 - HTTP
+* Cél port 443 - HTTPS
 
 [[pc_network_objects]]
-===== Network Objects
-
-There are four network object, for easier ACL
-creation and PAT configuration.
-
-These are:
+===== Network Objektumok
 
 [cols="1,1,1",options="header"]
 |===
-|Name
-|Network
-|Mask
+|Név
+|Hálózat
+|Maszk
 
 |DMZ-NETWORK
 |10.2.250.2
@@ -1937,17 +1866,13 @@ These are:
 |255.255.0.0
 |===
 
-NOTE: `LAN1` and `LAN2` are separated because NAT configuration
-occurs inside the given network object which is dependent
-on the zone, so `INSIDE1` and `INSIDE2` both needed a dedicated
-network object.
+NOTE: `LAN1` és `LAN2` a `INSIDE1` és `INSIDE2` zónák NATolás érdekében
+lettek szétszedve illetve duplikálva.
 
 ===== Policy Map
 
-The default policy map is additionally configured to inspect
-HTTP traffic as well.
-
-Thus the default policy map will be the following:
+Az alapértelmezett policy map-hez még hozzá lezz adva a http
+csomagok ellenörzése.
 
 .Policy Map
 [source]
@@ -1964,62 +1889,57 @@ policy-map global_policy
 
 ====== PAT
 
-PAT was set up for the zones, `INSIDE1` and `INSIDE2`.
-The network objects responsible for them are `LAN1` and `LAN2`.
+PAT van konfigurálva a `INSIDE1` és `INSIDE2` zónáknak.
 
-These two PAT configurations are used by the whole network
-across two different uplinks (This is why the same configuration
-is duplicated), and so they use the same address, which is `12.12.12.2`.
+Külső címük: `12.12.12.2`
 
 ====== SNAT
 
-SNAT is set up specifically for the `DMZ`, with the 
-responsible network object being named `DMZ-NETWORK`.
-
-The server's address (`10.2.250.2`) is being staticly 
-translated to `12.12.12.3`
+SNAT van konfigurálva a `DMZ` zónának.
+ 
+Külső cím: `12.12.12.3`
 
 ==== VPN
 
-Site-to-site VPN is set up between `HQ-ASA` and `PC-ASA` with the 
-following parameters:
+Site-to-site VPN van felállítva `HQ-ASA` és `PC-ASA` az
+alábbi paraméterekkel:
 
 [cols="1h,1",options="header"]
 |===
-|Setting
-|Parameter
+|Beállítás
+|Paraméter
 
-|Key Exchange
+|Kulcs Csere
 |IKEv1
 
-|IPsec Protocol
+|IPsec Protokol
 |ESP
 
-|Confidentiality
+|Titkosítás
 |AES
 
-|Integrity
+|Integritás
 |SHA256
 
-|Authentication
+|Hitelesítés
 |PSK
 
-|Pre-shared-key
+|Megosztott Kulcs
 |vpnpa55
 
 |Diffie-Hellman
 |DH2
 
-|Lifetime
+|Élettartam
 |1 Hour
 
-|Peer
+|Pár
 |11.11.11.2
 |===
 
 ===== Transform-set
 
-The transfrom-set is configured as such:
+A transform-set az alábbi módon lett konfigurálva:
 
 .VPN Transform Set
 [source]
@@ -2029,8 +1949,7 @@ crypto ipsec ikev1 transform-set VPN-SET esp-aes 256 esp-sha-hmac
 
 ===== ACL
 
-To detect the interesting traffic for the VPN connection
-the following ACL is configured, named as `VPN-TRAFFIC`:
+A VPN csomagok észleléséhez az alébbi ACL-t használjuk:
 
 .VPN Traffic
 [source]
@@ -2038,20 +1957,20 @@ the following ACL is configured, named as `VPN-TRAFFIC`:
 access-list VPN-TRAFFIC extended permit ip object LOCAL object REMOTE
 ----
 
-NOTE: For further information about the network objects, `LOCAL` and
-`REMOTE`, refer to <<pc_network_objects>>
+NOTE: További információért az objektumokkal kapcsolatban,
+lásd <<pc_network_objects>>
 
 <<<
 
 [#pc-ip-addressing]
-==== IPv4 Addressing
+==== IPv4 Címzés
 
 [cols="1,1,1,1",options="header"]
-.IPv4 Addressing
+.IPv4 Címzés
 |===
-|Device             
-|Interface  
-|Address    
+|Eszköz
+|Port
+|Cím
 |Default Gateway
 
 .3+.^|PC-ASA
@@ -2210,21 +2129,21 @@ NOTE: For further information about the network objects, `LOCAL` and
 
 <<<
 
-==== IPv6 Addressing
+==== IPv6 Címzés
 
-IPv6 addressing is implemented only for the `Public Linux`
-webserver and `PC-ASA` firewall for the sake of alternative addressing. 
+IPv6 címzés csak a `PC-ASA` és `Public Linux` eszközöknek van 
+beállítva.
 
-Through the use of IPv6 GUA addresses, there is no need
-to configure NAT66.
+Mivel IPv6 GUA címzés van használva, nincs szükség NAT66 
+konfigurálására.
 
 [cols="1,1,2,1,1",options="header"]
-.IPv6 Addressing
+.IPv6 Címzés
 |===
-|Device             
-|Interface  
-|Address    
-|Type
+|Eszköz
+|Port
+|Cím
+|Tipus
 |Default Gateway
 
 .2+.^|PC-ASA
@@ -2245,228 +2164,240 @@ to configure NAT66.
 |FE80::1
 |===
 
-== Private Windows Server in Package Center
-This windows server provides the package center office with an active directory, DNS, DHCP, printer sharing and AAA capebilities.
+== Private Windows Szerver (`Package Center`)
+Ez a szerver az alábbi szolgáltatásokat nyultja:
+
+- Active Directory
+- DNS
+- DHCP
+- Nyomtató megosztás
+- AAA
 
 === Active Directory
 
-==== Domain Name
-The domain name for the active directory is 
-`bitbox.com`.
+==== Domain 
+Domain név: `bitbox.com`.
 
-==== Organizational Units
-The organizational units are as follows:
+==== Organizational Unitok
+Organizational unitok az alábbi módon vannak konfigurálva:
 
-.Organizational Units
+.Organizational Unitok
 [cols="1,1,1",options="header"]
 |===
-|Name
-|Description
-|Groups
+|Név
+|Leírás
+|Csoport
 
 |FRONTDESK
-|Contains all the frontdesk users and devices
-|Frontdesk Users
+|Frontdesk eszközök
+|Frontdesk Felhasználók
 
 |PS-MANAGEMENT
-|Contains all the PS-MANAGEMENT users and devices
-|PS-MANAGEMENT Users
+|Management eszközök
+|PS-MANAGEMENT Felhasználók
 
 |WORKERS
-|Contains all the WORKERS users and devices
-|WORKERS Users
+|Worker eszközök
+|WORKERS Felhasználók
 |===
 
-==== Frontdesk Group policy
-This policy is applied to all users and devices in the `FRONTDESK` organizational unit.
+==== Frontdesk Group Policy
+Az alábbi Group Policy minden Frontdesk eszközre és felhasználóra vonatkozik:
 
-User Configuration:
+Felhasználói konfigurációk:
 
-Automatic software installation:
+Autómatikus szoftver telepítés:
 
-* Install the company system software on all frontdesk PCs and keep it updated
+* Jóváhagyott szoftverek telepítése és frissítése
 
-Printers: 
+Nyomtatók: 
 
-* Allow access to the frontdesk printer only
-* Disable adding new printers
-* Disable removing printers
+* Csak a Frontdesk nyomtatókhoz kap hozzáférést
+* Nem adhat hozzá új nyomtatót
+* Nem törölhet már létező nyomtatót
 
-Start Menu & Taskbar:
+Start Menu és Taskbar:
 
-* Remove access to:
+* Nem férhet hozzá:
     ** Control Panel
-    ** Settings
+    ** Beállítások
     ** Run
-* Lock Start Menu Layout(predefined by the administrator)
-* Disable taskbar context menu
+* Előre beállított Start Menu felosztás
+* Taskbar context menu kikapcsolva
 
-Browser Restrictions:
+Böngésző korlátozások:
 
-* Set homepage to the company system
-* Disable access to the following websites:
+* Alapértelmezett lap a cég weboldala
+* Tiltott oldalak:
     ** Social media
-    ** Entertainment
-* Disable extensions and plugins
-* Disable downloading files
+    ** Szorakoztatás
+* Bővítmények és kiegészítők tiltva
+* Letöltés tiltva
 
-Control panel & CMD:
+Control panel és CMD:
 
-* Disable access to command prompt
-* Disable access to powershell
-* Disable access to registry editor
-* Disable access to task manager
+* Command prompt tiltva
+* Powershell tiltva
+* Registry editor tiltva
+* Task manager tiltva
 
-Windows Settings:
+Windows beállítások:
 
-* Disable changing desktop background
-* Disable access to settings
+* Háttérkép állítása tiltva
+* Beállítások elérése tiltva
 
-Computer Configuration:
+Gép konfigurációk:
 
-Removeable Media:
+Csatlakoztatható média:
 
-* Disable usb storage device reading and writing
+* USB írás és olvasás tiltva
 
-Application Control:
+Applikáció kontrol:
 
-* Package management software
-* Browser
+* Csomag menedzsment
+* Böngésző
 
-* Disable local admin access for users
-* Minimum password requirements:
-    ** Minimum length of 12 characters
-    ** Must contain uppercase letters, lowercase letters, numbers and special characters
-    ** Password expiration every 90 days
-    ** Account lockout after 5 failed login attempts
-    ** Any failed attempts are all audited
+* Lokálisan nem csatlakozhat admin fiók
 
+* Jelszó szabályok:
+    ** Minimum 12 karakter
+    ** Minimum 1 nagy, 1 kicsi és 1 speciális karakter
+    ** Jelszó lejárat: 90 nap
+    ** Fiók tiltás 5 próba után
+    ** Minden hibás próba auditálva
 
+Frissítések:
 
-Updates:
+* Felhasználó nem érheti el
+* Minden frissítés munkaidőn kívül, autómatikusan történik
 
-* Disable user access to updates
-* All updates are automatically installed outside of working hours
+Audit és Monitorozás:
 
-Auditing & Monitoring:
-
-* Audit account lockout
-* Audit failed login attempts
-* Audit successful logins
-* Audit file share access
-* Audit file system access
-* At logon wait for the network before allowing the user to log in, to ensure that the latest policies are applied and that the user is not logging in with cached credentials, which may be a security risk if the user is using a different device or if their account has been compromised.
+* Audit fiók kizárás
+* Audit sikertelen bejelentkezés 
+* Audit sikeres bejelentkezés
+* Audit fájl megosztás hozzáférés
+* Audit fájl rendszer hozzáférés
+* Bejelentkezéskor meg kell várni a hálózati kapcsolatot, hogy a legfrissebb
+zabálok legyenek aktívak az adott eszközön és hogy a felhasználó biztos ne
+lépjen a cached credentials használatával
 
 ==== Workers Group policy
 
-This policy is applied to all users and devices in the `WORKERS` organizational unit.
+Az alábbi Group Policy minden Workers eszközre és felhasználóra
+vonatkozik.
 
-User Configuration:
+Felhasználói konfigurációk:
 
-* Allow access to removable media but it is monitored and audited
-* Remove Run menu from start menu
-* Disable access to control panel and settings
-* Enable only certain control panel items such as devices nad Printers, network
-* Disable access to command prompt, powershell, registry editor and task manager.
-Browser Restrictions:
+* Megendedett a médiák kapcsolása,
+viszont monitorozva és auditálva van
+* Run menu a Start menu-n belül tiltva
+* Control panel and beállítások tiltva 
+* Csak adott control panel opciók eléthetőek,
+mint az eszközök és nyomtatók
+* Command prompt, powershell, registry editor and task manager tiltva
 
-* Set homepage to the company system
-* Disable access to the following websites:
+Böngésző korlátozások:
+
+* Alapértelmezett lap a cég weboldala
+* Tiltott oldalak:
     ** Social media
-    ** Entertainment
-* Allow only whitelisted extensions and plugins
-* Download directory is set to a monitored and audited folder
-* Print access is only allowed to the shared printer in the storage area
-* Only users in the `WORKERS` organizational unit have access to the shared printer in the storage area
-*At startup run the package management software and scanner software
+    ** Szorakoztatás
+* Csak fehérlistás bővítmények és kiegészítők
+* letöltési mappa monitorozva és auditálva 
+* Csak saját nyomtatót használhatnak
+* Indításkor a Package management szoftver és 
+Scanner szoftver autómatikusan lefut
 
-Computer Configuration:
+Gép konfigurációk:
 
-* Application control:
-    *** Allowed:
-        ** Package management software
-        ** Scanner software
-        ** Label printing software
-        ** Browser
-    *** Denied:
-        ** Deny unknown applications not explicitly allowed
-* Windows Updates:
-    *** Disable user access to updates
-    *** All updates are automatically installed outside of working hours
- * At logon wait for the network before allowing the user to log in, to ensure that the latest policies are applied and that the user is not logging in with cached credentials, which may be a security risk if the user is using a different device or if their account has been compromised.
- * Auditing & Monitoring:
-    *** Audit account lockout
-    *** Audit failed login attempts
-    *** Audit successful logins
-    *** Audit file share access
-    *** Audit file system access
-    *** Audit removable media access
-    *** Audit browser download folder activity
-    *** Audit printer access
+* Applikáció kontrol:
+    *** Megengedett:
+        ** Package menedzsment szoftver 
+        ** Scanner szoftver
+        ** Label printing szoftver
+        ** Böngésző
+    *** Tiltott:
+        ** Minden ismeretlen applikáció
+* Windows frissítések:
+    *** Frissítések elérése tiltva
+    *** Frissítések autómatikusan munkaidőn kívül futnak
+
+* Bejelentkezéskor meg kell várni a hálózati kapcsolatot, hogy a legfrissebb
+zabálok legyenek aktívak az adott eszközön és hogy a felhasználó biztos ne
+lépjen a cached credentials használatával
+    *** Audit és Monitorozás:
+    *** Audit fiók kizárás
+    *** Audit sikertelen bejelentkezés 
+    *** Audit sikeres bejelentkezés
+    *** Audit fájl megosztás hozzáférés
+    *** Audit fájl rendszer hozzáférés
+    *** Audit média csatlakoztatása
+    *** Audit letöltések mappa
+    *** Audit nyomtató hozzáférés
 
 ==== PS-MANAGEMENT Group policy
 
-User Configuration:
+Felhasználó konfigurációk:
 
-* Browser Control:
-    ** Set homepage to the company system
-    ** Allow access to all websites but monitor and audit access
-    ** Allow extensions and plugins but monitor and audit access
-    ** Allow downloading files but set the download directory to a monitored and audited folder
+* Böngésző kontrol:
+    ** Alapértelmezett lap a cég weboldala
+    ** Minden weboldal engedélyezett, viszont 
+    auditálva és monitorozva
+    ** Minden bővítmény és kiegészítő engedélyezett, viszont
+    auditálva és monitorozva
+    ** Letöltés engedélyezve, viszont auditálva és monitorozva
 
-* Printer Access:
-    ** Allow access to all printers but monitor and audit access
-    ** Allow adding and removing printers but monitor and audit access
+* Nyomtató hozzáférés:
+    ** Hozzáfér minden nyomtatóhoz, viszont auditálva 
+    és monitorozva
+    ** Nyomtató hozzáadád és törlés, viszont auditálva 
+    és monitorozva
 
-Computer Configuration:
+Gép konfiguráció:
 
-* Application control:
-    *** Allowed:
-        ** Allow only the necessary management software for the PS-MANAGEMENT team, such as remote desktop software, monitoring software and management consoles.
-    *** Denied:
-        ** Deny unknown applications not explicitly allowed
-* Remote Desktop Access:
-    *** Only allow remote desktop access to devices in the `PS-MANAGEMENT` organizational unit
-    *** Only allow users in the `PS-MANAGEMENT` organizational unit to initiate remote desktop sessions
-* Removable Media:
-    *** Allow access to removable media but it is monitored and audited
-* Windows Updates:
-    *** Allow user to schedule updates but all updates must be installed outside of working hours
-    *** However updates are configured automatically
-* Security Hardening:
-    *** Enable User Account Control:
-        ** Run all administrators in Admin Approval Mode
-        ** Prompt for creditials when ther is an elevation request
-        ** Prompt for credentials on the secure desktop
+* Applikáció kontrol:
+    *** Megengedett:
+        ** Csak szükséges menedzsment szoftver, mint Remote Desktop
+    *** tiltott:
+        ** Minden ismeretlen szoftver
+* Remote Desktop hozzáférés:
+    *** Csak `PS-MANAGEMENT` eszközökre csatlakozhat
+    *** Csak `PS-MANAGEMENT` eszközök kezdeményezhetnek 
+    Remote Desktop kapcsolatot 
+* Csatolható média:
+    *** Engedélyezett írás és olvasás, viszont auditálva 
+    és monitorozva
+* Windows Frissítések:
+    *** Ütemezhető, viszont csak munkaidőn kívül
+* Biztonság:
+    *** Felhasználó kontrol:
+        ** Minden adminisztrátor a Admin Approval módban fut
+        ** Jogosultság emeléskor jelszó kérés
+        ** Jelszó kérés Secure Desktop használatákor
 * Credintial Guard:
-    *** Enable Credential Guard to protect against credential theft attacks, such as Pass-the-Hash and Pass-the-Ticket, by isolating and protecting user credentials in a secure environment.
-    *** Disallow storage of passwords local device to prevent credential theft in case of device compromise.
-* Auditing & Monitoring:
-    *** Audit account lockout
-    *** Audit failed login attempts
-    *** Audit successful logins
-    *** Audit file share access
-    *** Audit file system access
-    *** Audit removable media access
-    *** Audit browser download folder activity
-    *** Audit printer access
-    *** Audit privileged User activity, such as access to sensitive files and folders, use of administrative tools and changes to user accounts and group memberships.
+    *** Credential Guard bekapcsolva
+    *** Lokális jelszó tárolás tiltva
+* Audit és monitorozás:
+    *** Audit felhasználó tiltás
+    *** Audit sikertelen bejelentkezés
+    *** Audit sikeres bejelentkezés
+    *** Audit fájl megosztás
+    *** Audit fájl rendszer használat
+    *** Audit csatolható média használat
+    *** Audit letöltés mappa
+    *** Audit nyomtató hozzáférés
+    *** Audit priviligizált felhasználó tevékenységek
 
 === DHCP
 
-The DHCP serves the `WORKERS`, `FRONTDESK` and `PS-MANAGEMENT` Vlans,.
-
-==== DHCP Configurations
-
-Configurations for the DHCP scopes for each Vlan are as follows:
-
-.DHCP Configurations
+.DHCP Konfiguráció
 [cols="1,1,1,1,1",options="header"]
 |===
-|Name
-|Addressing Range
-|DNS server
-|Domain Name
+|Név
+|Cím Tartomány
+|DNS 
+|Domain Név
 |Default Gateway
 
 |Frontdesk
@@ -2488,23 +2419,40 @@ Configurations for the DHCP scopes for each Vlan are as follows:
 |10.2.255.190
 |===
 
-=== File Backup
+=== Fájl Backup
 
-There is a seperate drive for file backup in the server, which is shared across the network and only accessible to users in the Administrators group, to ensure that only authorized personnel have access to sensitive data.
+Külön lemez a fájlok backup mentésére a szerveren, 
+amit csak az adminisztratoroknak van hozzáférése.
 
-Every shared folder in the server is backed up to this drive, and the backup is scheduled to run every day outside of working hours, to minimize disruption to users.
+Minden megosztott mappa a szerveren, mentve lesz erre a lemenre.
+Minden nap munkaidőn kívül fut ez a mentés.
 
-=== File Sharing
+=== Fájl Megosztás
 
-File sharing is achieved through shared folders on the server, with access permissions set according to the organizational units and groups in Active Directory.
+Az Active Directory szabályoknak megfelelően hozzáférést kaphat
+az adott felhasználó a szerveren tárolt megosztott mappákhoz.
 
-Users in the `FRONTDESK` organizational unit have a maxiumum 2GB of storage space, users in the `WORKERS` organizational unit have a maximum of 5GB of storage space and users in the `PS-MANAGEMENT` organizational unit have a maximum of 10GB of storage space, to ensure that storage resources are allocated efficiently and to prevent any one user from consuming excessive amounts of storage.
+.Maximum Tárhely Csoportonként
+[cols="1,1",options="header"]
+|===
+|Csoport
+|Méret
+
+|FRONTDESK
+|2GB
+
+|WORKERS
+|5GB
+
+|PS-MANAGEMENT
+|10GB
+|===
 
 === AAA
 
-AAA is configured on the server to provide centralized authentication, authorization and accounting for users accessing network resources.
+Központosított hitelesítésre a AAA RADIUS protokollt használjuk.
 
-The RADIUS server has the following RADIUS clients:
+Kliensek:
 
 * PC-CORE-MLS1
 * PC-CORE-MLS2
@@ -2515,431 +2463,428 @@ The RADIUS server has the following RADIUS clients:
 * PC-PS-S1
 * PC-PS-S2
 
-The passkey for all clients is `Passw0rd`.
+Jelszó: `aaapa55`
 
+== Private Windows Szerver (`HQ`) 
 
-== Private Windows Server in HQ office
+Ez a szerver az alábbi szolgátatásokat nyultja:
 
-This windows server provides the HQ office with an active directory, DNS, DHCP, printer/file sharing and AAA capebilities.
+- Active Directorz
+- DNS
+- DHCP
+- Nyomtató és fájl megosztás
+- AAA
 
 === Active Directory
 
-==== Domain Name
-The domain name for the active directory is `bitbox.com`.
+==== Domain Név
+Domain név: `bitbox.com` 
 
-==== Organizational Units
-The organizational units are as follows:
+==== Organizational Unitok
+Az organizational unitok az alábbiak:
 
-.Organizational Units
+.Organizational Unitok
 [cols="1,1,1",options="header"]
 |===
-|Name
-|Description
-|Groups
+|Név
+|Leírás
+|Csoport
 
 |Accounting
-|Contains all the accounting users and devices
-|Accounting Users
+|Accounting eszközök
+|Accounting felhasználók
 
 |Developers
-|Contains all the developers users and devices
-|Developer Users
+|Developer eszközök
+|Developer felhasználók
 
 |Frontdesk
-|Contains all the frontdesk users and devices
-|Frontdesk Users
+|Frontdesk eszközök
+|Frontdesk felhasználók
 
 |HR
-|Contains all the HR users and devices
-|HR Users
+|HR eszközök
+|HR felhasználók
 
 |Management
-|Contains all the management users and devices
-|Management Users
+|Management eszközök
+|Management felhasználók
 
 |Marketing
-|Contains all the marketing users and devices
-|Marketing Users
+|Marketing eszközök
+|Marketing felhasználók
 |===
 
 ==== Accounting Group policy
-This policy is applied to all users and devices in the `Accounting` organizational unit.
+Ez a szabályzat az `Accounting` szervezeti egység minden felhasználójára és eszközére vonatkozik.
 
 User Configuration:
 
 * Start Menu & Taskbar:
-    ** Remove access to Run menu From start menu
-    ** Disable changes to the taskbar and start menu
+    ** Run menü elérésének eltávolítása a Start Menu-ből
+    ** Taskbar és Start Menu módosításának letiltása
 
-* Disable access to control panel and settings
+* Control Panel és Settings elérésének letiltása
 
-* Enable only certain control panel items such as devices and Printers and Programs and Features
+* Csak bizonyos Control Panel elemek engedélyezése, mint például a Devices and Printers és a Programs and Features
 
-* Disable access to command prompt, powershell, registry editor and task manager.
+* Command Prompt, PowerShell, Registry Editor és Task Manager elérésének letiltása.
 
-* Browser Restrictions:
-    ** Set homepage to the company system
-    ** Allow access to all websites but monitor and audit access
-    ** Allow only whitelisted extensions and plugins
-    ** Disable downloading files
-    ** Disable access to developer tools in the browser
+* Browser korlátozások:
+    ** Kezdőlap beállítása a vállalati rendszerre
+    ** Hozzáférés engedélyezése minden webhelyhez, de a hozzáférés monitorozása és naplózása
+    ** Csak a fehérlistán szereplő bővítmények és pluginok engedélyezése
+    ** Fájlok letöltésének letiltása
+    ** Developer tools elérésének letiltása a böngészőben
 
-* Printer Access:
-    ** Allow access to the shared printer in the accounting area only
-    ** Disable adding and removing printers
+* Printer elérés:
+    ** Hozzáférés engedélyezése csak az Accounting területén található megosztott nyomtatóhoz
+    ** Nyomtatók hozzáadásának és eltávolításának letiltása
 
 Computer Configuration:
 
 * Application control:
-    *** Allowed:
-        ** Accounting software
+    *** Engedélyezett:
+        ** Accounting szoftver
         ** Browser
-    *** Denied:
-        ** Deny unknown applications not explicitly allowed
+    *** Tiltott:
+        ** Ismeretlen alkalmazások tiltása, amelyek nincsenek kifejezetten engedélyezve
 
 * Removable media:
-    ** Disallow all removable storage class access to prevent data exfiltration and malware introduction through USB devices.
+    ** Minden cserélhető tárolóeszköz-osztály elérésének tiltása az adatszivárgás és a kártevők USB-eszközökön keresztüli bejutásának megakadályozása érdekében.
 
 * Windows Updates:
-    ** Disable user access to updates
-    ** All updates are automatically installed outside of working hours
+    ** Felhasználói hozzáférés letiltása a frissítésekhez
+    ** Minden frissítés automatikusan települ munkaidőn kívül
 
 * Security Hardening:
-    ** Enable User Account Control:
-        *** Run all administrators in Admin Approval Mode
-        *** Prompt for credentials when there is an elevation request
+    ** User Account Control engedélyezése:
+        *** Minden adminisztrátor futtatása Admin Approval Mode-ban
+        *** Hitelesítési adatok kérése emelt szintű jogosultság igénylésekor
 
 * Credential Guard:
-    ** Enable Credential Guard to protect against credential theft attacks, such as Pass-the-Hash and Pass-the-Ticket, by isolating and protecting user credentials in a secure environment.
-    ** Disallow storage of passwords local device to prevent credential theft in case of device compromise.
+    ** Credential Guard engedélyezése a hitelesítési adatok ellopása elleni védelem érdekében (pl. Pass-the-Hash és Pass-the-Ticket), a felhasználói hitelesítő adatok izolálásával és védelmével biztonságos környezetben.
+    ** Jelszavak helyi eszközön történő tárolásának tiltása a hitelesítő adatok ellopásának megakadályozására az eszköz kompromittálódása esetén.
 
 * Auditing & Monitoring:
-    ** Audit account lockout
-    ** Audit failed login attempts
-    ** Audit successful logins
-    ** Audit file share access
-    ** Audit file system access
-    ** Audit Privileged User activity, such as access to sensitive files and folders, use of administrative tools.
+    ** Fiók zárolásának naplózása (Audit account lockout)
+    ** Sikertelen bejelentkezési kísérletek naplózása
+    ** Sikeres bejelentkezések naplózása
+    ** Fájlmegosztás elérésének naplózása
+    ** Fájlrendszer elérésének naplózása
+    ** Privileged User tevékenységek naplózása, mint például a bizalmas fájlokhoz és mappákhoz való hozzáférés, valamint az adminisztrációs eszközök használata.
 
 === Frontdesk Group policy
 
-This policy is applied to all users and devices in the `FRONTDESK` organizational unit.
+Ez a szabályzat a `FRONTDESK` szervezeti egység minden felhasználójára és eszközére vonatkozik.
 
 User Configuration:
 
-Automatic software installation:
+Automatikus szoftvertelepítés:
 
-* Install the company system software on all frontdesk PCs and keep it updated
+* A vállalati rendszerszoftver telepítése minden Frontdesk PC-re és annak naprakészen tartása
 
 Printers: 
 
-* Allow access to the frontdesk printer only
-* Disable adding new printers
-* Disable removing printers
+* Hozzáférés engedélyezése csak a Frontdesk nyomtatóhoz
+* Új nyomtatók hozzáadásának letiltása
+* Nyomtatók eltávolításának letiltása
 
 Start Menu & Taskbar:
 
-* Remove access to:
+* Hozzáférés eltávolítása:
     ** Control Panel
     ** Settings
     ** Run
-* Lock Start Menu Layout(predefined by the administrator)
-* Disable taskbar context menu
+* Start Menu elrendezés rögzítése (adminisztrátor által előre meghatározott)
+* Taskbar helyi menüjének letiltása
 
-Browser Restrictions:
+Browser korlátozások:
 
-* Set homepage to the company system
-* Disable access to the following websites:
-    ** Social media
-    ** Entertainment
-* Disable extensions and plugins
-* Disable downloading files
+* Kezdőlap beállítása a vállalati rendszerre
+* Hozzáférés letiltása a következő webhelyekhez:
+    ** Közösségi média
+    ** Szórakozás
+* Bővítmények és pluginok letiltása
+* Fájlok letöltésének letiltása
 
-Control panel & CMD:
+Control Panel & CMD:
 
-* Disable access to command prompt
-* Disable access to powershell
-* Disable access to registry editor
-* Disable access to task manager
+* Command Prompt elérésének letiltása
+* PowerShell elérésének letiltása
+* Registry Editor elérésének letiltása
+* Task Manager elérésének letiltása
 
 Windows Settings:
 
-* Disable changing desktop background
-* Disable access to settings
+* Asztali háttérkép módosításának letiltása
+* Settings elérésének letiltása
 
 Computer Configuration:
 
-Removeable Media:
+Removable Media:
 
-* Disable usb storage device reading and writing
+* USB tárolóeszközök olvasásának és írásának letiltása
 
 Application Control:
 
-* Package management software
+* Csomagkezelő szoftver
 * Browser
 
-* Disable local admin access for users
-* Minimum password requirements:
-    ** Minimum length of 12 characters
-    ** Must contain uppercase letters, lowercase letters, numbers and special characters
-    ** Password expiration every 90 days
-    ** Account lockout after 5 failed login attempts
-    ** Any failed attempts are all audited
-
-
+* Helyi adminisztrátori hozzáférés letiltása a felhasználók számára
+* Minimális jelszókövetelmények:
+    ** Minimum 12 karakter hosszúság
+    ** Tartalmaznia kell nagybetűket, kisbetűket, számokat és speciális karaktereket
+    ** Jelszó lejárata 90 naponta
+    ** Fiók zárolása 5 sikertelen bejelentkezési kísérlet után
+    ** Minden sikertelen kísérlet naplózásra kerül
 
 Updates:
 
-* Disable user access to updates
-* All updates are automatically installed outside of working hours
+* Felhasználói hozzáférés letiltása a frissítésekhez
+* Minden frissítés automatikusan települ munkaidőn kívül
 
 Auditing & Monitoring:
 
-* Audit account lockout
-* Audit failed login attempts
-* Audit successful logins
-* Audit file share access
-* Audit file system access
-* At logon wait for the network before allowing the user to log in, to ensure that the latest policies are applied and that the user is not logging in with cached credentials, which may be a security risk if the user is using a different device or if their account has been compromised.
+* Fiók zárolásának naplózása
+* Sikertelen bejelentkezési kísérletek naplózása
+* Sikeres bejelentkezések naplózása
+* Fájlmegosztás elérésének naplózása
+* Fájlrendszer elérésének naplózása
+* Bejelentkezéskor várjon a hálózatra, mielőtt engedélyezné a felhasználó bejelentkezését, hogy biztosítsa a legfrissebb szabályzatok alkalmazását, és hogy a felhasználó ne gyorsítótárazott hitelesítő adatokkal jelentkezzen be, ami biztonsági kockázatot jelenthet, ha a felhasználó más eszközt használ, vagy ha a fiókja kompromittálódott.
 
 
 === Management Group policy
 
-This policy is applied to all users and devices in the `Management` organizational unit.
+Ez a szabályzat a `Management` szervezeti egység minden felhasználójára és eszközére vonatkozik.
 
 User Configuration:
 
 * Browser Control:
-    ** Set homepage to the company system
-    ** Allow access to all websites but monitor and audit access
-    ** Allow extensions and plugins but monitor and audit access
-    ** Allow downloading files but set the download directory to a monitored and audited folder
+    ** Kezdőlap beállítása a vállalati rendszerre
+    ** Hozzáférés engedélyezése minden webhelyhez, de a hozzáférés monitorozása és naplózása
+    ** Bővítmények és pluginok engedélyezése, de a hozzáférés monitorozása és naplózása
+    ** Fájlok letöltésének engedélyezése, de a letöltési könyvtár beállítása egy monitorozott és naplózott mappára
 
-* Printer Access:
-    ** Allow access to all printers but monitor and audit access
-    ** Allow adding and removing printers but monitor and audit access
+* Printer elérés:
+    ** Hozzáférés engedélyezése minden nyomtatóhoz, de a hozzáférés monitorozása és naplózása
+    ** Nyomtatók hozzáadásának és eltávolításának engedélyezése, de a hozzáférés monitorozása és naplózása
 
 Computer Configuration:
 
 * Application control:
-    *** Allowed:
-        ** Allow only the necessary management software for the MANAGEMENT team, such as remote desktop software, monitoring software and management consoles.
-    *** Denied:
-        ** Deny unknown applications not explicitly allowed
+    *** Engedélyezett:
+        ** Csak a MANAGEMENT csapat számára szükséges menedzsment szoftverek engedélyezése, mint például távoli asztali szoftverek, monitorozó szoftverek és menedzsment konzolok.
+    *** Tiltott:
+        ** Ismeretlen alkalmazások tiltása, amelyek nincsenek kifejezetten engedélyezve
 * Remote Desktop Access:
-    *** Only allow remote desktop access to devices in the `MANAGEMENT` organizational unit
-    *** Only allow users in the `MANAGEMENT` organizational unit to initiate remote desktop sessions
+    *** Csak a `MANAGEMENT` szervezeti egységben lévő eszközökhöz engedélyezett a távoli asztali hozzáférés
+    *** Csak a `MANAGEMENT` szervezeti egységben lévő felhasználók számára engedélyezett távoli asztali munkamenetek indítása
 * Removable Media:
-    *** Allow access to removable media but it is monitored and audited
+    *** Hozzáférés engedélyezése a cserélhető adathordozókhoz, de az monitorozva és naplózva van
 * Windows Updates:
-    *** Allow user to schedule updates but all updates must be installed outside of working hours
-    *** However updates are configured automatically
+    *** Felhasználó számára engedélyezett a frissítések ütemezése, de minden frissítést munkaidőn kívül kell telepíteni
+    *** A frissítések azonban automatikusan vannak konfigurálva
 * Security Hardening:
-    *** Enable User Account Control:
-        ** Run all administrators in Admin Approval Mode
-        ** Prompt for creditials when ther is an elevation request
-        ** Prompt for credentials on the secure desktop
-* Credintial Guard:
-    *** Enable Credential Guard to protect against credential theft attacks, such as Pass-the-Hash and Pass-the-Ticket, by isolating and protecting user credentials in a secure environment.
-    *** Disallow storage of passwords local device to prevent credential theft in case of device compromise.
+    *** User Account Control engedélyezése:
+        ** Minden adminisztrátor futtatása Admin Approval Mode-ban
+        ** Hitelesítési adatok kérése emelt szintű jogosultság igénylésekor
+        ** Hitelesítési adatok kérése a biztonságos asztalon (secure desktop)
+* Credential Guard:
+    *** Credential Guard engedélyezése a hitelesítési adatok ellopása elleni védelem érdekében (pl. Pass-the-Hash és Pass-the-Ticket), a felhasználói hitelesítő adatok izolálásával és védelmével biztonságos környezetben.
+    *** Jelszavak helyi eszközön történő tárolásának tiltása a hitelesítő adatok ellopásának megakadályozására az eszköz kompromittálódása esetén.
 * Auditing & Monitoring:
-    *** Audit account lockout
-    *** Audit failed login attempts
-    *** Audit successful logins
-    *** Audit file share access
-    *** Audit file system access
-    *** Audit removable media access
-    *** Audit browser download folder activity
-    *** Audit printer access
-    *** Audit privileged User activity, such as access to sensitive files and folders, use of administrative tools and changes to user accounts and group memberships.
+    *** Fiók zárolásának naplózása
+    *** Sikertelen bejelentkezési kísérletek naplózása
+    *** Sikeres bejelentkezések naplózása
+    *** Fájlmegosztás elérésének naplózása
+    *** Fájlrendszer elérésének naplózása
+    *** Cserélhető adathordozók elérésének naplózása
+    *** Böngésző letöltési mappájának tevékenységének naplózása
+    *** Nyomtató elérésének naplózása
+    *** Privileged User tevékenységek naplózása, mint például a bizalmas fájlokhoz és mappákhoz való hozzáférés, adminisztrációs eszközök használata, valamint a felhasználói fiókok és csoporttagságok módosítása.
 
 === Developers Group policy
 
-This policy is applied to all users and devices in the `Developers` organizational unit.
+Ez a szabályzat a `Developers` szervezeti egység minden felhasználójára és eszközére vonatkozik.
 
 User Configuration:
 
-* Allow access to Control Panel and Settings to allow developers to change necessary settings for development purposes, but monitor and audit access to sensitive settings such as user accounts and group memberships.
+* A Control Panel és a Settings elérésének engedélyezése, hogy a fejlesztők módosíthassák a fejlesztési célokhoz szükséges beállításokat, de a bizalmas beállításokhoz (például felhasználói fiókok és csoporttagságok) való hozzáférés monitorozása és naplózása.
 
-* Allow access to command prompt, powershell and registry editor for development purposes, but monitor and audit access to sensitive commands and registry keys.
+* A Command Prompt, PowerShell és Registry Editor elérésének engedélyezése fejlesztési célokra, de a bizalmas parancsokhoz és regisztrációs kulcsokhoz való hozzáférés monitorozása és naplózása.
 
-* Task manager is enabled for developers to allow them to monitor their applications and processes, but access is monitored and audited.
+* A Task Manager engedélyezve van a fejlesztők számára, hogy monitorozhassák alkalmazásaikat és folyamataikat, de a hozzáférés monitorozva és naplózva van.
 
 * Browser Control:
-    ** Set homepage to the company system
-    ** Allow access to all websites but monitor and audit access
-    ** Allow extensions and plugins but monitor and audit access
-    ** Allow downloading files but set the download directory to a monitored and audited folder
+    ** Kezdőlap beállítása a vállalati rendszerre
+    ** Hozzáférés engedélyezése minden webhelyhez, de a hozzáférés monitorozása és naplózása
+    ** Bővítmények és pluginok engedélyezése, de a hozzáférés monitorozása és naplózása
+    ** Fájlok letöltésének engedélyezése, de a letöltési könyvtár beállítása egy monitorozott és naplózott mappára
 
 Computer Configuration:
 
 * Application control:
-    *** Allowed:
-        ** Allow necessary development software, such as IDEs, code editors, version control software and testing tools.
-    *** Denied:
-        ** Deny unknown applications not explicitly allowed
+    *** Engedélyezett:
+        ** Szükséges fejlesztői szoftverek engedélyezése, mint például IDE-k, kódszerkesztők, verziókezelő szoftverek és tesztelő eszközök.
+    *** Tiltott:
+        ** Ismeretlen alkalmazások tiltása, amelyek nincsenek kifejezetten engedélyezve
 
 * Removable Media:
-    ** Allow access to removable media but it is monitored and audited to prevent data exfiltration and malware introduction through USB devices.
+    ** Hozzáférés engedélyezése a cserélhető adathordozókhoz, de az monitorozva és naplózva van az adatszivárgás és a kártevők USB-eszközökön keresztüli bejutásának megakadályozása érdekében.
 
-* Powershell Control:
-    Powershell Script Block logging is enabled to monitor and audit powershell activity, which can be used by attackers for malicious purposes.
+* PowerShell Control:
+    ** A PowerShell Script Block logging engedélyezve van a PowerShell tevékenységek monitorozása és naplózása érdekében, amelyeket a támadók rosszindulatú célokra használhatnak fel.
 
 * Windows Updates:
-    ** Updates are automatically configured.
-    ** Users are notified before install.
-    ** Updates are scheduled to be installed outside of working hours to minimize disruption.
+    ** A frissítések automatikusan vannak konfigurálva.
+    ** A felhasználók értesítést kapnak a telepítés előtt.
+    ** A frissítések munkaidőn kívüli telepítésre vannak ütemezve a zavarás minimalizálása érdekében.
 
 * Security Hardening:
-    ** Enable User Account Control:
-        *** Run all administrators in Admin Approval Mode
-        *** Prompt for credentials when there is an elevation request
+    ** User Account Control engedélyezése:
+        *** Minden adminisztrátor futtatása Admin Approval Mode-ban
+        *** Hitelesítési adatok kérése emelt szintű jogosultság igénylésekor
 
 * Credential Guard:
-    ** Enable Credential Guard to protect against credential theft attacks, such as Pass-the-Hash and Pass-the-Ticket, by isolating and protecting user credentials in a secure environment.
-    ** Disallow storage of passwords local device to prevent credential theft in case of device compromise.
+    ** Credential Guard engedélyezése a hitelesítési adatok ellopása elleni védelem érdekében (pl. Pass-the-Hash és Pass-the-Ticket), a felhasználói hitelesítő adatok izolálásával és védelmével biztonságos környezetben.
+    ** Jelszavak helyi eszközön történő tárolásának tiltása a hitelesítő adatok ellopásának megakadályozására az eszköz kompromittálódása esetén.
 
 * Auditing & Monitoring:
-    ** Audit account lockout
-    ** Audit failed login attempts
-    ** Audit successful logins
-    ** Audit file share access
-    ** Audit file system access
-    ** Audit process creation and termination
-    ** Audit powershell activity through script block logging
-    *Audit control panel and settings access, with special attention to sensitive settings such as user accounts and group memberships.
+    ** Fiók zárolásának naplózása
+    ** Sikertelen bejelentkezési kísérletek naplózása
+    ** Sikeres bejelentkezések naplózása
+    ** Fájlmegosztás elérésének naplózása
+    ** Fájlrendszer elérésének naplózása
+    ** Folyamatok létrehozásának és leállításának naplózása
+    ** PowerShell tevékenység naplózása script block logging segítségével
+    ** Control Panel és Settings elérésének naplózása, különös tekintettel a bizalmas beállításokra, mint például a felhasználói fiókok és csoporttagságok.
 
 === Marketing Group policy
 
-This policy is applied to all users and devices in the `Marketing` organizational unit.
+Ez a szabályzat a `Marketing` szervezeti egység minden felhasználójára és eszközére vonatkozik.
 
 User Configuration:
 
-* Allow access to Control Panel and Settings to allow marketing team to change necessary settings for their work, but monitor and audit access to sensitive settings such as user accounts and group memberships.
+* A Control Panel és a Settings elérésének engedélyezése, hogy a marketing csapat módosíthassa a munkájához szükséges beállításokat, de a bizalmas beállításokhoz (például felhasználói fiókok és csoporttagságok) való hozzáférés monitorozása és naplózása.
 
-* Allow access to command prompt and powershell for marketing purposes, but monitor and audit access to sensitive commands.
+* A Command Prompt és PowerShell elérésének engedélyezése marketing célokra, de a bizalmas parancsokhoz való hozzáférés monitorozása és naplózása.
 
-* Disable access to registry editor and task manager to prevent unauthorized changes and monitoring of processes.
+* A Registry Editor és a Task Manager elérésének letiltása a jogosulatlan módosítások és a folyamatok monitorozásának megakadályozása érdekében.
 
 * Browser Control:
-    ** Set homepage to the company system
-    ** Allow access to all websites but monitor and audit access
-    ** Allow extensions and plugins but monitor and audit access
-    ** Allow downloading files but set the download directory to a monitored and audited folder
-    ** Allow access to developer tools in the browser to allow marketing team to analyze web pages and troubleshoot issues, but monitor and audit access.
+    ** Kezdőlap beállítása a vállalati rendszerre
+    ** Hozzáférés engedélyezése minden webhelyhez, de a hozzáférés monitorozása és naplózása
+    ** Bővítmények és pluginok engedélyezése, de a hozzáférés monitorozása és naplózása
+    ** Fájlok letöltésének engedélyezése, de a letöltési könyvtár beállítása egy monitorozott és naplózott mappára
+    ** Developer tools elérésének engedélyezése a böngészőben, hogy a marketing csapat elemezhesse a weboldalakat és hibákat háríthasson el, de a hozzáférés monitorozása és naplózása.
 
-* Printer Access:
-    ** Allow access to all printers in the `MARKETING` organizational unit.
-    ** Allow adding and removing printers but monitor and audit access
+* Printer elérés:
+    ** Hozzáférés engedélyezése a `MARKETING` szervezeti egység összes nyomtatójához.
+    ** Nyomtatók hozzáadásának és eltávolításának engedélyezése, de a hozzáférés monitorozása és naplózása
 
 Computer Configuration:
 
 * Application control:
-    *** Allowed:
-        ** Allow necessary marketing software, such as graphic design software, video editing software and social media management tools.
-    *** Denied:
-        ** Deny unknown applications not explicitly allowed
+    *** Engedélyezett:
+        ** Szükséges marketing szoftverek engedélyezése, mint például grafikai tervező szoftverek, videószerkesztő szoftverek és közösségi média kezelő eszközök.
+    *** Tiltott:
+        ** Ismeretlen alkalmazások tiltása, amelyek nincsenek kifejezetten engedélyezve
 
 * Removable Media:
-    ** Allow access to removable media but it is monitored and audited to prevent data exfiltration and malware introduction through USB devices.
+    ** Hozzáférés engedélyezése a cserélhető adathordozókhoz, de az monitorozva és naplózva van az adatszivárgás és a kártevők USB-eszközökön keresztüli bejutásának megakadályozása érdekében.
 
 * Windows Updates:
-    ** Updates are configured automatically and they are installed outside of work hours to not disrupt the marketing team during their work.
+    ** A frissítések automatikusan vannak konfigurálva, és munkaidőn kívül települnek, hogy ne zavarják a marketing csapatot a munkájuk során.
 
 * Security Hardening:
-    ** Enable User Account Control:
-        *** Run all administrators in Admin Approval Mode
-        *** Prompt for credentials when there is an elevation request
+    ** User Account Control engedélyezése:
+        *** Minden adminisztrátor futtatása Admin Approval Mode-ban
+        *** Hitelesítési adatok kérése emelt szintű jogosultság igénylésekor
 
 * Credential Guard:
-    ** Enable Credential Guard to protect against credential theft attacks, such as Pass-the-Hash and Pass-the-Ticket, by isolating and protecting user credentials in a secure environment.
-    ** Disallow storage of passwords local device to prevent credential theft in case of device compromise.
+    ** Credential Guard engedélyezése a hitelesítési adatok ellopása elleni védelem érdekében (pl. Pass-the-Hash és Pass-the-Ticket), a felhasználói hitelesítő adatok izolálásával és védelmével biztonságos környezetben.
+    ** Jelszavak helyi eszközön történő tárolásának tiltása a hitelesítő adatok ellopásának megakadályozására az eszköz kompromittálódása esetén.
 
 * Auditing & Monitoring:
-    ** Audit account lockout
-    ** Audit failed login attempts
-    ** Audit successful logins
-    ** Audit file share access
-    ** Audit file system access
-    ** Audit process creation and termination
-    ** Audit powershell activity through script block logging
-    *Audit control panel and settings access, with special attention to sensitive settings such as user accounts and group memberships.
+    ** Fiók zárolásának naplózása
+    ** Sikertelen bejelentkezési kísérletek naplózása
+    ** Sikeres bejelentkezések naplózása
+    ** Fájlmegosztás elérésének naplózása
+    ** Fájlrendszer elérésének naplózása
+    ** Folyamatok létrehozásának és leállításának naplózása
+    ** PowerShell tevékenység naplózása script block logging segítségével
+    ** Control Panel és Settings elérésének naplózása, különös tekintettel a bizalmas beállításokra, mint például a felhasználói fiókok és csoporttagságok.
 
 === HR Group policy
 
-This policy is applied to all users and devices in the `HR` organizational unit.
+Ez a szabályzat a `HR` szervezeti egység minden felhasználójára és eszközére vonatkozik.
 
 User Configuration:
 
 * Start Menu & Taskbar:
-    ** Remove access to Run menu From start menu
-    ** Disable changes to the taskbar and start menu
+    ** Run menü elérésének eltávolítása a Start Menu-ből
+    ** Taskbar és Start Menu módosításának letiltása
 
-* Control panel:
-    ** Disable access to control panel and settings
-    ** Enable only certain control panel items such as devices and Printers and Programs and Features
+* Control Panel:
+    ** Control Panel és Settings elérésének letiltása
+    ** Csak bizonyos Control Panel elemek engedélyezése, mint például a Devices and Printers és a Programs and Features
 
-* Disable access to command prompt, powershell, registry editor and task manager.
+* Command Prompt, PowerShell, Registry Editor és Task Manager elérésének letiltása.
 
-* Browser Restrictions:
-    ** Set homepage to the company system
-    ** Allow access to all websites but monitor and audit access
-    ** Allow only whitelisted extensions and plugins
-    ** Disable downloading files
-    ** Disable access to developer tools in the browser
+* Browser korlátozások:
+    ** Kezdőlap beállítása a vállalati rendszerre
+    ** Hozzáférés engedélyezése minden webhelyhez, de a hozzáférés monitorozása és naplózása
+    ** Csak a fehérlistán szereplő bővítmények és pluginok engedélyezése
+    ** Fájlok letöltésének letiltása
+    ** Developer tools elérésének letiltása a böngészőben
 
-* Printer Access:
-    ** Allow access to the shared printer in the HR area only
-    ** Disable adding and removing printers
+* Printer elérés:
+    ** Hozzáférés engedélyezése csak a HR területén található megosztott nyomtatóhoz
+    ** Nyomtatók hozzáadásának és eltávolításának letiltása
 
 Computer Configuration:
 
 * Application control:
-    *** Allowed:
-        ** HR software
+    *** Engedélyezett:
+        ** HR szoftver
         ** Browser
-    *** Denied:
-        ** Deny unknown applications not explicitly allowed
+    *** Tiltott:
+        ** Ismeretlen alkalmazások tiltása, amelyek nincsenek kifejezetten engedélyezve
 
 * Removable media:
-    ** Disallow all removable storage class access to prevent data exfiltration and malware introduction through USB devices.
+    ** Minden cserélhető tárolóeszköz-osztály elérésének tiltása az adatszivárgás és a kártevők USB-eszközökön keresztüli bejutásának megakadályozása érdekében.
 
 * Windows Updates:
-    ** Disable user access to updates
-    ** All updates are automatically installed outside of working hours
+    ** Felhasználói hozzáférés letiltása a frissítésekhez
+    ** Minden frissítés automatikusan települ munkaidőn kívül
 
 * Security Hardening:
-    ** Enable User Account Control:
-        *** Run all administrators in Admin Approval Mode
-        *** Prompt for credentials when there is an elevation request
+    ** User Account Control engedélyezése:
+        *** Minden adminisztrátor futtatása Admin Approval Mode-ban
+        *** Hitelesítési adatok kérése emelt szintű jogosultság igénylésekor
 
 * Credential Guard:
-    ** Enable Credential Guard to protect against credential theft attacks, such as Pass-the-Hash and Pass-the-Ticket, by isolating and protecting user credentials in a secure environment.
-    ** Disallow storage of passwords local device to prevent credential theft in case of device compromise.
+    ** Credential Guard engedélyezése a hitelesítési adatok ellopása elleni védelem érdekében (pl. Pass-the-Hash és Pass-the-Ticket), a felhasználói hitelesítő adatok izolálásával és védelmével biztonságos környezetben.
+    ** Jelszavak helyi eszközön történő tárolásának tiltása a hitelesítő adatok ellopásának megakadályozására az eszköz kompromittálódása esetén.
 
 * Auditing & Monitoring:
-    ** Audit account lockout
-    ** Audit failed login attempts
-    ** Audit successful logins
-    ** Audit file share access
-    ** Audit file system access
-    * At logon wait for the network before allowing the user to log in, to ensure that the latest policies are applied and that the user is not logging in with cached credentials, which may be a security risk if the user is using a different device or if their account has been compromised.
+    ** Fiók zárolásának naplózása
+    ** Sikertelen bejelentkezési kísérletek naplózása
+    ** Sikeres bejelentkezések naplózása
+    ** Fájlmegosztás elérésének naplózása
+    ** Fájlrendszer elérésének naplózása
+    * Bejelentkezéskor várjon a hálózatra, mielőtt engedélyezné a felhasználó bejelentkezését, hogy biztosítsa a legfrissebb szabályzatok alkalmazását, és hogy a felhasználó ne gyorsítótárazott hitelesítő adatokkal jelentkezzen be, ami biztonsági kockázatot jelenthet, ha a felhasználó más eszközt használ, vagy ha a fiókja kompromittálódott.
 
 === DHCP
 
-The DHCP serves the `Accounting`, `Frontdesk`, `HR`, `Management`, `Marketing` and `Developers` Vlans,.
-
-==== DHCP Configurations
-
-Configurations for the DHCP scopes for each Vlan are as follows:
-
-.DHCP Configurations
+.DHCP Konfiguráció
 [cols="1,1,1,1,1",options="header"]
 |===
-|Name
-|Addressing Range
-|DNS server
-|Domain Name
+|Név
+|Cím Tartomány
+|DNS
+|Domain Név
 |Default Gateway
 
 |HQ-DEVELOPERS
@@ -2979,23 +2924,49 @@ Configurations for the DHCP scopes for each Vlan are as follows:
 |10.1.255.30
 |===
 
-=== File Backup
+=== Fájl Backup
 
-There is a seperate drive for file backup in the server, which is shared across the network and only accessible to users in the Administrators group, to ensure that only authorized personnel have access to sensitive data.
+Külön lemez a fájlok backup mentésére a szerveren, 
+amit csak az adminisztratoroknak van hozzáférése.
 
-Every shared folder in the server is backed up to this drive, and the backup is scheduled to run every day outside of working hours, to minimize disruption to users.
+Minden megosztott mappa a szerveren, mentve lesz erre a lemenre.
+Minden nap munkaidőn kívül fut ez a mentés.
 
-=== File Sharing
+=== Fájl Megosztás
 
-File sharing is achieved through shared folders on the server, with access permissions set according to the organizational units and groups in Active Directory.
+Az Active Directory szabályoknak megfelelően hozzáférést kaphat
+az adott felhasználó a szerveren tárolt megosztott mappákhoz.
 
-Users in the `Accounting` organizational unit have a maxiumum 5GB of storage space, users in the `HR` organizational unit have a maximum of 5GB of storage space, users in the `MARKETING` organizational unit have a maximum of 10GB of storage space, users in the `DEVELOPERS` organizational unit have a maximum of 20GB of storage space, users in the `MANAGEMENT` organizational unit have a maximum of 20GB of storage space and users in the `FRONTDESK` organizational unit have a maximum of 2GB of storage space, to ensure that storage resources are allocated efficiently and to prevent any one user from consuming excessive amounts of storage.
+.Maximum Tárhely Csoportonként
+[cols="1,1",options="header"]
+|===
+|Csoport
+|Méret
+
+|Accounting
+|5GB
+
+|HR
+|5GB
+
+|Marketing
+|10GB
+
+|Developers
+|20GB
+
+|Management
+|20GB
+
+|Frontdesk
+|2GB
+|===
 
 === AAA
 
-AAA is set up on the server to provide centralized authentication, authorization and accounting for users accessing network resources.
+Központosított hitelesítésre a AAA RADIUS protokollt használjuk.
 
-The RADIUS server has the following RADIUS clients:
+Kliensek:
 
 * HQ-CORE-MLS1
 * HQ-CORE-MLS2
@@ -3006,30 +2977,50 @@ The RADIUS server has the following RADIUS clients:
 * HQ-PS-S1
 * HQ-PS-S2
 
-The passkey for all clients is `Passw0rd`.
+Jelszó: `aaapa55`
 
-== Public Linux Server in HQ office
+== Public Linux Server (`Package Center`) 
 
-This server's purpose is to host a the company webpage using nginx web server. It is accessible from the internet and it is protected by the `HQ-ASA` firewall. Only the the management and developers can modify the webpage. 
-The website uses the company domain bitbox.com. 
+Ez a szerver a cég weblapját szolgáltatja, erre az Nginx programot használjuk.
+A szervert egy DMZ be helyeztük, amit csak a `PC-ASA` tűzfalon keresztül lehet
+elérni.
+
+.Nginx Paraméterek
+[cols="1,1",options="header"]
+|===
+|Beállítás
+|Paraméter
+
+|Port
+|80
+
+|Domain Név
+|bitbox.com
+
+|Root Lokáció
+|/var/www/
+
+|Log Lokáció
+|/var/log/nginx
+|===
 
 <<<
 
 == Remote Package Storage
 
-=== Network
+=== Hálózat
 
-The remote package storage site consists on a 
-`SOHO Router` serving WIFI to storage workers and
-directly connecting to the ISP.
+A Remote Package Storage telephely csak egy
+SOHO router-ből áll, ami wifi-t szolgáltat a helyi dolgozóknak
+és direkt kapcsolatban van az ISP-vel.
 
-==== Topology
+==== Topológia
 
 image::images/rps-topology.png[align="center"]
 
 ==== LAN
 
-This site only serves one lan, which is `10.3.0.0/24`.
+Ez a telephely csak a `10.3.0.0/24` hálózatot hírdeti.
 
 ==== Wifi
 
@@ -3037,9 +3028,9 @@ This site only serves one lan, which is `10.3.0.0/24`.
 [cols="1,1,1,1",options="header"]
 |===
 |SSID               
-|Password 
-|Auth   
-|Encryption
+|Jelszó
+|Hitelesítés
+|Titkosítás
 
 |Warehouse
 |warehousepa55
@@ -3049,14 +3040,13 @@ This site only serves one lan, which is `10.3.0.0/24`.
 
 ==== DHCPv4
 
-The DHCP server is the `SOHO Router`, 
-providing IPv4 addresses for the following networks:
+DHCP szerver: `SOHO Router`
 
 [cols="1,1,1,1",options="header"]
-.IPv4 DHCP Addressing
+.IPv4 DHCP Címzés
 |===
-|Addressing Range   
-|Number Of Hosts
+|Cím Tartomány
+|Címek Száma
 |DNS    
 |Default-gateway
 
@@ -3066,14 +3056,14 @@ providing IPv4 addresses for the following networks:
 |10.3.0.1
 |===
 
-==== IPv4 Addressing
+==== IPv4 Címzés
 
 [cols="1,1,1,1",options="header"]
-.IPv4 Addressing
+.IPv4 Címzés
 |===
-|Device             
-|Interface  
-|Address    
+|Eszköz
+|Port
+|Cím
 |Default Gateway
 
 .2+.^|SOHO Router
@@ -3093,81 +3083,73 @@ providing IPv4 addresses for the following networks:
 
 <<<
 
-== Network Programming (Necop)
-For the automatic network configuration section, we developed a TUI
-program that can login to registered devices and save the running-configuration
-to a certain TFTP server.
+== Hálózat Programozás (Necop)
+A Necop program, egy TUI felülettel felszerelt hálózat
+konfigurációs program ami képes elérketőség teszt-re és
+konfiguráció mentésre egy TFTP szerverre.
 
-NOTE: For testing, refer to the video
+NOTE: Tesztelésre, lásd a videót
 
 [#device_response]
-=== Device Responses
-The buttons corresponding to the given device has four states 
-shown by the border's color. 
-These are:
+=== Eszköz Válaszok
+Minden gombnak négy statusza van amik szín alapján jelzik
+a művelet állapotát, ezek:
 
-- *Gray*: Default
-- *Orange*: Loading
-- *Green*: Success
-- *Red*: Error
+- *Szürke*: Alapértelmezett
+- *Narancs*: Tölt
+- *Zöld*: Sikeres
+- *Piros*: Sikertelen
 
-NOTE: When an action is being performed on a certain device
-a loading indicator will also appear with orange color.
+NOTE: A művelet folyamata közben megjelenik ez töltést
+jelző indikátor
 
-The interface is split into two tabs, which are `Devices` and `TFTP`.
+A felület két tab-ra van felbontva, melyeket az alábbi sekciókban lehet
+megtekinteni:
 
 === Devices Tab
-The `Devices` tab is responsible for testing the registered devices 
-by pinging the given ip address with 2 counts.
+
+A `Devices` felületen az eszközök elérhetőségét lehet tesztelni 
 
 === TFTP Tab
-The `TFTP` tab is responsible for saving the running-configuration 
-of the given device to a certain TFTP server.
 
-==== Action Response
-In addition to the repsonses already stated in <<device_response>>,
-the `TFTP` tab introduces a label that shows the amount of bytes written in the
-case that the device successfully copied the running-configuration to the TFTP server.
+A `TFTP` felületen az eszközök konfigurációját lehet lementeni egy adott
+TFTP szerverre.
 
-<<<
+==== Válaszok
+Az eddig kifejezett állapotokon felül (<<device_response>>),
+a `TFTP` felületen, ha a művelet sikeresen lefutott, akkor az írt byte-ok
+mennyiségét is kiírja a zöld jelzésen felül.
 
-=== Device Registration
-Devices can be registered by adding it's details into the `resources/devices.txt` file,
-separated by a `,` character.
+=== Eszköz Regisztráció
+Eszközöket a `resources/devices.txt` fájlban lehet regisztrálni,
+egy `,`-vel elválasztva.
 
-The following details must be stated:
+A következő paramétereket kell megadni:
 
-- *Location*
-- *Hostname*
-- *IPv4 Address*
+- *Lokáció*
+- *Hostnév*
+- *IPv4 Cím*
 
-*Format:* `<Location>,<Hostname>,<IPv4 Address>`
-
-WARNING: The ASA devices don't have ip addresses in the management vlan
-so if you want to add an ASA device to the list you must choose an ip address
-from the already configured non-management ip addresses.
-For further information, refer to <<hq-ip-addressing, HQ IPv4 Addressing>>
-and <<pc-ip-addressing, Package Center IPv4 Addressing>>.
+*Format:* `<Lokáció>,<Hostnév>,<IPv4 Cím>`
  
-=== Exit Screen
-If the user wants to exit while network actions like pings or SSH connections
-are still active, a loading screen will appear that will wait for the worker threads
-to finnish.
+=== Kilépő felület
+Ha a felhasználó beakarja csukni a felületet viszont van még futó 
+művelet, egy várakozó képernyőre kerül ahol meg kell vérni a műveletek
+végét.
 
 [appendix]
-== Testing
-=== Network
-==== DHCP, Vlan and IPv4 (`HQ`)
-The following test will show how to different PCs will get
-IPv4 addresses in different networks.
+== Tesztelés
+=== Hálózat
+==== DHCP, Vlan és IPv4 (`HQ`)
+Az alábbi teszt a különböző vlanok és DHCP működését mutatja be.
 
-The tested PCs are the following:
+A tesztelt eszközök az alábbiak:
 
 [cols="1h,1,1",options="header"]
 |===
-|Device
+|Eszköz
 |Vlan
-|Expected Network
+|Várt Hálózat
 
 |Frontdesk PC
 |FRONTDESK (V160)
@@ -3185,31 +3167,27 @@ image::images/1-fepc.png[align="center"]
 image::images/1-mapc.png[align="center"]
 
 ==== Wifi (`Package Center`)
-The following test will show how a any device can access
-the network via an access point.
+Az alábbi teszt a Wifi műküdését mutatja be.
 
-The given phone should connect to the `PC-Package-Storage` wifi 
-with the `storagepa55` password and receive an IPv4 address.
-
-.Wifi Connection
+.Wifi Kapcsolat
 image::images/2-ph.png[align="center"]
 
-.DHCP Showcase
+.DHCP Bemutatás
 image::images/2-ph-2.png[align="center"]
 
 ==== HSRP (`HQ`)
-The following test will show how when a router fails, the other
-takes up the role of the active router and continue routing.
+Az alábbi teszt a HSRP működését mutatja be, amikor az
+aktív router meghibásodik.
 
-.HQ-R1 On
+.HQ-R1 Be
 image::images/3-ma-1.png[align="center"]
 
-.HQ-R1 Off
+.HQ-R1 Ki
 image::images/3-ma-2.png[align="center"]
 
 ==== ACL (`Package Center`)
-The following test will show how only the `MANAGEMENT` Vlan
-has access to the SSH configured on the network devices.
+Az alábbi teszt az SSH ACL működését mutatja be, ahol csak a 
+`MANAGEMENT` vlan csatlakozhat.
 
 .MANAGEMENT Vlan
 image::images/4-ma.png[align="center"]
@@ -3217,31 +3195,30 @@ image::images/4-ma.png[align="center"]
 .FRONTDESK Vlan
 image::images/4-fe.png[align="center"]
 
-==== R-PVST+ and Etherchannel (`HQ`)
-The following test will show that even after shutting down
-multiple cables, connection is still possible.
+==== R-PVST+ és Etherchannel (`HQ`)
+Az alábbi teszt a második rétegbeli redundanciát mutatja be.
 
-Connection is tested by pinging the `HQ-R1` router from `Management PC`.
+A Kapcsolat a `Management PC` és a `HQ-R1` között folyik.
 
-.Standard
+.Sztandard
 image::images/5-ma-1.png[align="center"]
 
-.HQ-F2-S2 Fa0/1 Off
+.HQ-F2-S2 Fa0/1 Ki
 image::images/5-ma-2.png[align="center"]
 
-.HQ-F2-S2 Gig0/1 Off
+.HQ-F2-S2 Gig0/1 Ki
 image::images/5-ma-3.png[align="center"]
 
-.HQ-S2 Fa0/24 Off
+.HQ-S2 Fa0/24 Ki
 image::images/5-ma-4.png[align="center"]
 
-==== PAT, SNAT and Static Routing (`Package Center`)
-The following test will show that the `Public Linux` will get translated
-to a static ip address of `12.12.12.3` and the `PC-CORE-MLS1` will get
-translated to the ip address `12.12.12.2` with a dynamic port number.
+==== PAT, SNAT és Statikus Irányítás (`Package Center`)
+Az alábbi teszt a NAT protokol működését mutatja be.
 
-Static routing is proved by the `PC-ASA` successfully forwarding the packet
-to the ISP after not seeing the destination network in it's routing table.
+A `Public Linux` eszköz vártan a `12.12.12.3` IP címet veszi fel, míg
+a `PC-CORE-MLS1` eszköz vártan a `12.12.12.2` IP címet veszi fel.
+
+Statikus irányítás a csomag sikeres kifelé irányítása alapján tesztelhető.
 
 .SNAT
 image::images/6-li.png[align="center"]
@@ -3249,34 +3226,30 @@ image::images/6-li.png[align="center"]
 .PAT
 image::images/6-mls.png[align="center"]
 
-==== Dynamic Routing (`HQ`)
-The following test will show that the `HQ-ASA` has multiple
-paths into the LAN.
+==== Dinamikus irányítás (`HQ`)
+Az alábbi teszt a redundáns útvonalakat mutatja be.
 
-.HQ-R1 On
+.HQ-R1 Be
 image::images/7-r1.png[align="center"]
 
-.HQ-R1 Off
+.HQ-R1 Ki
 image::images/7-r2.png[align="center"]
 
 ==== WAN (`HQ` & `Package Center`)
-The following test will show that sites can communicate with
-eachother through a WAN connection witch is the ISP.
+Az alábbi teszt a telephelyek közötti kapcsolatot mutatja be.
 
 .WAN
 image::images/8-asa.png[align="center"]
 
 ==== VPN (`HQ` & `Package Center`)
-The following test will show that communication can 
-occur between two sites, in a way that looks like a 
-local connection.
+Az alábbi teszt a telephelyek közötti VPN kapcsolatot mutatja be. 
 
 .VPN
 image::images/9-vpn.png[align="center"]
 
-==== Firewall (`Remote Package Storage` & `Package Center`)
-The following test will show that `PC-ASA` will only let through
-HTTP and HTTPS traffic into the DMZ.
+==== Tűzfal (`Remote Package Storage` & `Package Center`)
+Az alábbi teszt a DMZ be való irányítást mutatja be, ahol
+csak HTTP és HTTPS csomagok mehetnek át.
 
 .HTTP
 image::images/10-li.png[align="center"]
@@ -3285,21 +3258,20 @@ image::images/10-li.png[align="center"]
 image::images/10-li-2.png[align="center"]
 
 ==== IPv6 (`Package Center`)
-The following test will show that IPv6 addressing is working, by
-pingin `PC-ASA` from `Public Linux`
+Az alábbi teszt az IPv6 működését mutatja be a DMZ hálózaton belül.
 
 .IPv6
 image::images/ipv6.png[align="center"]
 
-=== Server
+=== Szerver
 ==== HQ
 ==== Package Center
 
 [appendix]
-== Network Device Configurations
+== Hálózati Eszköz Konfigurációk
 === HQ
 ==== HQ-ASA
-.Configuration
+.Konfiguráció
 [source]
 ----
 : Saved
@@ -3427,7 +3399,7 @@ router ospf 1
 ----
 
 ==== HQ-R1
-.Configuration
+.Konfiguráció
 [source]
 ----
 Building configuration...
@@ -3625,7 +3597,7 @@ end
 ----
 
 ==== HQ-R2
-.Configuration
+.Konfiguráció
 [source]
 ----
 Building configuration...
@@ -3809,7 +3781,7 @@ end
 ----
 
 ==== HQ-S1
-.Configuration
+.Konfiguráció
 [source]
 ----
 Building configuration...
@@ -4096,7 +4068,7 @@ end
 ----
 
 ==== HQ-S2
-.Configuration
+.Konfiguráció
 [source]
 ----
 Building configuration...
@@ -4367,7 +4339,7 @@ end
 ----
 
 ==== HQ-F0-S1
-.Configuration
+.Konfiguráció
 [source]
 ----
 Building configuration...
@@ -4636,7 +4608,7 @@ end
 ----
 
 ==== HQ-F1-S1
-.Configuration
+.Konfiguráció
 [source]
 ----
 Building configuration...
@@ -4899,7 +4871,7 @@ end
 ----
 
 ==== HQ-F1-S2
-.Configuration
+.Konfiguráció
 [source]
 ----
 Building configuration...
@@ -5165,7 +5137,7 @@ end
 ----
 
 ==== HQ-F2-S1
-.Configuration
+.Konfiguráció
 [source]
 ----
 Building configuration...
@@ -5420,7 +5392,7 @@ end
 ----
 
 ==== HQ-F2-S2
-.Configuration
+.Konfiguráció
 [source]
 ----
 Building configuration...
@@ -5681,7 +5653,7 @@ end
 
 === Package Center
 ==== PC-ASA
-.Configuration
+.Konfiguráció
 [source]
 ----
 : Saved
@@ -5827,7 +5799,7 @@ router ospf 1
 ----
 
 ==== PC-CORE-MLS1
-.Configuration
+.Konfiguráció
 [source]
 ----
 Building configuration...
@@ -6146,7 +6118,7 @@ end
 ----
 
 ==== PC-CORE-MLS2
-.Configuration
+.Konfiguráció
 [source]
 ----
 Building configuration...
@@ -6465,7 +6437,7 @@ end
 ----
 
 ==== PC-PS-MLS1
-.Configuration
+.Konfiguráció
 [source]
 ----
 Building configuration...
@@ -6800,7 +6772,7 @@ end
 ----
 
 ==== PC-PS-MLS2
-.Configuration
+.Konfiguráció
 [source]
 ----
 Building configuration...
@@ -7128,7 +7100,7 @@ end
 ----
 
 ==== PC-O-R1
-.Configuration
+.Konfiguráció
 [source]
 ----
 Building configuration...
@@ -7268,7 +7240,7 @@ end
 ----
 
 ==== PC-O-S1
-.Configuration
+.Konfiguráció
 [source]
 ----
 Building configuration...
@@ -7516,7 +7488,7 @@ end
 ----
 
 ==== PC-PS-S1
-.Configuration
+.Konfiguráció
 [source]
 ----
 Building configuration...
@@ -7770,7 +7742,7 @@ end
 ----
 
 ==== PC-PS-S2
-.Configuration
+.Konfiguráció
 [source]
 ----
 Building configuration...
@@ -8013,15 +7985,13 @@ end
 ----
 
 [appendix]
-== Network Programming (Necop)
-=== Files
+== Hálózat Programozás (Necop)
+=== Fájlok
 ==== main.py
 
-*Location*: `necop/main.py`
+*Lokáció*: `necop/main.py`
 
-Responsable for starting the frontend modules.
-
-.Source Code
+.Forrás Kód
 [source, python]
 ----
 """Main file responsable for program init."""
@@ -8037,11 +8007,9 @@ if __name__ == "__main__":
     main()
 ----
 
-==== Resources
+==== Források
 ===== devices.txt
-*Location*: `necop/resources/devices.txt`
-
-Stores registered devices.
+*Lokáció*: `necop/resources/devices.txt`
 
 .Registered Devices
 [source]
@@ -8065,15 +8033,13 @@ Package Center,PC-O-R1,10.2.255.193
 Package Center,PC-O-R1,10.2.255.194
 ----
 
-==== Modules
+==== Modulok
 
 ===== resources.py
 
-*Location*: `necop/modules/resources.py`
+*Lokáció*: `necop/modules/resources.py`
 
-Responsable for data storage to avoid unnecessary read operations.
-
-.Source Code
+.Forrás Kód
 [source, python]
 ----
 """Responsable for data storage to avoid unnecessary read operations."""
@@ -8130,11 +8096,9 @@ resources = Resources()
 
 ===== files.py
 
-*Location*: `necop/modules/files.py`
+*Lokáció*: `necop/modules/files.py`
 
-Responsable for handling file reading and writing.
-
-.Source Code
+.Forrás Kód
 [source, python]
 ----
 """This module is responsable for handling file reading and writing."""
@@ -8167,11 +8131,9 @@ def read_devices():
 
 ===== network.py
 
-*Location*: `necop/modules/network.py`
+*Lokáció*: `necop/modules/network.py`
 
-Responsable for network related tasks like pinging and SSH.
-
-.Source Code
+.Forrás Kód
 [source, python]
 ----
 """Network device connection and configuration handling."""
@@ -8239,11 +8201,9 @@ async def is_up(count, host):
 
 ===== frontend/base.py
 
-*Location*: `necop/modules/frontend/base.py`
+*Lokáció*: `necop/modules/frontend/base.py`
 
-Responsable for the base screen.
-
-.Source Code
+.Forrás Kód
 [source, python]
 ----
 """File responsable for frontend"""
@@ -8318,11 +8278,9 @@ class Base(App):
 
 ===== frontend/devices.py
 
-*Location*: `necop/modules/frontend/devices.py`
+*Lokáció*: `necop/modules/frontend/devices.py`
 
-Responsable for the device testing screen.
-
-.Source Code
+.Forrás Kód
 [source, python]
 ----
 """Responsable for the Devices panel"""
@@ -8350,7 +8308,7 @@ class Devices(Container):
     def compose(self) -> ComposeResult:
         with Vertical(id="device-base-container"):
             with Horizontal(classes="device-container lighter-default-border"):
-                yield Label("Location", classes="device-info")
+                yield Label("Lokáció", classes="device-info")
                 yield Label("Hostname", classes="device-info")
                 yield Label("IPv4 address", classes="device-info")
                 yield Static(classes="device-indicator-container")
@@ -8401,11 +8359,9 @@ class Devices(Container):
 
 ===== frontend/tftp.py
 
-*Location*: `necop/modules/frontend/devices.py`
+*Lokáció*: `necop/modules/frontend/devices.py`
 
-Responsable for saving running configurations onto a given tftp server.
-
-.Source Code
+.Forrás Kód
 [source, python]
 ----
 """Responsable for the TFTP"""
@@ -8433,7 +8389,7 @@ class TFTP(Container):
     def compose(self) -> ComposeResult:
         with Vertical(id="device-base-container"):
             with Horizontal(classes="device-container lighter-default-border"):
-                yield Label("Location", classes="device-info")
+                yield Label("Lokáció", classes="device-info")
                 yield Label("Hostname", classes="device-info")
                 yield Label("IPv4 address", classes="device-info")
                 yield Static(classes="device-indicator-container")
@@ -8494,9 +8450,7 @@ class TFTP(Container):
 
 ===== frontend/style.tcss
 
-*Location*: `necop/modules/frontend/style.tcss`
-
-Stores style settings for all frontend related files.
+*Lokáció*: `necop/modules/frontend/style.tcss`
 
 .CSS
 [source, scss]

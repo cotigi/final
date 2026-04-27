@@ -270,6 +270,8 @@ must be configured with `switchport nonegotiation`.
 
 . All switch interfaces must be configured with `duplex auto`.
 
+. All ASA devices can only be configured via console connection.
+
 <<<
 
 == HQ
@@ -281,6 +283,44 @@ must be configured with `switchport nonegotiation`.
 image::images/hq.png[align="center"]
 
 <<<
+
+==== Device Specification
+
+[cols="1h,1",options="header"]
+|===
+|Hostname
+|Model
+
+|HQ-ASA
+|Cisco ASA 5506-X
+
+|HQ-R1
+|Cisco 2911
+
+|HQ-R2
+|Cisco 2911
+
+|HQ-S1
+|Cisco 2960
+
+|HQ-S2
+|Cisco 2960
+
+|HQ-F0-S1
+|Cisco 2960
+
+|HQ-F1-S1
+|Cisco 2960
+
+|HQ-F1-S2
+|Cisco 2960
+
+|HQ-F2-S1
+|Cisco 2960
+
+|HQ-F2-S2
+|Cisco 2960
+|===
 
 [#hq-vlans]
 ==== Vlans
@@ -429,47 +469,6 @@ These are:
 
 Loop guard is configured on all switches and multi-layer switches
 globally in the case of a link's partial failure.
-
-The interfaces configured with loop guard is as follows:
-
-.Loop Guard Interfaces
-[cols="1,1",options="header"]
-|===
-|Device
-|Interface
-
-.2+.^|HQ-S1
-|Fa0/23
-|Fa0/24
-
-.2+.^|HQ-S2
-|Fa0/23
-|Fa0/24
-
-.2+.^|HQ-F0-S1
-|Fa0/1
-|Fa0/2
-
-.3+.^|HQ-F1-S1
-|Fa0/1
-|Fa0/2
-|Gig0/1
-
-.3+.^|HQ-F1-S2
-|Fa0/1
-|Fa0/2
-|Gig0/1
-
-.3+.^|HQ-F2-S1
-|Fa0/1
-|Fa0/2
-|Gig0/1
-
-.3+.^|HQ-F2-S2
-|Fa0/1
-|Fa0/2
-|Gig0/1
-|===
 
 ===== Root Guard
 
@@ -1282,6 +1281,41 @@ NOTE: For further information about the network objects, `LOCAL` and
 image::images/package-center.png[align="center"]
 
 <<<
+
+==== Device Specification
+
+[cols="1h,1",options="header"]
+|===
+|Hostname
+|Model
+
+|PC-ASA
+|Cisco ASA 5506-X
+
+|PC-CORE-MLS1
+|Cisco 3650
+
+|PC-CORE-MLS2
+|Cisco 3650
+
+|PC-O-R1
+|Cisco 2911
+
+|PC-PS-MLS1
+|Cisco 3650
+
+|PC-PS-MLS1
+|Cisco 3650
+
+|PC-O-S1
+|Cisco 2960
+
+|PC-PS-S1
+|Cisco 2960
+
+|PC-PS-S2
+|Cisco 2960
+|===
 
 ==== Vlans
 
@@ -3064,6 +3098,8 @@ For the automatic network configuration section, we developed a TUI
 program that can login to registered devices and save the running-configuration
 to a certain TFTP server.
 
+NOTE: For testing, refer to the video
+
 [#device_response]
 === Device Responses
 The buttons corresponding to the given device has four states 
@@ -3248,11 +3284,16 @@ image::images/10-li.png[align="center"]
 .Ping
 image::images/10-li-2.png[align="center"]
 
+==== IPv6 (`Package Center`)
+The following test will show that IPv6 addressing is working, by
+pingin `PC-ASA` from `Public Linux`
+
+.IPv6
+image::images/ipv6.png[align="center"]
+
 === Server
 ==== HQ
 ==== Package Center
-
-=== Network Programming
 
 [appendix]
 == Network Device Configurations

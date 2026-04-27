@@ -39,6 +39,8 @@ These categories are:
 - *Linux server*
 - *Windows server*
 
+image::images/trello.png[align="center"]
+
 ==== Automations
 
 ===== Labeling
@@ -74,6 +76,8 @@ When an addition is completed the person assigned to the task has to issue
 a pull-request and the other party has to authorize it.
 The main branch is protected and thus people can't push directly.
 
+image::images/git-tree.png[align="center"]
+
 ==== Github Actions
 
 There is one workflow that is responsible for converting the 
@@ -81,6 +85,8 @@ Asciidoctor file to a PDF file for every branch on push and or pull requests.
 This PDF file is uploaded as an artifact and can be downloaded in a zip file.
 In the case of the main branch there is an additional feature 
 that places the generated PDF file into the latest release.
+
+image::images/git-actions.png[align="center"]
 
 <<<
 

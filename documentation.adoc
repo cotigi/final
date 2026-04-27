@@ -2259,9 +2259,11 @@ providing IPv4 addresses for the following networks:
 This section includes the testing process and results for the network and server features.
 
 
-==== Webpage testing
+=== Webpage testing
 
 In this test we will check if the web server is accessible from the outside and if the correct webpage is being displayed.
+
+We tested this and the webpage was successfully shown.
 === Network
 ==== HQ
 ==== Package Center
@@ -2270,37 +2272,27 @@ In this test we will check if the web server is accessible from the outside and 
 
 This section includes all the tests performed on the servers to ensure that they are configured correctly and functioning as expected.
 
-==== HQ
-
 ==== Active Directory Testing
 
-In this test we will join a client pc to the company domain and we will also test out some group policy setting and we will test if the client can reach the folder which is share through the network.
+In this test we will join a client pc to the company domain and we will also test out some group policy setting and we will test if the client can reach the folder which is shared through the network.
+
+image::images/AD-teszt1.png[align="center"]
+
+NOTE: This image shows that one of the users of the Management Organizational Unit is trying to login in to the domain.
+
+image::images/AD-teszt2.png[align="center"]
+
+NOTE: This image shows that the user is successfully logged in to the domain.
+
+image::images/gpo-teszt1.png[align="center"]
+
+NOTE: This image shows that the Jade Boss user is trying to change a network connection setting but the user gets prompted for administrator credintials.
 
 ==== DHCP Testing
 
 In this test we will request an IP address with DHCP from the server.
 
-==== File backup testing
 
-In this test we will test if the shared folders will be backed up to the backup drive and if the backup is scheduled to run outside of working hours.
-
-==== Automatic update testing
-
-In this test we will check if the updates are automatically installed and if they are scheduled to be installed outside of working hours.
-
-We tested this feature and it is working as intented the system was updated.  
-
-==== Package Center
-
-===== Active Directory Testing
-
-In this test we will join a client pc to the company domain and we will also test out some group policy setting and we will test if the client can reach the folder which is share through the network.
-
-===== DHCP Testing
-
-In this test we will request an IP address with DHCP from the server.
-
-//.This image shows that the ip address is set to static.
 image::images/DHCP-teszt1.png[align="center"]
 
 NOTE: This image shows that the ip address is set to static.
@@ -2314,11 +2306,23 @@ image::images/DHCP-teszt3.png[align="center"]
 NOTE: This image shows that the DHCP request was successful from the server.
 
 
-===== File backup testing
+==== File backup testing
 
 In this test we will test if the shared folders will be backed up to the backup drive and if the backup is scheduled to run outside of working hours.
 
-===== Automatic update testing
+image::images/Filebackup-teszt3.png[align="center"]
+
+NOTE: This image shows that the backups are scheduled at 7:00PM every day to the backup folder.
+
+image::images/Filebackup-teszt1.png[align="center"]
+
+NOTE: This image show that the backups happened successfully.
+
+image::images/Filebackup-teszt2.png[align="center"]
+
+NOTE: This image show the details of the latest backup.
+
+==== Automatic update testing
 
 In this test we will check if the updates are automatically installed and if they are scheduled to be installed outside of working hours.
 

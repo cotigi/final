@@ -3156,6 +3156,15 @@ to finnish.
 
 [appendix]
 == Testing
+
+This section includes the testing process and results for the network and server features.
+
+
+=== Webpage testing
+
+In this test we will check if the web server is accessible from the outside and if the correct webpage is being displayed.
+
+We tested this and the webpage was successfully shown.
 === Network
 ==== DHCP, Vlan and IPv4 (`HQ`)
 The following test will show how to different PCs will get
@@ -3291,9 +3300,65 @@ pingin `PC-ASA` from `Public Linux`
 .IPv6
 image::images/ipv6.png[align="center"]
 
-=== Server
-==== HQ
-==== Package Center
+=== Server Testing
+
+This section includes all the tests performed on the servers to ensure that they are configured correctly and functioning as expected.
+
+==== Active Directory Testing
+
+In this test we will join a client pc to the company domain and we will also test out some group policy setting and we will test if the client can reach the folder which is shared through the network.
+
+image::images/AD-teszt1.png[align="center"]
+
+NOTE: This image shows that one of the users of the Management Organizational Unit is trying to login in to the domain.
+
+image::images/AD-teszt2.png[align="center"]
+
+NOTE: This image shows that the user is successfully logged in to the domain.
+
+image::images/gpo-teszt1.png[align="center"]
+
+NOTE: This image shows that the Jade Boss user is trying to change a network connection setting but the user gets prompted for administrator credintials.
+
+==== DHCP Testing
+
+In this test we will request an IP address with DHCP from the server.
+
+
+image::images/DHCP-teszt1.png[align="center"]
+
+NOTE: This image shows that the ip address is set to static.
+
+image::images/DHCP-teszt2.png[align="center"]
+
+NOTE: This image shows that the ip address is changed to DHCP.
+
+image::images/DHCP-teszt3.png[align="center"]
+
+NOTE: This image shows that the DHCP request was successful from the server.
+
+
+==== File backup testing
+
+In this test we will test if the shared folders will be backed up to the backup drive and if the backup is scheduled to run outside of working hours.
+
+image::images/Filebackup-teszt3.png[align="center"]
+
+NOTE: This image shows that the backups are scheduled at 7:00PM every day to the backup folder.
+
+image::images/Filebackup-teszt1.png[align="center"]
+
+NOTE: This image show that the backups happened successfully.
+
+image::images/Filebackup-teszt2.png[align="center"]
+
+NOTE: This image show the details of the latest backup.
+
+==== Automatic update testing
+
+In this test we will check if the updates are automatically installed and if they are scheduled to be installed outside of working hours.
+
+We tested this feature and it is working as intented the system was updated.  
 
 [appendix]
 == Network Device Configurations

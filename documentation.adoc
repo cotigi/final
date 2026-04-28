@@ -2184,7 +2184,7 @@ Az alábbi Group Policy minden Frontdesk eszközre és felhasználóra vonatkozi
 
 Felhasználói konfigurációk:
 
-Autómatikus szoftver telepítés:
+Automatikus szoftver telepítés:
 
 * Jóváhagyott szoftverek telepítése és frissítése
 
@@ -2247,7 +2247,7 @@ Applikáció kontrol:
 Frissítések:
 
 * Felhasználó nem érheti el
-* Minden frissítés munkaidőn kívül, autómatikusan történik
+* Minden frissítés munkaidőn kívül, automatikusan történik
 
 Audit és Monitorozás:
 
@@ -2285,7 +2285,7 @@ Böngésző korlátozások:
 * letöltési mappa monitorozva és auditálva 
 * Csak saját nyomtatót használhatnak
 * Indításkor a Package management szoftver és 
-Scanner szoftver autómatikusan lefut
+Scanner szoftver automatikusan lefut
 
 Gép konfigurációk:
 
@@ -2299,7 +2299,7 @@ Gép konfigurációk:
         ** Minden ismeretlen applikáció
 * Windows frissítések:
     *** Frissítések elérése tiltva
-    *** Frissítések autómatikusan munkaidőn kívül futnak
+    *** Frissítések automatikusan munkaidőn kívül futnak
 
 * Bejelentkezéskor meg kell várni a hálózati kapcsolatot, hogy a legfrissebb
 zabálok legyenek aktívak az adott eszközön és hogy a felhasználó biztos ne
@@ -3284,12 +3284,12 @@ NOTE: A kliens sikeresen kapott IP címet a DHCP szerver által.
 
 ==== File Backup Teszt
 
-Az alábbi teszt a megosztott mappák autómatikus, munkaidőn kívüli,
+Az alábbi teszt a megosztott mappák automatikus, munkaidőn kívüli,
 mentését mutatja be, egy külön lemezre.
 
 image::images/Filebackup-teszt3.png[align="center"]
 
-NOTE: Az autómatikus mentés minden nap este 7 kor kerül sorra.
+NOTE: Az automatikus mentés minden nap este 7 kor kerül sorra.
 
 image::images/Filebackup-teszt1.png[align="center"]
 
@@ -3299,9 +3299,9 @@ image::images/Filebackup-teszt2.png[align="center"]
 
 NOTE: Legutóbbi biztonsági mentés részletei.
 
-==== Autómatikus Frissítés Teszt
+==== Automatikus Frissítés Teszt
 
-Az alábbi teszt az autómatikus frissítések sikeres 
+Az alábbi teszt az automatikus frissítések sikeres 
 ütemezését mutatja be, munkaidőn kívül.
 
 A rendszeren lévő programok sikeresen lefrissűltek.

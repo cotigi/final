@@ -16,8 +16,6 @@ Remote Package Storage:: Hosszú távú csomag tárolás és feldolgozás
 Package Center:: Rövid távú csomag tárolás és átadás, illetve web szerver
 futtatása és tárolása
 
-<<<
-
 == Projektmenedzsment
 
 === Feladat Követés
@@ -56,8 +54,6 @@ rákerül a Done bélyeg.
 - Amikoe egy feladat átkerül az `In Progress` listába,
 az adott személy automatikusan említve lesz a feladatban.
 
-<<<
-
 === Dokumentáció
 A dokumentáció https://asciidoctor.org/[Asciidoctor] leíró nyelvben
 van írva, ami késöbb PDF formátumba lesz konvertálva. 
@@ -85,8 +81,6 @@ fájl-t, PDF-re konvertálja és a main ág esetében ez a PDF fájl kikerül
 a latest release fül alá.
 
 image::images/git-actions.png[align="center"]
-
-<<<
 
 == Általános
 
@@ -279,8 +273,6 @@ parancsal.
 
 image::images/hq.png[align="center"]
 
-<<<
-
 ==== Eszköz Specifikáció
 
 [cols="1h,1",options="header"]
@@ -400,8 +392,6 @@ között, az LACP protokol segítségével.
 |HQ-S2          
 |Fa0/23-24
 |===
-
-<<<
 
 [#hq-rpvst]
 ==== Rapid-PVST
@@ -630,8 +620,6 @@ Ez az alábbi konfigurációkkal lett elérve:
 |10.1.255.30
 |===
 
-<<<
-
 ==== DHCPv4
 
 Minden hálózatnak a `Private Windows` eszköz
@@ -677,8 +665,6 @@ a DHCP szervere.
 |15             
 |10.1.255.30
 |===
-
-<<<
 
 [[hq_dhcp_snooping]]
 ==== DHCP Snooping
@@ -1068,8 +1054,6 @@ access-list VPN-TRAFFIC extended permit ip object LOCAL object REMOTE
 NOTE: További információért a hálózati objetumokkal kapcsolatban,
 lásd <<hq_network_objects>>
 
-<<<
-
 ==== IPv4 Címzés
 
 [cols="1,1,1,1",options="header"]
@@ -1250,8 +1234,6 @@ lásd <<hq_network_objects>>
 ==== Topológia
 
 image::images/package-center.png[align="center"]
-
-<<<
 
 ==== Eszköz Specifikáció
 
@@ -1586,6 +1568,8 @@ Ez az állapot az alábbi megbízott portokkal lett elérve:
 |Gig0/2
 |===
 
+<<<
+
 [[pc_arp_inspection]]
 ==== Dynamic ARP Inspection
 
@@ -1642,8 +1626,6 @@ NOTE: Etherchannels kapcsolatok egyszerüsítve vannak.
 
 `PC-ASA` eszköz felelős az alapértelmezett útvonal hírdetéséért.
 Az alapértelmezett útvonal: `12.12.12.1`.
-
-<<<
 
 ===== Router-ID
 
@@ -1960,8 +1942,6 @@ access-list VPN-TRAFFIC extended permit ip object LOCAL object REMOTE
 NOTE: További információért az objektumokkal kapcsolatban,
 lásd <<pc_network_objects>>
 
-<<<
-
 [#pc-ip-addressing]
 ==== IPv4 Címzés
 
@@ -2126,8 +2106,6 @@ lásd <<pc_network_objects>>
 |Wifi
 |10.2.10.254
 |===
-
-<<<
 
 ==== IPv6 Címzés
 
@@ -3081,8 +3059,6 @@ DHCP szerver: `SOHO Router`
 |10.3.0.1
 |===
 
-<<<
-
 == Hálózat Programozás (Necop)
 A Necop program, egy TUI felülettel felszerelt hálózat
 konfigurációs program ami képes elérketőség teszt-re és
@@ -3263,9 +3239,72 @@ Az alábbi teszt az IPv6 működését mutatja be a DMZ hálózaton belül.
 .IPv6
 image::images/ipv6.png[align="center"]
 
-=== Szerver
-==== HQ
-==== Package Center
+=== Weboldal Teszt
+
+Az alábbi teszt a webszerver sikeres elérését teszteli egy külsö kliens által
+és a weblap megjelenik.
+
+A teszt sikeresen lefutott.
+
+=== Szerver Teszt
+
+==== Active Directory Teszt
+
+Az alábbi teszt egy kliens sikeres tartományba lépését mutatja be.
+Emellett némely group policy beállítást is illusztrálunk.
+
+image::images/AD-teszt1.png[align="center"]
+
+NOTE: A felhasználó megpróbál belépni a Management csoportba.
+
+image::images/AD-teszt2.png[align="center"]
+
+NOTE: A felhasználó sikeresen belép a Management csoportba.
+
+image::images/gpo-teszt1.png[align="center"]
+
+NOTE: A "Jade Boss" felhasználó megpróbál hálózati beállításokat
+állítani és adminisztrator jogok kér az eszköz.
+
+==== DHCP Teszt
+
+Az alábbi teszt a DCHP szerver működését mutatja be.
+
+image::images/DHCP-teszt1.png[align="center"]
+
+NOTE: Statikus IP cím beállítása.
+
+image::images/DHCP-teszt2.png[align="center"]
+
+NOTE: IP cím DHCP-re állítása és a kérés kezdeményezése.
+
+image::images/DHCP-teszt3.png[align="center"]
+
+NOTE: A kliens sikeresen kapott IP címet a DHCP szerver által.
+
+==== File Backup Teszt
+
+Az alábbi teszt a megosztott mappák autómatikus, munkaidőn kívüli,
+mentését mutatja be, egy külön lemezre.
+
+image::images/Filebackup-teszt3.png[align="center"]
+
+NOTE: Az autómatikus mentés minden nap este 7 kor kerül sorra.
+
+image::images/Filebackup-teszt1.png[align="center"]
+
+NOTE: A mentés sikeresen lefutott.
+
+image::images/Filebackup-teszt2.png[align="center"]
+
+NOTE: Legutóbbi biztonsági mentés részletei.
+
+==== Autómatikus Frissítés Teszt
+
+Az alábbi teszt az autómatikus frissítések sikeres 
+ütemezését mutatja be, munkaidőn kívül.
+
+A rendszeren lévő programok sikeresen lefrissűltek.
 
 [appendix]
 == Hálózati Eszköz Konfigurációk
@@ -7252,7 +7291,7 @@ no service timestamps log datetime msec
 no service timestamps debug datetime msec
 service password-encryption
 !
-hostname PS-O-S1
+hostname PC-O-S1
 !
 enable secret 5 $1$mERr$STCVvBm3rx8XD5gcSxKFC/
 !

@@ -3159,14 +3159,16 @@ to finnish.
 
 This section includes the testing process and results for the network and server features.
 
-
 === Webpage testing
 
 In this test we will check if the web server is accessible from the outside and if the correct webpage is being displayed.
 
 We tested this and the webpage was successfully shown.
+
 === Network
+
 ==== DHCP, Vlan and IPv4 (`HQ`)
+
 The following test will show how to different PCs will get
 IPv4 addresses in different networks.
 

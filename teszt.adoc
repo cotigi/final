@@ -1,0 +1,195 @@
+= Tesztelés
+Pászti Tibor Miklós & Póra Dávid
+include::utils.adoc[]
+
+== Hálózat
+=== DHCP, Vlan és IPv4 (`HQ`)
+Az alábbi teszt a különböző vlanok és DHCP működését mutatja be.
+
+A tesztelt eszközök az alábbiak:
+
+[cols="1h,1,1",options="header"]
+|===
+|Eszköz
+|Vlan
+|Várt Hálózat
+
+|Frontdesk PC
+|FRONTDESK (V160)
+|10.1.60.0/28
+
+|Management PC
+|MANAGEMENT (V333)
+|10.1.255.0/27
+|===
+
+.Frontdesk PC
+image::images/1-fepc.png[align="center"]
+
+.Management PC
+image::images/1-mapc.png[align="center"]
+
+=== Wifi (`Package Center`)
+Az alábbi teszt a Wifi műküdését mutatja be.
+
+.Wifi Kapcsolat
+image::images/2-ph.png[align="center"]
+
+.DHCP Bemutatás
+image::images/2-ph-2.png[align="center"]
+
+=== HSRP (`HQ`)
+Az alábbi teszt a HSRP működését mutatja be, amikor az
+aktív router meghibásodik.
+
+.HQ-R1 Be
+image::images/3-ma-1.png[align="center"]
+
+.HQ-R1 Ki
+image::images/3-ma-2.png[align="center"]
+
+=== ACL (`Package Center`)
+Az alábbi teszt az SSH ACL működését mutatja be, ahol csak a 
+`MANAGEMENT` vlan csatlakozhat.
+
+.MANAGEMENT Vlan
+image::images/4-ma.png[align="center"]
+
+.FRONTDESK Vlan
+image::images/4-fe.png[align="center"]
+
+=== R-PVST+ és Etherchannel (`HQ`)
+Az alábbi teszt a második rétegbeli redundanciát mutatja be.
+
+A Kapcsolat a `Management PC` és a `HQ-R1` között folyik.
+
+.Sztandard
+image::images/5-ma-1.png[align="center"]
+
+.HQ-F2-S2 Fa0/1 Ki
+image::images/5-ma-2.png[align="center"]
+
+.HQ-F2-S2 Gig0/1 Ki
+image::images/5-ma-3.png[align="center"]
+
+.HQ-S2 Fa0/24 Ki
+image::images/5-ma-4.png[align="center"]
+
+=== PAT, SNAT és Statikus Irányítás (`Package Center`)
+Az alábbi teszt a NAT protokol működését mutatja be.
+
+A `Public Linux` eszköz vártan a `12.12.12.3` IP címet veszi fel, míg
+a `PC-CORE-MLS1` eszköz vártan a `12.12.12.2` IP címet veszi fel.
+
+Statikus irányítás a csomag sikeres kifelé irányítása alapján tesztelhető.
+
+.SNAT
+image::images/6-li.png[align="center"]
+
+.PAT
+image::images/6-mls.png[align="center"]
+
+=== Dinamikus irányítás (`HQ`)
+Az alábbi teszt a redundáns útvonalakat mutatja be.
+
+.HQ-R1 Be
+image::images/7-r1.png[align="center"]
+
+.HQ-R1 Ki
+image::images/7-r2.png[align="center"]
+
+=== WAN (`HQ` & `Package Center`)
+Az alábbi teszt a telephelyek közötti kapcsolatot mutatja be.
+
+.WAN
+image::images/8-asa.png[align="center"]
+
+=== VPN (`HQ` & `Package Center`)
+Az alábbi teszt a telephelyek közötti VPN kapcsolatot mutatja be. 
+
+.VPN
+image::images/9-vpn.png[align="center"]
+
+=== Tűzfal (`Remote Package Storage` & `Package Center`)
+Az alábbi teszt a DMZ be való irányítást mutatja be, ahol
+csak HTTP és HTTPS csomagok mehetnek át.
+
+.HTTP
+image::images/10-li.png[align="center"]
+
+.Ping
+image::images/10-li-2.png[align="center"]
+
+=== IPv6 (`Package Center`)
+Az alábbi teszt az IPv6 működését mutatja be a DMZ hálózaton belül.
+
+.IPv6
+image::images/ipv6.png[align="center"]
+
+== Weboldal Teszt
+
+Az alábbi teszt a webszerver sikeres elérését teszteli egy külsö kliens által
+és a weblap megjelenik.
+
+A teszt sikeresen lefutott.
+
+== Szerver Teszt
+
+=== Active Directory Teszt
+
+Az alábbi teszt egy kliens sikeres tartományba lépését mutatja be.
+Emellett némely group policy beállítást is illusztrálunk.
+
+image::images/AD-teszt1.png[align="center"]
+
+NOTE: A felhasználó megpróbál belépni a Management csoportba.
+
+image::images/AD-teszt2.png[align="center"]
+
+NOTE: A felhasználó sikeresen belép a Management csoportba.
+
+image::images/gpo-teszt1.png[align="center"]
+
+NOTE: A "Jade Boss" felhasználó megpróbál hálózati beállításokat
+állítani és adminisztrator jogok kér az eszköz.
+
+=== DHCP Teszt
+
+Az alábbi teszt a DCHP szerver működését mutatja be.
+
+image::images/DHCP-teszt1.png[align="center"]
+
+NOTE: Statikus IP cím beállítása.
+
+image::images/DHCP-teszt2.png[align="center"]
+
+NOTE: IP cím DHCP-re állítása és a kérés kezdeményezése.
+
+image::images/DHCP-teszt3.png[align="center"]
+
+NOTE: A kliens sikeresen kapott IP címet a DHCP szerver által.
+
+=== File Backup Teszt
+
+Az alábbi teszt a megosztott mappák automatikus, munkaidőn kívüli,
+mentését mutatja be, egy külön lemezre.
+
+image::images/Filebackup-teszt3.png[align="center"]
+
+NOTE: Az automatikus mentés minden nap este 7 kor kerül sorra.
+
+image::images/Filebackup-teszt1.png[align="center"]
+
+NOTE: A mentés sikeresen lefutott.
+
+image::images/Filebackup-teszt2.png[align="center"]
+
+NOTE: Legutóbbi biztonsági mentés részletei.
+
+=== Automatikus Frissítés Teszt
+
+Az alábbi teszt az automatikus frissítések sikeres 
+ütemezését mutatja be, munkaidőn kívül.
+
+A rendszeren lévő programok sikeresen lefrissűltek.
+
